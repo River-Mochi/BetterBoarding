@@ -1,18 +1,27 @@
+// <copyright file="Mod.cs" company="River-Mochi">
+// Copyright (c) 2026 River-Mochi. All rights reserved.
+// Licensed under the MIT License. You may not use this file except in compliance with this License.
+// See LICENSE file in the project root for full license information.
+// This notice and the MIT License notice must be kept with
+// all copies or substantial portions of this code.
+// ================= </copyright> ======================
+
 // File: Mod.cs
 // Purpose: Entry point for Fast Boarding.
 
 namespace FastBoarding
 {
+    using System;
+    using System.Reflection;
     using Colossal;
     using Colossal.IO.AssetDatabase;
     using Colossal.Localization;
     using Colossal.Logging;
+    using CS2Shared.RiverMochi;
     using Game;
     using Game.Modding;
     using Game.SceneFlow;
     using Game.Simulation;
-    using System;
-    using System.Reflection;
 
     public sealed class Mod : IMod
     {

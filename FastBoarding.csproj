@@ -1,10 +1,12 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>Library</OutputType>
 		<Configurations>Debug;Release</Configurations>
 
 		<!-- The file where mod information required for publishing on PDX Mods is stored -->
 		<PublishConfigurationPath>Properties\PublishConfiguration.xml</PublishConfigurationPath>
+        <!-- Path to the PowerShell that syncs PublishConfiguration.xml + mod.json with $(Version). -->
+        <PublishConfigScript>$(MSBuildProjectDirectory)\Scripts\Update-PublishConfig.ps1</PublishConfigScript>
 		
 		<!-- Enable nullable reference types project-wide -->
 		<Nullable>enable</Nullable>
@@ -14,7 +16,8 @@
 		<RootNamespace>FastBoarding</RootNamespace>
 
 		<!-- Single source of truth for version number -->
-		<Version>1.1.1</Version>
+        <GameVersion>1.6.*</GameVersion>
+		<Version>1.1.2</Version>
 		<AssemblyVersion>$(Version).0</AssemblyVersion>
 		<FileVersion>$(Version).0</FileVersion>
 	</PropertyGroup>
@@ -85,15 +88,13 @@
 		<None Include="$(ModTargetsFile)" Link="Properties\Mod.targets" />
 	</ItemGroup>
 
-    <!-- AUTO UPDATE PublishConfiguration ModVersion using CSPROJ Version number
-	     remove bom, make EOL=CRLF, and left-align text -->
-    <Target Name="UpdatePublishConfigVersion" BeforeTargets="Build" Condition="Exists('$(MSBuildProjectDirectory)\Scripts\Update-PublishConfig.ps1')          AND Exists('$(MSBuildProjectDirectory)\$(PublishConfigurationPath)')">
+    <!-- AUTO UPDATE PublishConfiguration.xml GameVersion + ModVersion + nested mod.json "version" from $(Version). -->
+    <Target Name="UpdatePublishConfigVersion" BeforeTargets="PrepareForBuild" Condition="Exists('$(PublishConfigScript)') AND Exists('$(MSBuildProjectDirectory)\$(PublishConfigurationPath)')">
 
-        <Message Text="FastBoarding PublishConfig: syncing ModVersion + normalizing EOL/BOM + left-align blocks..." Importance="high" />
+        <Message Text="$(AssemblyTitle) PublishConfig: syncing ModVersion/GameVersion + normalizing EOL/BOM + left-aligning blocks..." Importance="high" />
 
-        <Exec Command="&quot;$(SystemRoot)\System32\WindowsPowerShell\v1.0\powershell.exe&quot; -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\Scripts\Update-PublishConfig.ps1&quot; -Path &quot;$(MSBuildProjectDirectory)\$(PublishConfigurationPath)&quot; -Version &quot;$(Version)&quot; -Eol crlf -LeftAlignBlocks" />
+        <Exec Command="&quot;$(SystemRoot)\System32\WindowsPowerShell\v1.0\powershell.exe&quot; -NoProfile -ExecutionPolicy Bypass -File &quot;$(PublishConfigScript)&quot; -Path &quot;$(MSBuildProjectDirectory)\$(PublishConfigurationPath)&quot; -Version &quot;$(Version)&quot; -GameVersion &quot;$(GameVersion)&quot; -Eol lf -LeftAlignBlocks" />
     </Target>
-
 
 
 </Project>

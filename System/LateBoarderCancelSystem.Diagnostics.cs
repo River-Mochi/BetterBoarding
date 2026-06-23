@@ -1,13 +1,22 @@
+// <copyright file="LateBoarderCancelSystem.Diagnostics.cs" company="River-Mochi">
+// Copyright (c) 2026 River-Mochi. All rights reserved.
+// Licensed under the MIT License. You may not use this file except in compliance with this License.
+// See LICENSE file in the project root for full license information.
+// This notice and the MIT License notice must be kept with
+// all copies or substantial portions of this code.
+// ================= </copyright> ======================
+
 // File: System/LateBoarderCancelSystem.Diagnostics.cs
 // Purpose: Verbose diagnostics and delayed follow-up samples.
 
 namespace FastBoarding
 {
+    using System;           // DateTime
+    using CS2Shared.RiverMochi; // LogUtils
     using Game;             // GameSystemBase
     using Game.Common;      // Deleted, Destroyed
     using Game.Creatures;   // CurrentVehicle, CreatureVehicleFlags
     using Game.Vehicles;    // PublicTransport, Passenger
-    using System;           // DateTime
     using Unity.Entities;   // Entity
     using TransportType = Game.Prefabs.TransportType; // bus/train/etc.
 
