@@ -78,7 +78,7 @@ tags: boarding time, bus stop, slow transit, debunching, unbunching
 	<Screenshot Value="Properties/image10-BoardingSpeed.jpg"/>
 	<Screenshot Value="Properties/image30-Status.jpg"/>
     <Screenshot Value="Properties/image40-11Languages.jpg"/>
-    <Screenshot Value="Properties/image60-senryu-BoardingNow.jpg"/>
+    <Screenshot Value="Properties/image60-senryu-BoardingFix.jpg"/>
 
 	<!--Tag, can be set multiple times-->
 	<Tag Value=""/>

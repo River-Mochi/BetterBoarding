@@ -76,7 +76,7 @@ dotnet_diagnostic.IDE0073.severity = warning
 
 # Shared GPL-3.0-or-later header for River-Mochi CS2 mods.
 # LICENSE-EXCEPTION is the Cities: Skylines II linking exception.
-file_header_template = <copyright file="{fileName}" company="River-Mochi">\nCopyright (C) 2026 River-Mochi.\nLicensed under the GNU General Public License v3.0 or later,\nwith the Cities: Skylines II Linking Exception.\nSee LICENSE and LICENSE-EXCEPTION in the project root.\nCopyright and license notices MUST be preserved.\n================= </copyright> ======================
+file_header_template = <copyright file="{fileName}" company="River-Mochi">\nCopyright (c) 2026 River-Mochi. All rights reserved.\nLicensed under the GNU General Public License v3.0 or later,\nwith the Cities: Skylines II Linking Exception.\nSee LICENSE and LICENSE-EXCEPTION in the project root.\nThis notice MUST be kept with copies or substantial portions of this code.\n================= </copyright> ======================
 indent_size = 4
 
 # ---- Namespace policy: flat namespace allowed ----
