@@ -9,7 +9,7 @@
 // File: System/Status/TransitWaitStatus.cs
 // Purpose: Cached Options UI status text for current transit wait snapshots.
 
-namespace BoardingNow
+namespace BetterBoarding
 {
     using System;
     using System.Text;
@@ -446,7 +446,7 @@ namespace BoardingNow
             GameManager gm = GameManager.instance;
             if (world == null || !world.IsCreated || !gm.gameMode.IsGame())
             {
-                LogUtils.Info(Mod.s_Log, () => Localize(KeyReportNoCityLoaded, "[BN] Stats report requested, but no city is loaded."));
+                LogUtils.Info(Mod.s_Log, () => Localize(KeyReportNoCityLoaded, "[BBoard] Stats report requested, but no city is loaded."));
                 return;
             }
 
@@ -460,7 +460,7 @@ namespace BoardingNow
                 // Keep this verbose output in the log, not the cramped Options UI row.
                 StringBuilder sb = new StringBuilder();
                 sb.AppendLine();
-                AppendSectionHeader(sb, Localize(KeyReportTitle, "Boarding Now transit status report"));
+                AppendSectionHeader(sb, Localize(KeyReportTitle, "Better Boarding transit status report"));
                 AppendField(sb, "Snapshot updated", s_LastSnapshotLocalTime == default ? "unknown" : s_LastSnapshotLocalTime.ToString("HH:mm:ss"));
                 AppendField(sb, "Options Settings", BoardingRuntimeSettings.DescribeForLog());
                 AppendField(sb, "Note", Localize(KeyReportNote, "Worst line is a hint from the highest-wait waypoint at the worst stop."));

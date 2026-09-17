@@ -9,7 +9,7 @@
 // File: System/LateBoarderCancelSystem.Diagnostics.cs
 // Purpose: Verbose diagnostics and delayed follow-up samples.
 
-namespace BoardingNow
+namespace BetterBoarding
 {
     using System;           // DateTime
     using CS2Shared.RiverMochi; // LogUtils

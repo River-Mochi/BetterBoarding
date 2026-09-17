@@ -9,7 +9,7 @@
 // File: System/LateBoarderCancelSystem.Helpers.cs
 // Purpose: Helper methods for tool safety, passenger checks, run assists, and cancellation edits.
 
-namespace BoardingNow
+namespace BetterBoarding
 {
     using Game; // GameSystemBase
     using Game.Common; // Deleted, Destroyed, Overridden

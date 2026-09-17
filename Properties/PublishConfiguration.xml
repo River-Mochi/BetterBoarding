@@ -2,7 +2,7 @@
 	<!--Id must be set in order to update existed mod. it is not required for publishing mod for the first time-->
 	<ModId Value="141997"/>
 	<!--Name of the mod to display to players-->
-	<DisplayName Value="Boarding Now"/>
+	<DisplayName Value="Better Boarding"/>
 	<!--Short description of the mod-->
 	<ShortDescription Value="Faster Transit Boarding. Late solo passengers stop holding up vehicles, and cims may start running earlier to catch their bus or tram. "/>
 	<!--Long description of the mod. Single line or multi line. Supports minimal markdown subset-->
@@ -13,7 +13,7 @@
 Still useful post patch 1.5.7-1.6.0
 
 The game has a fallback for stuck transit and releases them if it's ~10 minutes past scheduled departure time.
-Boarding Now helps before that by making boarding faster and reducing late-passenger delays to keep things smooth and on time.
+Better Boarding helps before that by making boarding faster and reducing late-passenger delays to keep things smooth and on time.
 
 - Improve traffic, increase transit usage, reduce bunching of vehicles.
 - The larger your city, the more this mod will help.
@@ -45,7 +45,7 @@ After the city runs a bit, check the Options menu to see current status.
 
 ### Notes
 - Important compatibility: conflicts possible with mods that change boarding, like All-Aboard, so Only Choose One.
-Some players report no issues with Smart Transportation + Boarding Now together.
+Some players report no issues with Smart Transportation + Better Boarding together.
 - Mod is intended to be a lighter, safer alternative than replacing the game's transport system files approach.
 - This mod works nicely with `Public Works Plus` to solve many transit issues.
 - Group boarding is left to normal vanilla handling to avoid splitting groups (they are few compared to the many single travelers).

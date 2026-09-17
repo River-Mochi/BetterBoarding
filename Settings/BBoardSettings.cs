@@ -1,4 +1,4 @@
-// <copyright file="Setting.cs" company="River-Mochi">
+// <copyright file="BBoardSettings.cs" company="River-Mochi">
 // Copyright (c) 2026 River-Mochi. All rights reserved.
 // Licensed under the GNU General Public License v3.0 or later,
 // with the Cities: Skylines II Linking Exception.
@@ -6,10 +6,10 @@
 // This notice MUST be kept with copies or substantial portions of this code.
 // ================= </copyright> ======================
 
-// File: Settings/Setting.cs
-// Purpose: Options UI settings for Boarding Now.
+// File: Settings/BBoardSettings.cs
+// Purpose: Options UI settings for Better Boarding.
 
-namespace BoardingNow
+namespace BetterBoarding
 {
     using System;
     using Colossal.IO.AssetDatabase;
@@ -22,11 +22,11 @@ namespace BoardingNow
     using Unity.Entities;
     using UnityEngine;
 
-    [FileLocation("ModsSettings/BoardingNow/BoardingNow")]
+    [FileLocation("ModsSettings/BetterBoarding/BetterBoarding")]
     [SettingsUITabOrder(ActionsTab, AboutTab)]
     [SettingsUIGroupOrder(SpeedGroup, BehaviorGroup, StatusGroup, AboutInfoGroup, AboutLinksGroup, DebugGroup)]
     [SettingsUIShowGroupName(SpeedGroup, BehaviorGroup, StatusGroup, AboutLinksGroup, DebugGroup)]
-    public sealed class Setting : ModSetting
+    public sealed class BBoardSettings : ModSetting
     {
         public const string ActionsTab = "Actions";
         public const string AboutTab = "About";
@@ -49,7 +49,7 @@ namespace BoardingNow
         public const int MaxSpeedFactor = 5;
         public const int SpeedStepFactor = 1;
 
-        public Setting(IMod mod)
+        public BBoardSettings(IMod mod)
             : base(mod)
         {
             SetDefaults();
@@ -60,7 +60,7 @@ namespace BoardingNow
             max = MaxSpeedFactor,
             step = SpeedStepFactor)]
         [SettingsUISection(ActionsTab, SpeedGroup)]
-        [SettingsUISetter(typeof(Setting), nameof(SetBusBoardingSpeedFactorLive))]
+        [SettingsUISetter(typeof(BBoardSettings), nameof(SetBusBoardingSpeedFactorLive))]
         public int BusBoardingSpeedFactor { get; set; }
 
         [SettingsUISlider(
@@ -68,7 +68,7 @@ namespace BoardingNow
             max = MaxSpeedFactor,
             step = SpeedStepFactor)]
         [SettingsUISection(ActionsTab, SpeedGroup)]
-        [SettingsUISetter(typeof(Setting), nameof(SetRailBoardingSpeedFactorLive))]
+        [SettingsUISetter(typeof(BBoardSettings), nameof(SetRailBoardingSpeedFactorLive))]
         public int RailBoardingSpeedFactor { get; set; }
 
         [SettingsUISlider(
@@ -76,7 +76,7 @@ namespace BoardingNow
             max = MaxSpeedFactor,
             step = SpeedStepFactor)]
         [SettingsUISection(ActionsTab, SpeedGroup)]
-        [SettingsUISetter(typeof(Setting), nameof(SetWaterBoardingSpeedFactorLive))]
+        [SettingsUISetter(typeof(BBoardSettings), nameof(SetWaterBoardingSpeedFactorLive))]
         public int WaterBoardingSpeedFactor { get; set; }
 
         [SettingsUISlider(
@@ -84,15 +84,15 @@ namespace BoardingNow
             max = MaxSpeedFactor,
             step = SpeedStepFactor)]
         [SettingsUISection(ActionsTab, SpeedGroup)]
-        [SettingsUISetter(typeof(Setting), nameof(SetAirBoardingSpeedFactorLive))]
+        [SettingsUISetter(typeof(BBoardSettings), nameof(SetAirBoardingSpeedFactorLive))]
         public int AirBoardingSpeedFactor { get; set; }
 
         [SettingsUISection(ActionsTab, BehaviorGroup)]
-        [SettingsUISetter(typeof(Setting), nameof(SetCancelLateBoardersLive))]
+        [SettingsUISetter(typeof(BBoardSettings), nameof(SetCancelLateBoardersLive))]
         public bool CancelLateBoarders { get; set; }
 
         [SettingsUISection(ActionsTab, BehaviorGroup)]
-        [SettingsUISetter(typeof(Setting), nameof(SetCimsRunSoonerToCatchBusesLive))]
+        [SettingsUISetter(typeof(BBoardSettings), nameof(SetCimsRunSoonerToCatchBusesLive))]
         public bool CimsRunSoonerToCatchBuses { get; set; }
 
         [SettingsUISection(ActionsTab, StatusGroup)]
@@ -251,7 +251,7 @@ namespace BoardingNow
         }
 
         [SettingsUISection(AboutTab, DebugGroup)]
-        [SettingsUISetter(typeof(Setting), nameof(SetEnableVerboseLoggingLive))]
+        [SettingsUISetter(typeof(BBoardSettings), nameof(SetEnableVerboseLoggingLive))]
         public bool EnableVerboseLogging { get; set; }
 
         public override void SetDefaults()

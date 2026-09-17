@@ -9,7 +9,7 @@
 // File: System/LateBoarderCancelSystem.Types.cs
 // Purpose: Small private structs used by the late-boarder cancellation and diagnostics partials.
 
-namespace BoardingNow
+namespace BetterBoarding
 {
     using Game; // GameSystemBase
     using System; // DateTime

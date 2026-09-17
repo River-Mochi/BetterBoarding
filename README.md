@@ -1,6 +1,6 @@
-## Boarding Now
+## Better Boarding
 
-Boarding Now helps public transport board faster without replacing the game's transport AI.
+Better Boarding helps public transport board faster without replacing the game's transport AI.
 
 ### What It Does
 
@@ -12,7 +12,7 @@ Boarding Now helps public transport board faster without replacing the game's tr
 
 ### Safe Design
 
-Boarding Now does not use Harmony and does not replace vanilla transport systems.
+Better Boarding does not use Harmony and does not replace vanilla transport systems.
 
 - Sliders tune vanilla passenger stop data.
 - Skipped cims are not deleted; vanilla can reassign or reroute them.

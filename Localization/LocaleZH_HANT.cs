@@ -7,9 +7,9 @@
 // ================= </copyright> ======================
 
 // File: Localization/LocaleZH_HANT.cs
-// Purpose: Traditional Chinese zh-HANT locale entries for Boarding Now.
+// Purpose: Traditional Chinese zh-HANT locale entries for Better Boarding.
 
-namespace BoardingNow
+namespace BetterBoarding
 {
     using System.Collections.Generic;
     using Colossal;
@@ -19,13 +19,13 @@ namespace BoardingNow
     /// </summary>
     public sealed class LocaleZH_HANT : IDictionarySource
     {
-        private readonly Setting m_Setting;
+        private readonly BBoardSettings m_Setting;
 
         /// <summary>
         /// Constructs the Traditional Chinese locale.
         /// </summary>
         /// <param name="setting">Settings object used for locale IDs.</param>
-        public LocaleZH_HANT(Setting setting)
+        public LocaleZH_HANT(BBoardSettings setting)
         {
             m_Setting = setting;
         }
@@ -85,41 +85,41 @@ namespace BoardingNow
                 { m_Setting.GetSettingsLocaleID(), title },
 
                 // Tabs
-                { m_Setting.GetOptionTabLocaleID(Setting.ActionsTab), "操作" },
-                { m_Setting.GetOptionTabLocaleID(Setting.AboutTab), "關於" },
+                { m_Setting.GetOptionTabLocaleID(BBoardSettings.ActionsTab), "操作" },
+                { m_Setting.GetOptionTabLocaleID(BBoardSettings.AboutTab), "關於" },
 
                 // Groups
-                { m_Setting.GetOptionGroupLocaleID(Setting.SpeedGroup), "上車速度" },
-                { m_Setting.GetOptionGroupLocaleID(Setting.BehaviorGroup), "行為" },
-                { m_Setting.GetOptionGroupLocaleID(Setting.StatusGroup), "狀態" },
-                { m_Setting.GetOptionGroupLocaleID(Setting.AboutInfoGroup), "模組資訊" },
-                { m_Setting.GetOptionGroupLocaleID(Setting.AboutLinksGroup), "連結" },
-                { m_Setting.GetOptionGroupLocaleID(Setting.DebugGroup), "偵錯" },
+                { m_Setting.GetOptionGroupLocaleID(BBoardSettings.SpeedGroup), "上車速度" },
+                { m_Setting.GetOptionGroupLocaleID(BBoardSettings.BehaviorGroup), "行為" },
+                { m_Setting.GetOptionGroupLocaleID(BBoardSettings.StatusGroup), "狀態" },
+                { m_Setting.GetOptionGroupLocaleID(BBoardSettings.AboutInfoGroup), "模組資訊" },
+                { m_Setting.GetOptionGroupLocaleID(BBoardSettings.AboutLinksGroup), "連結" },
+                { m_Setting.GetOptionGroupLocaleID(BBoardSettings.DebugGroup), "偵錯" },
 
                 // Boarding speed sliders
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.BusBoardingSpeedFactor)), "公車上車速度" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.BusBoardingSpeedFactor)),
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.BusBoardingSpeedFactor)), "公車上車速度" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.BusBoardingSpeedFactor)),
                     SpeedDescription(
                         "公車站",
                         "公車",
                         string.Empty)
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.RailBoardingSpeedFactor)), "軌道上車速度" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.RailBoardingSpeedFactor)),
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.RailBoardingSpeedFactor)), "軌道上車速度" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.RailBoardingSpeedFactor)),
                     SpeedDescription(
                         "火車、電車和地鐵站",
                         "車輛",
                         "適用於火車、電車和地鐵站。\n")
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.WaterBoardingSpeedFactor)), "船舶 + 渡輪速度" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.WaterBoardingSpeedFactor)),
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.WaterBoardingSpeedFactor)), "船舶 + 渡輪速度" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.WaterBoardingSpeedFactor)),
                     SpeedDescription(
                         "船舶和渡輪站",
                         "車輛",
                         "適用於船舶和渡輪站。\n")
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AirBoardingSpeedFactor)), "飛機速度" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AirBoardingSpeedFactor)),
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)), "飛機速度" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)),
                     SpeedDescription(
                         "飛機航廈",
                         "飛機",
@@ -127,16 +127,16 @@ namespace BoardingNow
                 },
 
                 // Late passenger behavior
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), ToggleName },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.CancelLateBoarders)),
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CancelLateBoarders)), ToggleName },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CancelLateBoarders)),
                     "發車時間後仍然<未準備好>的遲到乘客可以錯過車輛。\n" +
                     "注意：只跳過單獨遲到的市民。\n" +
                     "一起出行的遲到團體/家庭<不會被跳過>，仍可能像 vanilla 一樣造成公共交通延誤。\n" +
                     "團體只占人群的一小部分；主要收益來自跳過遲到奔跑的單獨 cim。\n" +
                     "被跳過的遲到市民不會被刪除；遊戲會自然重新分配他們。"
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)), "提早奔跑：公車+路面電車" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)),
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "提早奔跑：公車+路面電車" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
                     "<遲到>市民會<提早奔跑>，嘗試在發車時間**之前**趕到。\n" +
                     "幫助公車/路面電車保持準點。\n" +
                     "只影響已分配到目前正在上客車輛的市民。\n" +
@@ -146,58 +146,58 @@ namespace BoardingNow
                 },
 
                 // Status overview
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusOverview)), "總使用量" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusOverview)),
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusOverview)), "總使用量" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusOverview)),
                     "來自遊戲交通資訊視圖的每月公共交通使用量。\n" +
                     "更新時間顯示此狀態快照的取得時間（通常是在進入選項選單後）。"
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusCimsRunSooner)), "市民提早奔跑" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusCimsRunSooner)),
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)), "市民提早奔跑" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)),
                     "啟用 [x] 時，統計今天開始**提早奔跑**、嘗試在發車前趕上公車/路面電車的市民。\n" +
                     "市民會比 vanilla 提早 512 幀奔跑（現實時間約提早 2-8 秒，遊戲內約 2 分鐘）。"
                 },
 
                 // Status rows
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusBus)), "公車" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusBus)), StatusDescription("公車") },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusTram)), "電車" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusTram)), StatusDescription("電車") },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusTrain)), "火車" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusTrain)), StatusDescription("火車") },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusSubway)), "地鐵" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusSubway)), StatusDescription("地鐵") },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusFerry)), "渡輪" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusFerry)), StatusDescription("渡輪") },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusShip)), "船舶" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusShip)), StatusDescription("船舶") },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusAir)), "飛機" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusAir)), StatusDescription("飛機") },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusBus)), "公車" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusBus)), StatusDescription("公車") },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusTram)), "電車" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTram)), StatusDescription("電車") },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusTrain)), "火車" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTrain)), StatusDescription("火車") },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusSubway)), "地鐵" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusSubway)), StatusDescription("地鐵") },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusFerry)), "渡輪" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusFerry)), StatusDescription("渡輪") },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusShip)), "船舶" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusShip)), StatusDescription("船舶") },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusAir)), "飛機" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusAir)), StatusDescription("飛機") },
 
                 // Status buttons
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatsToLog)), "統計寫入日誌" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatsToLog)),
-                    "向 **BoardingNow.log** 寫入一次性詳細報告。\n" +
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatsToLog)), "統計寫入日誌" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatsToLog)),
+                    "向 **BetterBoarding.log** 寫入一次性詳細報告。\n" +
                     "包含等待總數、每種模式最差的 3 個站點、被跳過 cim 範例、實體 ID 和路線提示。"
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenLog)), "開啟日誌" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenLog)),
-                    "如果存在，則開啟 **BoardingNow.log**。\n" +
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.OpenLog)), "開啟日誌" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.OpenLog)),
+                    "如果存在，則開啟 **BetterBoarding.log**。\n" +
                     "如果尚未找到該檔案，則改為開啟 Logs 資料夾。"
                 },
 
                 // About
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutName)), "模組" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutName)), "此模組的顯示名稱。" },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutVersion)), "版本" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutVersion)), "目前模組版本。" },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenParadoxMods)), "Paradox Mods" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenParadoxMods)), "開啟作者的 Paradox Mods 頁面。" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AboutName)), "模組" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AboutName)), "此模組的顯示名稱。" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AboutVersion)), "版本" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AboutVersion)), "目前模組版本。" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.OpenParadoxMods)), "Paradox Mods" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.OpenParadoxMods)), "開啟作者的 Paradox Mods 頁面。" },
 
                 // Debug
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableVerboseLogging)), "啟用詳細日誌" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableVerboseLogging)),
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.EnableVerboseLogging)), "啟用詳細日誌" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.EnableVerboseLogging)),
                     "**僅供偵錯 / 測試**\n" +
-                    "城市執行時向 <Logs/BoardingNow.log> 加入 <live> 詳細資訊。\n" +
+                    "城市執行時向 <Logs/BetterBoarding.log> 加入 <live> 詳細資訊。\n" +
                     "**不要在正常遊玩時啟用。**\n" +
                     "保持啟用可能降低效能並產生巨大的日誌檔。\n" +
                     "之後可以刪除舊日誌檔。\n" +
@@ -220,8 +220,8 @@ namespace BoardingNow
                 { TransitWaitStatus.KeyStatusRunSoonerOff, "提早奔跑OFF" },
 
                 // Stats-to-log report strings
-                { TransitWaitStatus.KeyReportNoCityLoaded, "[BN] 已請求統計報告，但未載入城市。" },
-                { TransitWaitStatus.KeyReportTitle, "統計寫入日誌快照 - Boarding Now" },
+                { TransitWaitStatus.KeyReportNoCityLoaded, "[BBoard] 已請求統計報告，但未載入城市。" },
+                { TransitWaitStatus.KeyReportTitle, "統計寫入日誌快照 - Better Boarding" },
                 { TransitWaitStatus.KeyReportSettings, "設定: {0}" },
                 { TransitWaitStatus.KeyReportNote, "路線提示來自該站點等待最高的 waypoint。" },
                 { TransitWaitStatus.KeyReportTesterHintsHeader, "測試提示" },

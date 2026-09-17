@@ -7,9 +7,9 @@
 // ================= </copyright> ======================
 
 // File: Mod.cs
-// Purpose: Entry point for Boarding Now.
+// Purpose: Entry point for Better Boarding.
 
-namespace BoardingNow
+namespace BetterBoarding
 {
     using System;
     using System.Reflection;
@@ -25,21 +25,21 @@ namespace BoardingNow
 
     public sealed class Mod : IMod
     {
-        public const string ModName = "Boarding Now";
-        public const string ModId = "BoardingNow";
-        public const string ModTag = "[BN]";
+        public const string ModName = "Better Boarding";
+        public const string ModId = "BetterBoarding";
+        public const string ModTag = "[BBoard]";
 
         public static readonly string ModVersion =
             Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.0.0";
 
-        // Register a dedicated BoardingNow.log, then use LogUtils for popup-safe writes.
+        // Register a dedicated BetterBoarding.log, then use LogUtils for popup-safe writes.
         public static readonly ILog s_Log =
             LogManager.GetLogger(ModId).SetShowsErrorsInUI(false);
 
         // OnLoad may run more than once during mod reload tests; keep the banner once per process.
         private static bool s_BannerLogged;
 
-        public static Setting? Settings;
+        public static BBoardSettings? Settings;
 
         public void OnLoad(UpdateSystem updateSystem)
         {
@@ -51,7 +51,7 @@ namespace BoardingNow
                 LogUtils.Info(s_Log, () => $"{ModName} v{ModVersion} OnLoad");
             }
 
-            Setting setting = new Setting(this);
+            BBoardSettings setting = new BBoardSettings(this);
             Settings = setting;
           
 
@@ -72,7 +72,7 @@ namespace BoardingNow
             {
                 // CS2 persists ModSetting values in the mod .coc file.
                 // Locales + load settings before register in OptionsUI so it shows localized+saved settings.
-                AssetDatabase.global.LoadSettings(ModId, setting, new Setting(this));
+                AssetDatabase.global.LoadSettings(ModId, setting, new BBoardSettings(this));
 
                 // Clamp old saved values before Options UI sees them.
                 // Example: helps legacy 6x-10x values become new 5x max after this update.

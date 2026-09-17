@@ -9,7 +9,7 @@
 // File: System/TransportStopTuningSystem.cs
 // Purpose: Applies boarding-speed slider values to public transport stop prefabs.
 
-namespace BoardingNow
+namespace BetterBoarding
 {
     using System;
     using Colossal.Serialization.Entities;
@@ -94,7 +94,7 @@ namespace BoardingNow
                 int speedFactor = GetSpeedFactor(authoringStop.m_TransportType);
                 bool hasMarker = EntityManager.HasComponent<TransportStopTuningMarker>(prefabEntity);
 
-                if (speedFactor == Setting.VanillaSpeedFactor && !hasMarker)
+                if (speedFactor == BBoardSettings.VanillaSpeedFactor && !hasMarker)
                 {
                     // Strict vanilla/no-op path: leave untouched stop prefabs alone at 1x.
                     continue;
@@ -110,7 +110,7 @@ namespace BoardingNow
                 tunedStop.m_LoadingFactor = baseEffectiveLoading * speedMultiplier - 1f;
                 tunedStop.m_BoardingTime = authoringStop.m_BoardingTime / speedMultiplier;
 
-                if (speedFactor == Setting.VanillaSpeedFactor)
+                if (speedFactor == BBoardSettings.VanillaSpeedFactor)
                 {
                     // Restore only prefabs we previously marked, then remove our marker.
                     EntityManager.SetComponentData(prefabEntity, tunedStop);
@@ -124,7 +124,7 @@ namespace BoardingNow
 
                     var marker = new TransportStopTuningMarker
                     {
-                        // Marker lets us restore only prefabs Boarding Now previously touched.
+                        // Marker lets us restore only prefabs Better Boarding previously touched.
                         m_LoadingFactor = tunedStop.m_LoadingFactor,
                         m_BoardingTime = tunedStop.m_BoardingTime
                     };
@@ -206,7 +206,7 @@ namespace BoardingNow
                     return BoardingRuntimeSettings.AirBoardingSpeedFactor;
                 default:
                     // Unknown transport types should stay at the true vanilla baseline.
-                    return Setting.VanillaSpeedFactor;
+                    return BBoardSettings.VanillaSpeedFactor;
             }
         }
     }

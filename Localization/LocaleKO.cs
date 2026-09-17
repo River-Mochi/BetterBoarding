@@ -7,9 +7,9 @@
 // ================= </copyright> ======================
 
 // File: Localization/LocaleKO.cs
-// Purpose: Korean ko-KR locale entries for Boarding Now.
+// Purpose: Korean ko-KR locale entries for Better Boarding.
 
-namespace BoardingNow
+namespace BetterBoarding
 {
     using System.Collections.Generic;
     using Colossal;
@@ -19,13 +19,13 @@ namespace BoardingNow
     /// </summary>
     public sealed class LocaleKO : IDictionarySource
     {
-        private readonly Setting m_Setting;
+        private readonly BBoardSettings m_Setting;
 
         /// <summary>
         /// Constructs the Korean locale.
         /// </summary>
         /// <param name="setting">Settings object used for locale IDs.</param>
-        public LocaleKO(Setting setting)
+        public LocaleKO(BBoardSettings setting)
         {
             m_Setting = setting;
         }
@@ -85,41 +85,41 @@ namespace BoardingNow
                 { m_Setting.GetSettingsLocaleID(), title },
 
                 // Tabs
-                { m_Setting.GetOptionTabLocaleID(Setting.ActionsTab), "작업" },
-                { m_Setting.GetOptionTabLocaleID(Setting.AboutTab), "정보" },
+                { m_Setting.GetOptionTabLocaleID(BBoardSettings.ActionsTab), "작업" },
+                { m_Setting.GetOptionTabLocaleID(BBoardSettings.AboutTab), "정보" },
 
                 // Groups
-                { m_Setting.GetOptionGroupLocaleID(Setting.SpeedGroup), "탑승 속도" },
-                { m_Setting.GetOptionGroupLocaleID(Setting.BehaviorGroup), "동작" },
-                { m_Setting.GetOptionGroupLocaleID(Setting.StatusGroup), "상태" },
-                { m_Setting.GetOptionGroupLocaleID(Setting.AboutInfoGroup), "모드 정보" },
-                { m_Setting.GetOptionGroupLocaleID(Setting.AboutLinksGroup), "링크" },
-                { m_Setting.GetOptionGroupLocaleID(Setting.DebugGroup), "디버그" },
+                { m_Setting.GetOptionGroupLocaleID(BBoardSettings.SpeedGroup), "탑승 속도" },
+                { m_Setting.GetOptionGroupLocaleID(BBoardSettings.BehaviorGroup), "동작" },
+                { m_Setting.GetOptionGroupLocaleID(BBoardSettings.StatusGroup), "상태" },
+                { m_Setting.GetOptionGroupLocaleID(BBoardSettings.AboutInfoGroup), "모드 정보" },
+                { m_Setting.GetOptionGroupLocaleID(BBoardSettings.AboutLinksGroup), "링크" },
+                { m_Setting.GetOptionGroupLocaleID(BBoardSettings.DebugGroup), "디버그" },
 
                 // Boarding speed sliders
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.BusBoardingSpeedFactor)), "버스 탑승 속도" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.BusBoardingSpeedFactor)),
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.BusBoardingSpeedFactor)), "버스 탑승 속도" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.BusBoardingSpeedFactor)),
                     SpeedDescription(
                         "버스 정류장",
                         "버스",
                         string.Empty)
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.RailBoardingSpeedFactor)), "철도 탑승 속도" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.RailBoardingSpeedFactor)),
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.RailBoardingSpeedFactor)), "철도 탑승 속도" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.RailBoardingSpeedFactor)),
                     SpeedDescription(
                         "기차, 트램, 지하철 정류장",
                         "차량",
                         "기차, 트램, 지하철 정류장에 적용됩니다.\n")
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.WaterBoardingSpeedFactor)), "선박 + 페리 속도" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.WaterBoardingSpeedFactor)),
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.WaterBoardingSpeedFactor)), "선박 + 페리 속도" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.WaterBoardingSpeedFactor)),
                     SpeedDescription(
                         "선박 및 페리 정류장",
                         "차량",
                         "선박 및 페리 정류장에 적용됩니다.\n")
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AirBoardingSpeedFactor)), "항공기 속도" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AirBoardingSpeedFactor)),
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)), "항공기 속도" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)),
                     SpeedDescription(
                         "항공기 터미널",
                         "항공기",
@@ -127,16 +127,16 @@ namespace BoardingNow
                 },
 
                 // Late passenger behavior
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), ToggleName },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.CancelLateBoarders)),
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CancelLateBoarders)), ToggleName },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CancelLateBoarders)),
                     "출발 시간 이후에도 <준비 안 됨> 상태인 늦은 승객은 차량을 놓칠 수 있습니다.\n" +
                     "참고: 혼자 늦은 시민만 건너뜁니다.\n" +
                     "함께 이동하는 그룹/가족이 늦은 경우에는 <건너뛰지 않으며>, vanilla처럼 대중교통 지연을 계속 일으킬 수 있습니다.\n" +
                     "그룹은 군중의 작은 부분입니다. 대부분의 효과는 늦게 뛰어오는 혼자 cim을 건너뛰는 데서 옵니다.\n" +
                     "건너뛴 늦은 시민은 삭제되지 않으며, 게임이 자연스럽게 다시 배정합니다."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)), "더 일찍 달리기: 버스+트램" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)),
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "더 일찍 달리기: 버스+트램" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
                     "<늦은> 시민이 출발 시간 **전**에 도착해 보도록 <더 일찍 달리기> 시작합니다.\n" +
                     "버스/트램이 일정대로 움직이는 데 도움을 줍니다.\n" +
                     "현재 승차 중인 차량에 이미 배정된 cim에게만 적용됩니다.\n" +
@@ -146,58 +146,58 @@ namespace BoardingNow
                 },
 
                 // Status overview
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusOverview)), "전체 이용량" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusOverview)),
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusOverview)), "전체 이용량" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusOverview)),
                     "게임의 교통 정보 보기에서 가져온 월간 대중교통 이용량입니다.\n" +
                     "업데이트 시간은 이 상태 스냅샷을 찍은 시각을 표시합니다(보통 옵션 메뉴에 들어간 뒤)."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusCimsRunSooner)), "cim 더 일찍 달리기" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusCimsRunSooner)),
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)), "cim 더 일찍 달리기" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)),
                     "켜져 있으면 [x], 오늘 출발 전에 버스/트램을 잡으려고 **더 일찍 달리기 시작한** cim을 셉니다.\n" +
                     "cim은 vanilla보다 512프레임 일찍 달립니다(실시간 약 2-8초 빠름, 게임 내 약 2분)."
                 },
 
                 // Status rows
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusBus)), "버스" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusBus)), StatusDescription("버스") },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusTram)), "트램" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusTram)), StatusDescription("트램") },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusTrain)), "기차" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusTrain)), StatusDescription("기차") },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusSubway)), "지하철" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusSubway)), StatusDescription("지하철") },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusFerry)), "페리" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusFerry)), StatusDescription("페리") },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusShip)), "선박" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusShip)), StatusDescription("선박") },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusAir)), "항공기" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusAir)), StatusDescription("항공기") },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusBus)), "버스" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusBus)), StatusDescription("버스") },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusTram)), "트램" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTram)), StatusDescription("트램") },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusTrain)), "기차" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTrain)), StatusDescription("기차") },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusSubway)), "지하철" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusSubway)), StatusDescription("지하철") },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusFerry)), "페리" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusFerry)), StatusDescription("페리") },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusShip)), "선박" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusShip)), StatusDescription("선박") },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusAir)), "항공기" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusAir)), StatusDescription("항공기") },
 
                 // Status buttons
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatsToLog)), "Stats를 로그로" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatsToLog)),
-                    "**BoardingNow.log**에 일회성 자세한 보고서를 기록합니다.\n" +
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatsToLog)), "Stats를 로그로" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatsToLog)),
+                    "**BetterBoarding.log**에 일회성 자세한 보고서를 기록합니다.\n" +
                     "대기 총합, 모드별 최악 정류장 Top 3, 건너뛴 cim 예시, 엔티티 ID, 노선 힌트를 포함합니다."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenLog)), "로그 열기" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenLog)),
-                    "존재하면 **BoardingNow.log**를 엽니다.\n" +
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.OpenLog)), "로그 열기" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.OpenLog)),
+                    "존재하면 **BetterBoarding.log**를 엽니다.\n" +
                     "파일을 아직 찾을 수 없으면 Logs 폴더를 대신 엽니다."
                 },
 
                 // About
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutName)), "모드" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutName)), "이 모드의 표시 이름입니다." },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutVersion)), "버전" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutVersion)), "현재 모드 버전입니다." },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenParadoxMods)), "Paradox Mods" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenParadoxMods)), "제작자의 Paradox Mods 페이지를 엽니다." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AboutName)), "모드" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AboutName)), "이 모드의 표시 이름입니다." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AboutVersion)), "버전" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AboutVersion)), "현재 모드 버전입니다." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.OpenParadoxMods)), "Paradox Mods" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.OpenParadoxMods)), "제작자의 Paradox Mods 페이지를 엽니다." },
 
                 // Debug
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableVerboseLogging)), "자세한 로그 사용" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableVerboseLogging)),
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.EnableVerboseLogging)), "자세한 로그 사용" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.EnableVerboseLogging)),
                     "**디버그 / 테스트 전용**\n" +
-                    "도시가 실행되는 동안 <Logs/BoardingNow.log>에 <live> 세부 정보를 추가합니다.\n" +
+                    "도시가 실행되는 동안 <Logs/BetterBoarding.log>에 <live> 세부 정보를 추가합니다.\n" +
                     "**일반 플레이에서는 켜지 마세요.**\n" +
                     "켜 둔 상태는 성능을 낮추고 거대한 로그 파일을 만들 수 있습니다.\n" +
                     "오래된 로그 파일은 나중에 삭제할 수 있습니다.\n" +
@@ -220,8 +220,8 @@ namespace BoardingNow
                 { TransitWaitStatus.KeyStatusRunSoonerOff, "일찍 달리기 OFF" },
 
                 // Stats-to-log report strings
-                { TransitWaitStatus.KeyReportNoCityLoaded, "[BN] 통계 보고서가 요청되었지만 불러온 도시가 없습니다." },
-                { TransitWaitStatus.KeyReportTitle, "Stats를 로그로 스냅샷 - Boarding Now" },
+                { TransitWaitStatus.KeyReportNoCityLoaded, "[BBoard] 통계 보고서가 요청되었지만 불러온 도시가 없습니다." },
+                { TransitWaitStatus.KeyReportTitle, "Stats를 로그로 스냅샷 - Better Boarding" },
                 { TransitWaitStatus.KeyReportSettings, "설정: {0}" },
                 { TransitWaitStatus.KeyReportNote, "노선 힌트는 해당 정류장에서 대기 시간이 가장 높은 waypoint에서 가져옵니다." },
                 { TransitWaitStatus.KeyReportTesterHintsHeader, "테스터 힌트" },

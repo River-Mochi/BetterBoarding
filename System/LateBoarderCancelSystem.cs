@@ -9,7 +9,7 @@
 // File: System/LateBoarderCancelSystem.cs
 // Purpose: Main update loop and boarding-assist pass for late solo passengers.
 
-namespace BoardingNow
+namespace BetterBoarding
 {
     using Colossal.Serialization.Entities;
     using Game;

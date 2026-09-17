@@ -9,7 +9,7 @@
 // File: Settings/BoardingRuntimeSettings.cs
 // Purpose: Runtime settings snapshot shared by Options UI setters and ECS systems.
 
-namespace BoardingNow
+namespace BetterBoarding
 {
     using System;
 
@@ -34,13 +34,13 @@ namespace BoardingNow
 
         public static int LateBoarderRevision { get; private set; }
 
-        public static int BusBoardingSpeedFactor { get; private set; } = Setting.DefaultSpeedFactor;
+        public static int BusBoardingSpeedFactor { get; private set; } = BBoardSettings.DefaultSpeedFactor;
 
-        public static int RailBoardingSpeedFactor { get; private set; } = Setting.DefaultSpeedFactor;
+        public static int RailBoardingSpeedFactor { get; private set; } = BBoardSettings.DefaultSpeedFactor;
 
-        public static int WaterBoardingSpeedFactor { get; private set; } = Setting.DefaultSpeedFactor;
+        public static int WaterBoardingSpeedFactor { get; private set; } = BBoardSettings.DefaultSpeedFactor;
 
-        public static int AirBoardingSpeedFactor { get; private set; } = Setting.DefaultSpeedFactor;
+        public static int AirBoardingSpeedFactor { get; private set; } = BBoardSettings.DefaultSpeedFactor;
 
         public static bool CancelLateBoarders { get; private set; } = false;
 
@@ -50,7 +50,7 @@ namespace BoardingNow
 
         public static bool EnableVerboseLogging { get; private set; } = false;
 
-        public static BoardingRuntimeChangeFlags Apply(Setting settings)
+        public static BoardingRuntimeChangeFlags Apply(BBoardSettings settings)
         {
             BoardingRuntimeChangeFlags changes = BoardingRuntimeChangeFlags.None;
 
@@ -227,14 +227,14 @@ namespace BoardingNow
 
         private static int ClampSpeedFactor(int value)
         {
-            if (value < Setting.MinSpeedFactor)
+            if (value < BBoardSettings.MinSpeedFactor)
             {
-                return Setting.MinSpeedFactor;
+                return BBoardSettings.MinSpeedFactor;
             }
 
-            if (value > Setting.MaxSpeedFactor)
+            if (value > BBoardSettings.MaxSpeedFactor)
             {
-                return Setting.MaxSpeedFactor;
+                return BBoardSettings.MaxSpeedFactor;
             }
 
             return value;

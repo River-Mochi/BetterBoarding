@@ -9,12 +9,12 @@
 // File: System/TransportStopTuningMarker.cs
 // Purpose: Marker component recording the current tuned stop values.
 
-namespace BoardingNow
+namespace BetterBoarding
 {
     using Unity.Entities;
 
     /// <summary>
-    /// Runtime marker proving a prefab has Boarding Now values applied.
+    /// Runtime marker proving a prefab has Better Boarding values applied.
     /// Returning sliders to 1x removes it.
     /// </summary>
     public struct TransportStopTuningMarker : IComponentData

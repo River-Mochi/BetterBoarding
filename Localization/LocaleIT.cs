@@ -7,9 +7,9 @@
 // ================= </copyright> ======================
 
 // File: Localization/LocaleIT.cs
-// Purpose: Italian it-IT locale entries for Boarding Now.
+// Purpose: Italian it-IT locale entries for Better Boarding.
 
-namespace BoardingNow
+namespace BetterBoarding
 {
     using System.Collections.Generic;
     using Colossal;
@@ -19,13 +19,13 @@ namespace BoardingNow
     /// </summary>
     public sealed class LocaleIT : IDictionarySource
     {
-        private readonly Setting m_Setting;
+        private readonly BBoardSettings m_Setting;
 
         /// <summary>
         /// Constructs the Italian locale.
         /// </summary>
         /// <param name="setting">Settings object used for locale IDs.</param>
-        public LocaleIT(Setting setting)
+        public LocaleIT(BBoardSettings setting)
         {
             m_Setting = setting;
         }
@@ -85,41 +85,41 @@ namespace BoardingNow
                 { m_Setting.GetSettingsLocaleID(), title },
 
                 // Tabs
-                { m_Setting.GetOptionTabLocaleID(Setting.ActionsTab), "Azioni" },
-                { m_Setting.GetOptionTabLocaleID(Setting.AboutTab), "Info" },
+                { m_Setting.GetOptionTabLocaleID(BBoardSettings.ActionsTab), "Azioni" },
+                { m_Setting.GetOptionTabLocaleID(BBoardSettings.AboutTab), "Info" },
 
                 // Groups
-                { m_Setting.GetOptionGroupLocaleID(Setting.SpeedGroup), "Velocità imbarco" },
-                { m_Setting.GetOptionGroupLocaleID(Setting.BehaviorGroup), "Comportamento" },
-                { m_Setting.GetOptionGroupLocaleID(Setting.StatusGroup), "Stato" },
-                { m_Setting.GetOptionGroupLocaleID(Setting.AboutInfoGroup), "Info mod" },
-                { m_Setting.GetOptionGroupLocaleID(Setting.AboutLinksGroup), "Link" },
-                { m_Setting.GetOptionGroupLocaleID(Setting.DebugGroup), "Debug" },
+                { m_Setting.GetOptionGroupLocaleID(BBoardSettings.SpeedGroup), "Velocità imbarco" },
+                { m_Setting.GetOptionGroupLocaleID(BBoardSettings.BehaviorGroup), "Comportamento" },
+                { m_Setting.GetOptionGroupLocaleID(BBoardSettings.StatusGroup), "Stato" },
+                { m_Setting.GetOptionGroupLocaleID(BBoardSettings.AboutInfoGroup), "Info mod" },
+                { m_Setting.GetOptionGroupLocaleID(BBoardSettings.AboutLinksGroup), "Link" },
+                { m_Setting.GetOptionGroupLocaleID(BBoardSettings.DebugGroup), "Debug" },
 
                 // Boarding speed sliders
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.BusBoardingSpeedFactor)), "Velocità bus" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.BusBoardingSpeedFactor)),
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.BusBoardingSpeedFactor)), "Velocità bus" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.BusBoardingSpeedFactor)),
                     SpeedDescription(
                         "fermata bus",
                         "bus",
                         string.Empty)
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.RailBoardingSpeedFactor)), "Velocità ferrovia" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.RailBoardingSpeedFactor)),
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.RailBoardingSpeedFactor)), "Velocità ferrovia" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.RailBoardingSpeedFactor)),
                     SpeedDescription(
                         "fermata treno, tram e metropolitana",
                         "veicolo",
                         "Si applica alle fermate di treno, tram e metropolitana.\n")
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.WaterBoardingSpeedFactor)), "Nave + traghetto" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.WaterBoardingSpeedFactor)),
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.WaterBoardingSpeedFactor)), "Nave + traghetto" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.WaterBoardingSpeedFactor)),
                     SpeedDescription(
                         "fermata nave e traghetto",
                         "veicolo",
                         "Si applica alle fermate di nave e traghetto.\n")
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AirBoardingSpeedFactor)), "Velocità aereo" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AirBoardingSpeedFactor)),
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)), "Velocità aereo" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)),
                     SpeedDescription(
                         "terminal aereo",
                         "aereo",
@@ -127,16 +127,16 @@ namespace BoardingNow
                 },
 
                 // Late passenger behavior
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), ToggleName },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.CancelLateBoarders)),
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CancelLateBoarders)), ToggleName },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CancelLateBoarders)),
                     "I passeggeri in ritardo che sono ancora <non pronti> dopo l’orario di partenza possono perdere il veicolo.\n" +
                     "Nota: vengono saltati solo cittadini soli in ritardo.\n" +
                     "Gruppi/famiglie che viaggiano insieme e sono in ritardo <non vengono saltati> e possono ancora causare ritardi come in vanilla.\n" +
                     "I gruppi sono una piccola parte della folla; il beneficio principale viene dal saltare i cim soli in ritardo.\n" +
                     "I cittadini in ritardo saltati non vengono eliminati; il gioco li riassegna naturalmente."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)), "Cim corrono prima: bus + tram" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)),
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cim corrono prima: bus + tram" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
                     "I cittadini <in ritardo> iniziano a <correre prima> per provare ad arrivare **prima** dell’orario di partenza.\n" +
                     "Aiuta a tenere bus/tram in orario.\n" +
                     "Riguarda solo i cim già assegnati a un veicolo che sta imbarcando.\n" +
@@ -146,58 +146,58 @@ namespace BoardingNow
                 },
 
                 // Status overview
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusOverview)), "Uso totale" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusOverview)),
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusOverview)), "Uso totale" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusOverview)),
                     "Uso mensile del trasporto pubblico dall’infoview Trasporti del gioco.\n" +
                     "L’ora aggiornata mostra quando è stato preso questo snapshot (di solito dopo l’ingresso nel menu Opzioni)."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusCimsRunSooner)), "Cim corrono prima" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusCimsRunSooner)),
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)), "Cim corrono prima" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)),
                     "Se attivo [x], conta tutti i cim (oggi) che hanno iniziato a **correre prima** per provare a prendere un bus/tram prima della partenza.\n" +
                     "I cim corrono 512 frame prima rispetto a vanilla (~2-8 secondi prima in tempo reale, ~2 minuti in gioco)."
                 },
 
                 // Status rows
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusBus)), "Bus" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusBus)), StatusDescription("bus") },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusTram)), "Tram" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusTram)), StatusDescription("tram") },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusTrain)), "Treno" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusTrain)), StatusDescription("treno") },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusSubway)), "Metropolitana" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusSubway)), StatusDescription("metropolitana") },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusFerry)), "Traghetto" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusFerry)), StatusDescription("traghetto") },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusShip)), "Nave" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusShip)), StatusDescription("nave") },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusAir)), "Aereo" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusAir)), StatusDescription("aereo") },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusBus)), "Bus" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusBus)), StatusDescription("bus") },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusTram)), "Tram" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTram)), StatusDescription("tram") },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusTrain)), "Treno" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTrain)), StatusDescription("treno") },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusSubway)), "Metropolitana" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusSubway)), StatusDescription("metropolitana") },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusFerry)), "Traghetto" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusFerry)), StatusDescription("traghetto") },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusShip)), "Nave" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusShip)), StatusDescription("nave") },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusAir)), "Aereo" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusAir)), StatusDescription("aereo") },
 
                 // Status buttons
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatsToLog)), "Stats nel log" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatsToLog)),
-                    "Scrive un report dettagliato una tantum in **BoardingNow.log**.\n" +
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatsToLog)), "Stats nel log" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatsToLog)),
+                    "Scrive un report dettagliato una tantum in **BetterBoarding.log**.\n" +
                     "Include totali in attesa, top 3 peggiori fermate per modalità, esempi di cim saltati, ID entità e indizi linea."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenLog)), "Apri log" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenLog)),
-                    "Apre **BoardingNow.log** se esiste.\n" +
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.OpenLog)), "Apri log" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.OpenLog)),
+                    "Apre **BetterBoarding.log** se esiste.\n" +
                     "Se il file non viene ancora trovato, apre invece la cartella Logs."
                 },
 
                 // About
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutName)), "Mod" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutName)), "Nome visualizzato di questa mod." },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutVersion)), "Versione" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutVersion)), "Versione attuale della mod." },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenParadoxMods)), "Paradox Mods" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenParadoxMods)), "Apre la pagina Paradox Mods dell’autore." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AboutName)), "Mod" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AboutName)), "Nome visualizzato di questa mod." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AboutVersion)), "Versione" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AboutVersion)), "Versione attuale della mod." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.OpenParadoxMods)), "Paradox Mods" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.OpenParadoxMods)), "Apre la pagina Paradox Mods dell’autore." },
 
                 // Debug
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableVerboseLogging)), "Abilita log dettagliato" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableVerboseLogging)),
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.EnableVerboseLogging)), "Abilita log dettagliato" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.EnableVerboseLogging)),
                     "**Solo debug / test**\n" +
-                    "Aggiunge dettagli <live> a <Logs/BoardingNow.log> mentre la città è in esecuzione.\n" +
+                    "Aggiunge dettagli <live> a <Logs/BetterBoarding.log> mentre la città è in esecuzione.\n" +
                     "**Non abilitare durante il gioco normale.**\n" +
                     "Lasciarlo attivo può ridurre le prestazioni e creare file log enormi.\n" +
                     "Puoi eliminare i vecchi file log più tardi.\n" +
@@ -220,8 +220,8 @@ namespace BoardingNow
                 { TransitWaitStatus.KeyStatusRunSoonerOff, "corsa OFF" },
 
                 // Stats-to-log report strings
-                { TransitWaitStatus.KeyReportNoCityLoaded, "[BN] Report statistiche richiesto, ma nessuna città è caricata." },
-                { TransitWaitStatus.KeyReportTitle, "Snapshot Stats nel log - Boarding Now" },
+                { TransitWaitStatus.KeyReportNoCityLoaded, "[BBoard] Report statistiche richiesto, ma nessuna città è caricata." },
+                { TransitWaitStatus.KeyReportTitle, "Snapshot Stats nel log - Better Boarding" },
                 { TransitWaitStatus.KeyReportSettings, "Impostazioni: {0}" },
                 { TransitWaitStatus.KeyReportNote, "L’indizio linea viene dal waypoint con attesa più alta a quella fermata." },
                 { TransitWaitStatus.KeyReportTesterHintsHeader, "Suggerimenti tester" },

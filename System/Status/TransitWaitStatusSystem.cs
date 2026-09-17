@@ -9,7 +9,7 @@
 // File: System/Status/TransitWaitStatusSystem.cs
 // Purpose: Builds transit wait snapshots on demand for the Options UI status group.
 
-namespace BoardingNow
+namespace BetterBoarding
 {
     using System;
     using System.Collections.Generic;

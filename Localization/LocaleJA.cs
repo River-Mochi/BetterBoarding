@@ -7,9 +7,9 @@
 // ================= </copyright> ======================
 
 // File: Localization/LocaleJA.cs
-// Purpose: Japanese ja-JP locale entries for Boarding Now.
+// Purpose: Japanese ja-JP locale entries for Better Boarding.
 
-namespace BoardingNow
+namespace BetterBoarding
 {
     using System.Collections.Generic;
     using Colossal;
@@ -19,13 +19,13 @@ namespace BoardingNow
     /// </summary>
     public sealed class LocaleJA : IDictionarySource
     {
-        private readonly Setting m_Setting;
+        private readonly BBoardSettings m_Setting;
 
         /// <summary>
         /// Constructs the Japanese locale.
         /// </summary>
         /// <param name="setting">Settings object used for locale IDs.</param>
-        public LocaleJA(Setting setting)
+        public LocaleJA(BBoardSettings setting)
         {
             m_Setting = setting;
         }
@@ -85,41 +85,41 @@ namespace BoardingNow
                 { m_Setting.GetSettingsLocaleID(), title },
 
                 // Tabs
-                { m_Setting.GetOptionTabLocaleID(Setting.ActionsTab), "操作" },
-                { m_Setting.GetOptionTabLocaleID(Setting.AboutTab), "情報" },
+                { m_Setting.GetOptionTabLocaleID(BBoardSettings.ActionsTab), "操作" },
+                { m_Setting.GetOptionTabLocaleID(BBoardSettings.AboutTab), "情報" },
 
                 // Groups
-                { m_Setting.GetOptionGroupLocaleID(Setting.SpeedGroup), "乗車速度" },
-                { m_Setting.GetOptionGroupLocaleID(Setting.BehaviorGroup), "動作" },
-                { m_Setting.GetOptionGroupLocaleID(Setting.StatusGroup), "ステータス" },
-                { m_Setting.GetOptionGroupLocaleID(Setting.AboutInfoGroup), "MOD情報" },
-                { m_Setting.GetOptionGroupLocaleID(Setting.AboutLinksGroup), "リンク" },
-                { m_Setting.GetOptionGroupLocaleID(Setting.DebugGroup), "デバッグ" },
+                { m_Setting.GetOptionGroupLocaleID(BBoardSettings.SpeedGroup), "乗車速度" },
+                { m_Setting.GetOptionGroupLocaleID(BBoardSettings.BehaviorGroup), "動作" },
+                { m_Setting.GetOptionGroupLocaleID(BBoardSettings.StatusGroup), "ステータス" },
+                { m_Setting.GetOptionGroupLocaleID(BBoardSettings.AboutInfoGroup), "MOD情報" },
+                { m_Setting.GetOptionGroupLocaleID(BBoardSettings.AboutLinksGroup), "リンク" },
+                { m_Setting.GetOptionGroupLocaleID(BBoardSettings.DebugGroup), "デバッグ" },
 
                 // Boarding speed sliders
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.BusBoardingSpeedFactor)), "バス乗車速度" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.BusBoardingSpeedFactor)),
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.BusBoardingSpeedFactor)), "バス乗車速度" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.BusBoardingSpeedFactor)),
                     SpeedDescription(
                         "バス停",
                         "バス",
                         string.Empty)
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.RailBoardingSpeedFactor)), "鉄道乗車速度" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.RailBoardingSpeedFactor)),
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.RailBoardingSpeedFactor)), "鉄道乗車速度" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.RailBoardingSpeedFactor)),
                     SpeedDescription(
                         "列車・トラム・地下鉄の停車場",
                         "車両",
                         "列車、トラム、地下鉄の停車場に適用されます。\n")
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.WaterBoardingSpeedFactor)), "船＋フェリー速度" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.WaterBoardingSpeedFactor)),
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.WaterBoardingSpeedFactor)), "船＋フェリー速度" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.WaterBoardingSpeedFactor)),
                     SpeedDescription(
                         "船・フェリー停留所",
                         "車両",
                         "船とフェリーの停留所に適用されます。\n")
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AirBoardingSpeedFactor)), "飛行機速度" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AirBoardingSpeedFactor)),
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)), "飛行機速度" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)),
                     SpeedDescription(
                         "飛行機ターミナル",
                         "飛行機",
@@ -127,16 +127,16 @@ namespace BoardingNow
                 },
 
                 // Late passenger behavior
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CancelLateBoarders)), ToggleName },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.CancelLateBoarders)),
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CancelLateBoarders)), ToggleName },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CancelLateBoarders)),
                     "出発時刻後も <準備未完了> の遅れた乗客は、車両を逃すことがあります。\n" +
                     "注: スキップするのは単独の遅れた市民のみです。\n" +
                     "一緒に移動するグループ/家族が遅れている場合は <スキップされません>。vanilla と同じように交通機関を遅らせることがあります。\n" +
                     "グループは群衆の一部にすぎません。主な効果は、遅れて走っている単独 cim のスキップから得られます。\n" +
                     "スキップされた遅れた市民は削除されません。ゲームにより自然に再割り当てされます。"
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)), "早めに走る: バス+トラム" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.CimsRunSoonerToCatchBuses)),
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "早めに走る: バス+トラム" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
                     "<遅れている>市民が出発時刻**前**に間に合うよう、<早めに走り始め>ます。\n" +
                     "バス/トラムの定時運行を助けます。\n" +
                     "現在乗車中の車両にすでに割り当てられている cim だけに影響します。\n" +
@@ -146,58 +146,58 @@ namespace BoardingNow
                 },
 
                 // Status overview
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusOverview)), "総利用状況" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusOverview)),
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusOverview)), "総利用状況" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusOverview)),
                     "ゲームの交通インフォビューから取得した月間公共交通利用数。\n" +
                     "更新時刻は、このステータス snapshot が取得された時刻です（通常はオプションメニューを開いた後）。"
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusCimsRunSooner)), "早めに走る cim" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusCimsRunSooner)),
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)), "早めに走る cim" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)),
                     "有効 [x] の場合、今日、出発前にバス/トラムへ間に合うよう **早めに走り始めた** cim を数えます。\n" +
                     "cim は vanilla より 512 フレーム早く走ります（実時間で約 2～8 秒早く、ゲーム内で約 2 分）。"
                 },
 
                 // Status rows
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusBus)), "バス" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusBus)), StatusDescription("バス") },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusTram)), "トラム" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusTram)), StatusDescription("トラム") },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusTrain)), "列車" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusTrain)), StatusDescription("列車") },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusSubway)), "地下鉄" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusSubway)), StatusDescription("地下鉄") },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusFerry)), "フェリー" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusFerry)), StatusDescription("フェリー") },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusShip)), "船" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusShip)), StatusDescription("船") },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusAir)), "飛行機" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusAir)), StatusDescription("飛行機") },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusBus)), "バス" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusBus)), StatusDescription("バス") },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusTram)), "トラム" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTram)), StatusDescription("トラム") },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusTrain)), "列車" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTrain)), StatusDescription("列車") },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusSubway)), "地下鉄" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusSubway)), StatusDescription("地下鉄") },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusFerry)), "フェリー" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusFerry)), StatusDescription("フェリー") },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusShip)), "船" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusShip)), StatusDescription("船") },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusAir)), "飛行機" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusAir)), StatusDescription("飛行機") },
 
                 // Status buttons
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatsToLog)), "Statsをログへ" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatsToLog)),
-                    "**BoardingNow.log** に1回限りの詳細レポートを書き込みます。\n" +
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatsToLog)), "Statsをログへ" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatsToLog)),
+                    "**BetterBoarding.log** に1回限りの詳細レポートを書き込みます。\n" +
                     "待機合計、モードごとのワースト停留所上位3件、スキップされた cim 例、エンティティID、路線ヒントを含みます。"
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenLog)), "ログを開く" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenLog)),
-                    "存在する場合は **BoardingNow.log** を開きます。\n" +
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.OpenLog)), "ログを開く" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.OpenLog)),
+                    "存在する場合は **BetterBoarding.log** を開きます。\n" +
                     "ファイルがまだ見つからない場合は、代わりに Logs フォルダーを開きます。"
                 },
 
                 // About
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutName)), "Mod" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutName)), "このMODの表示名。" },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutVersion)), "バージョン" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutVersion)), "現在のMODバージョン。" },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenParadoxMods)), "Paradox Mods" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenParadoxMods)), "作者の Paradox Mods ページを開きます。" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AboutName)), "Mod" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AboutName)), "このMODの表示名。" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AboutVersion)), "バージョン" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AboutVersion)), "現在のMODバージョン。" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.OpenParadoxMods)), "Paradox Mods" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.OpenParadoxMods)), "作者の Paradox Mods ページを開きます。" },
 
                 // Debug
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableVerboseLogging)), "詳細ログを有効化" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableVerboseLogging)),
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.EnableVerboseLogging)), "詳細ログを有効化" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.EnableVerboseLogging)),
                     "**デバッグ / テスト専用**\n" +
-                    "都市実行中に <Logs/BoardingNow.log> へ <live> 詳細を追加します。\n" +
+                    "都市実行中に <Logs/BetterBoarding.log> へ <live> 詳細を追加します。\n" +
                     "**通常プレイでは有効にしないでください。**\n" +
                     "有効のままにすると、性能が下がり、巨大なログファイルが作成されることがあります。\n" +
                     "古いログファイルは後で削除できます。\n" +
@@ -220,8 +220,8 @@ namespace BoardingNow
                 { TransitWaitStatus.KeyStatusRunSoonerOff, "早走りOFF" },
 
                 // Stats-to-log report strings
-                { TransitWaitStatus.KeyReportNoCityLoaded, "[BN] 統計レポートが要求されましたが、都市が読み込まれていません。" },
-                { TransitWaitStatus.KeyReportTitle, "Statsをログへ snapshot - Boarding Now" },
+                { TransitWaitStatus.KeyReportNoCityLoaded, "[BBoard] 統計レポートが要求されましたが、都市が読み込まれていません。" },
+                { TransitWaitStatus.KeyReportTitle, "Statsをログへ snapshot - Better Boarding" },
                 { TransitWaitStatus.KeyReportSettings, "設定: {0}" },
                 { TransitWaitStatus.KeyReportNote, "路線ヒントは、その停留所で最も待ち時間が高い waypoint から取得されます。" },
                 { TransitWaitStatus.KeyReportTesterHintsHeader, "テスター向けヒント" },
