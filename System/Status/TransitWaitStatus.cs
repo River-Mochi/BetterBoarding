@@ -1,15 +1,15 @@
 // <copyright file="TransitWaitStatus.cs" company="River-Mochi">
 // Copyright (c) 2026 River-Mochi. All rights reserved.
-// Licensed under the MIT License. You may not use this file except in compliance with this License.
-// See LICENSE file in the project root for full license information.
-// This notice and the MIT License notice must be kept with
-// all copies or substantial portions of this code.
+// Licensed under the GNU General Public License v3.0 or later,
+// with the Cities: Skylines II Linking Exception.
+// See LICENSE and LICENSE-EXCEPTION in the project root.
+// This notice MUST be kept with copies or substantial portions of this code.
 // ================= </copyright> ======================
 
 // File: System/Status/TransitWaitStatus.cs
 // Purpose: Cached Options UI status text for current transit wait snapshots.
 
-namespace FastBoarding
+namespace BoardingNow
 {
     using System;
     using System.Text;
@@ -446,7 +446,7 @@ namespace FastBoarding
             GameManager gm = GameManager.instance;
             if (world == null || !world.IsCreated || !gm.gameMode.IsGame())
             {
-                LogUtils.Info(Mod.s_Log, () => Localize(KeyReportNoCityLoaded, "[FB] Stats report requested, but no city is loaded."));
+                LogUtils.Info(Mod.s_Log, () => Localize(KeyReportNoCityLoaded, "[BN] Stats report requested, but no city is loaded."));
                 return;
             }
 
@@ -460,7 +460,7 @@ namespace FastBoarding
                 // Keep this verbose output in the log, not the cramped Options UI row.
                 StringBuilder sb = new StringBuilder();
                 sb.AppendLine();
-                AppendSectionHeader(sb, Localize(KeyReportTitle, "Fast Boarding transit status report"));
+                AppendSectionHeader(sb, Localize(KeyReportTitle, "Boarding Now transit status report"));
                 AppendField(sb, "Snapshot updated", s_LastSnapshotLocalTime == default ? "unknown" : s_LastSnapshotLocalTime.ToString("HH:mm:ss"));
                 AppendField(sb, "Options Settings", BoardingRuntimeSettings.DescribeForLog());
                 AppendField(sb, "Note", Localize(KeyReportNote, "Worst line is a hint from the highest-wait waypoint at the worst stop."));

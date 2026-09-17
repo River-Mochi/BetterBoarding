@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>Library</OutputType>
 		<Configurations>Debug;Release</Configurations>
@@ -12,14 +12,14 @@
 		<Nullable>enable</Nullable>
 
 		<!-- DLL name and default namespace -->
-		<AssemblyName>FastBoarding</AssemblyName>
-		<RootNamespace>FastBoarding</RootNamespace>
+		<AssemblyName>BoardingNow</AssemblyName>
+		<RootNamespace>BoardingNow</RootNamespace>
 
 		<!-- Single source of truth for version number -->
-        <GameVersion>1.6.*</GameVersion>
-		<Version>1.1.2</Version>
+		<Version>1.1.3</Version>
 		<AssemblyVersion>$(Version).0</AssemblyVersion>
 		<FileVersion>$(Version).0</FileVersion>
+        <GameVersion>1.6.*</GameVersion>
 	</PropertyGroup>
 
 	<!-- Imports must be after PropertyGroup -->

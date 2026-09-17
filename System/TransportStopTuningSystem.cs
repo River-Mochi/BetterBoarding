@@ -1,15 +1,15 @@
 // <copyright file="TransportStopTuningSystem.cs" company="River-Mochi">
 // Copyright (c) 2026 River-Mochi. All rights reserved.
-// Licensed under the MIT License. You may not use this file except in compliance with this License.
-// See LICENSE file in the project root for full license information.
-// This notice and the MIT License notice must be kept with
-// all copies or substantial portions of this code.
+// Licensed under the GNU General Public License v3.0 or later,
+// with the Cities: Skylines II Linking Exception.
+// See LICENSE and LICENSE-EXCEPTION in the project root.
+// This notice MUST be kept with copies or substantial portions of this code.
 // ================= </copyright> ======================
 
 // File: System/TransportStopTuningSystem.cs
 // Purpose: Applies boarding-speed slider values to public transport stop prefabs.
 
-namespace FastBoarding
+namespace BoardingNow
 {
     using System;
     using Colossal.Serialization.Entities;
@@ -124,7 +124,7 @@ namespace FastBoarding
 
                     var marker = new TransportStopTuningMarker
                     {
-                        // Marker lets us restore only prefabs Fast Boarding previously touched.
+                        // Marker lets us restore only prefabs Boarding Now previously touched.
                         m_LoadingFactor = tunedStop.m_LoadingFactor,
                         m_BoardingTime = tunedStop.m_BoardingTime
                     };

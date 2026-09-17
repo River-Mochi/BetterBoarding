@@ -1,20 +1,20 @@
 // <copyright file="LocaleUtils.cs" company="River-Mochi">
 // Copyright (c) 2026 River-Mochi. All rights reserved.
-// Licensed under the MIT License. You may not use this file except in compliance with this License.
-// See LICENSE file in the project root for full license information.
-// This notice and the MIT License notice must be kept with
-// all copies or substantial portions of this code.
+// Licensed under the GNU General Public License v3.0 or later,
+// with the Cities: Skylines II Linking Exception.
+// See LICENSE and LICENSE-EXCEPTION in the project root.
+// This notice MUST be kept with copies or substantial portions of this code.
 // ================= </copyright> ======================
 
 // File: LocaleUtils.cs
-// Version: 0.1.0
+// Version: 0.1.1
 
 namespace CS2Shared.RiverMochi
 {
-    using Colossal.Localization;
-    using Game.SceneFlow;
     using System;
     using System.Globalization;
+    using Colossal.Localization;
+    using Game.SceneFlow;
 
     public static class LocaleUtils
     {

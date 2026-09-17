@@ -1,18 +1,18 @@
 // <copyright file="LocaleKO.cs" company="River-Mochi">
 // Copyright (c) 2026 River-Mochi. All rights reserved.
-// Licensed under the MIT License. You may not use this file except in compliance with this License.
-// See LICENSE file in the project root for full license information.
-// This notice and the MIT License notice must be kept with
-// all copies or substantial portions of this code.
+// Licensed under the GNU General Public License v3.0 or later,
+// with the Cities: Skylines II Linking Exception.
+// See LICENSE and LICENSE-EXCEPTION in the project root.
+// This notice MUST be kept with copies or substantial portions of this code.
 // ================= </copyright> ======================
 
 // File: Localization/LocaleKO.cs
-// Purpose: Korean ko-KR locale entries for Fast Boarding.
+// Purpose: Korean ko-KR locale entries for Boarding Now.
 
-namespace FastBoarding
+namespace BoardingNow
 {
-    using Colossal;
     using System.Collections.Generic;
+    using Colossal;
 
     /// <summary>
     /// Korean localization source.
@@ -176,12 +176,12 @@ namespace FastBoarding
                 // Status buttons
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatsToLog)), "Stats를 로그로" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatsToLog)),
-                    "**FastBoarding.log**에 일회성 자세한 보고서를 기록합니다.\n" +
+                    "**BoardingNow.log**에 일회성 자세한 보고서를 기록합니다.\n" +
                     "대기 총합, 모드별 최악 정류장 Top 3, 건너뛴 cim 예시, 엔티티 ID, 노선 힌트를 포함합니다."
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenLog)), "로그 열기" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenLog)),
-                    "존재하면 **FastBoarding.log**를 엽니다.\n" +
+                    "존재하면 **BoardingNow.log**를 엽니다.\n" +
                     "파일을 아직 찾을 수 없으면 Logs 폴더를 대신 엽니다."
                 },
 
@@ -197,7 +197,7 @@ namespace FastBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableVerboseLogging)), "자세한 로그 사용" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableVerboseLogging)),
                     "**디버그 / 테스트 전용**\n" +
-                    "도시가 실행되는 동안 <Logs/FastBoarding.log>에 <live> 세부 정보를 추가합니다.\n" +
+                    "도시가 실행되는 동안 <Logs/BoardingNow.log>에 <live> 세부 정보를 추가합니다.\n" +
                     "**일반 플레이에서는 켜지 마세요.**\n" +
                     "켜 둔 상태는 성능을 낮추고 거대한 로그 파일을 만들 수 있습니다.\n" +
                     "오래된 로그 파일은 나중에 삭제할 수 있습니다.\n" +
@@ -220,8 +220,8 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyStatusRunSoonerOff, "일찍 달리기 OFF" },
 
                 // Stats-to-log report strings
-                { TransitWaitStatus.KeyReportNoCityLoaded, "[FB] 통계 보고서가 요청되었지만 불러온 도시가 없습니다." },
-                { TransitWaitStatus.KeyReportTitle, "Stats를 로그로 스냅샷 - Fast Boarding" },
+                { TransitWaitStatus.KeyReportNoCityLoaded, "[BN] 통계 보고서가 요청되었지만 불러온 도시가 없습니다." },
+                { TransitWaitStatus.KeyReportTitle, "Stats를 로그로 스냅샷 - Boarding Now" },
                 { TransitWaitStatus.KeyReportSettings, "설정: {0}" },
                 { TransitWaitStatus.KeyReportNote, "노선 힌트는 해당 정류장에서 대기 시간이 가장 높은 waypoint에서 가져옵니다." },
                 { TransitWaitStatus.KeyReportTesterHintsHeader, "테스터 힌트" },

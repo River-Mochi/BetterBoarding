@@ -1,6 +1,6 @@
-## Fast Boarding
+## Boarding Now
 
-Fast Boarding helps public transport board faster without replacing the game's transport AI.
+Boarding Now helps public transport board faster without replacing the game's transport AI.
 
 ### What It Does
 
@@ -12,7 +12,7 @@ Fast Boarding helps public transport board faster without replacing the game's t
 
 ### Safe Design
 
-Fast Boarding does not use Harmony and does not replace vanilla transport systems.
+Boarding Now does not use Harmony and does not replace vanilla transport systems.
 
 - Sliders tune vanilla passenger stop data.
 - Skipped cims are not deleted; vanilla can reassign or reroute them.

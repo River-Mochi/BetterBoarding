@@ -1,18 +1,18 @@
 // <copyright file="LocaleZH_CN.cs" company="River-Mochi">
 // Copyright (c) 2026 River-Mochi. All rights reserved.
-// Licensed under the MIT License. You may not use this file except in compliance with this License.
-// See LICENSE file in the project root for full license information.
-// This notice and the MIT License notice must be kept with
-// all copies or substantial portions of this code.
+// Licensed under the GNU General Public License v3.0 or later,
+// with the Cities: Skylines II Linking Exception.
+// See LICENSE and LICENSE-EXCEPTION in the project root.
+// This notice MUST be kept with copies or substantial portions of this code.
 // ================= </copyright> ======================
 
 // File: Localization/LocaleZH_CN.cs
-// Purpose: Simplified Chinese zh-HANS locale entries for Fast Boarding.
+// Purpose: Simplified Chinese zh-HANS locale entries for Boarding Now.
 
-namespace FastBoarding
+namespace BoardingNow
 {
-    using Colossal;
     using System.Collections.Generic;
+    using Colossal;
 
     /// <summary>
     /// Simplified Chinese localization source.
@@ -176,12 +176,12 @@ namespace FastBoarding
                 // Status buttons
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatsToLog)), "统计写入日志" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatsToLog)),
-                    "向 **FastBoarding.log** 写入一次性详细报告。\n" +
+                    "向 **BoardingNow.log** 写入一次性详细报告。\n" +
                     "包括等待总数、每种模式最差的 3 个站点、被跳过 cim 示例、实体 ID 和线路提示。"
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenLog)), "打开日志" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenLog)),
-                    "如果存在，则打开 **FastBoarding.log**。\n" +
+                    "如果存在，则打开 **BoardingNow.log**。\n" +
                     "如果尚未找到该文件，则改为打开 Logs 文件夹。"
                 },
 
@@ -197,7 +197,7 @@ namespace FastBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableVerboseLogging)), "启用详细日志" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableVerboseLogging)),
                     "**仅用于调试 / 测试**\n" +
-                    "城市运行时向 <Logs/FastBoarding.log> 添加 <live> 详细信息。\n" +
+                    "城市运行时向 <Logs/BoardingNow.log> 添加 <live> 详细信息。\n" +
                     "**不要在正常游玩时启用。**\n" +
                     "保持开启可能降低性能并生成巨大的日志文件。\n" +
                     "以后可以删除旧日志文件。\n" +
@@ -220,8 +220,8 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyStatusRunSoonerOff, "提前奔跑OFF" },
 
                 // Stats-to-log report strings
-                { TransitWaitStatus.KeyReportNoCityLoaded, "[FB] 已请求统计报告，但未加载城市。" },
-                { TransitWaitStatus.KeyReportTitle, "统计写入日志快照 - Fast Boarding" },
+                { TransitWaitStatus.KeyReportNoCityLoaded, "[BN] 已请求统计报告，但未加载城市。" },
+                { TransitWaitStatus.KeyReportTitle, "统计写入日志快照 - Boarding Now" },
                 { TransitWaitStatus.KeyReportSettings, "设置: {0}" },
                 { TransitWaitStatus.KeyReportNote, "线路提示来自该站点等待最高的 waypoint。" },
                 { TransitWaitStatus.KeyReportTesterHintsHeader, "测试提示" },

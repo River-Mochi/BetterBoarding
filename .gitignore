@@ -298,7 +298,7 @@ FodyWeavers.xsd
 # =========================
 # Local docs / private notes
 # =========================
-# Ignore any docs/ or Docs/ folder anywhere in the repo.
+# Ignore any docs/ or Docs/ folder
 [Dd]ocs/
 **/[Dd]ocs/
 

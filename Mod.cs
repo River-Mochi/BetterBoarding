@@ -1,15 +1,15 @@
 // <copyright file="Mod.cs" company="River-Mochi">
 // Copyright (c) 2026 River-Mochi. All rights reserved.
-// Licensed under the MIT License. You may not use this file except in compliance with this License.
-// See LICENSE file in the project root for full license information.
-// This notice and the MIT License notice must be kept with
-// all copies or substantial portions of this code.
+// Licensed under the GNU General Public License v3.0 or later,
+// with the Cities: Skylines II Linking Exception.
+// See LICENSE and LICENSE-EXCEPTION in the project root.
+// This notice MUST be kept with copies or substantial portions of this code.
 // ================= </copyright> ======================
 
 // File: Mod.cs
-// Purpose: Entry point for Fast Boarding.
+// Purpose: Entry point for Boarding Now.
 
-namespace FastBoarding
+namespace BoardingNow
 {
     using System;
     using System.Reflection;
@@ -25,14 +25,14 @@ namespace FastBoarding
 
     public sealed class Mod : IMod
     {
-        public const string ModName = "Fast Boarding";
-        public const string ModId = "FastBoarding";
-        public const string ModTag = "[FB]";
+        public const string ModName = "Boarding Now";
+        public const string ModId = "BoardingNow";
+        public const string ModTag = "[BN]";
 
         public static readonly string ModVersion =
             Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.0.0";
 
-        // Register a dedicated FastBoarding.log, then use LogUtils for popup-safe writes.
+        // Register a dedicated BoardingNow.log, then use LogUtils for popup-safe writes.
         public static readonly ILog s_Log =
             LogManager.GetLogger(ModId).SetShowsErrorsInUI(false);
 

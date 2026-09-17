@@ -2,9 +2,9 @@
 	<!--Id must be set in order to update existed mod. it is not required for publishing mod for the first time-->
 	<ModId Value="141997"/>
 	<!--Name of the mod to display to players-->
-	<DisplayName Value="Fast Boarding"/>
+	<DisplayName Value="Boarding Now"/>
 	<!--Short description of the mod-->
-	<ShortDescription Value="Faster Transit Boarding; Late solo passengers stop holding up vehicles, and bus/tram cims may start running earlier to catch their ride. "/>
+	<ShortDescription Value="Faster Transit Boarding. Late solo passengers stop holding up vehicles, and cims may start running earlier to catch their bus or tram. "/>
 	<!--Long description of the mod. Single line or multi line. Supports minimal markdown subset-->
 	<!--LongDescription Value="This is a long description" /-->
 	<LongDescription>
@@ -13,7 +13,7 @@
 Still useful post patch 1.5.7-1.6.0
 
 The game has a fallback for stuck transit and releases them if it's ~10 minutes past scheduled departure time.
-Fast Boarding helps before that by making boarding faster and reducing late-passenger delays to keep things smooth and on time.
+Boarding Now helps before that by making boarding faster and reducing late-passenger delays to keep things smooth and on time.
 
 - Improve traffic, increase transit usage, reduce bunching of vehicles.
 - The larger your city, the more this mod will help.
@@ -45,7 +45,7 @@ After the city runs a bit, check the Options menu to see current status.
 
 ### Notes
 - Important compatibility: conflicts possible with mods that change boarding, like All-Aboard, so Only Choose One.
-Some players report no issues with Smart Transportation + Fast boarding together.
+Some players report no issues with Smart Transportation + Boarding Now together.
 - Mod is intended to be a lighter, safer alternative than replacing the game's transport system files approach.
 - This mod works nicely with `Public Works Plus` to solve many transit issues.
 - Group boarding is left to normal vanilla handling to avoid splitting groups (they are few compared to the many single travelers).
@@ -78,23 +78,23 @@ tags: boarding time, bus stop, slow transit, debunching, unbunching
 	<Screenshot Value="Properties/image10-BoardingSpeed.jpg"/>
 	<Screenshot Value="Properties/image30-Status.jpg"/>
     <Screenshot Value="Properties/image40-11Languages.jpg"/>
-    <Screenshot Value="Properties/image60-senryu-FastBoarding.jpg"/>
+    <Screenshot Value="Properties/image60-senryu-BoardingNow.jpg"/>
 
 	<!--Tag, can be set multiple times-->
 	<Tag Value=""/>
 	<!--Link to the forum post where the mod can be discussed-->
 	<ForumLink Value="https://forum.paradoxplaza.com/forum/threads/fast-boarding.1918695/"/>
 	<!--Version of the mod-->
-	<ModVersion Value="1.1.2"/>
+	<ModVersion Value="1.1.3"/>
 	<!--Recommended version of the base game to use the mod-->
 	<GameVersion Value="1.6.*"/>
 	<!--Dependency for the mod, can be set multiple times-->
 	<Dependency Id=""/>
 	<!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
 	<ChangeLog>
-- updated for game patch 1.6
+- updated for game patch 1.6.2
 </ChangeLog>
 	<!--External link. supported types are discord, github, youtube, twitch, x, paypal, patreon, buymeacoffee, kofi, crowdin, gitlab-->
-	<ExternalLink Type="github" Url="https://github.com/River-Mochi/FastBoarding"/>
+	<ExternalLink Type="github" Url="https://github.com/River-Mochi/BoardingNow"/>
 	<ExternalLink Type="discord" Url="https://discord.gg/gwXgvtyhjc"/>
 </Publish>

@@ -1,18 +1,18 @@
 // <copyright file="LocalePT_BR.cs" company="River-Mochi">
 // Copyright (c) 2026 River-Mochi. All rights reserved.
-// Licensed under the MIT License. You may not use this file except in compliance with this License.
-// See LICENSE file in the project root for full license information.
-// This notice and the MIT License notice must be kept with
-// all copies or substantial portions of this code.
+// Licensed under the GNU General Public License v3.0 or later,
+// with the Cities: Skylines II Linking Exception.
+// See LICENSE and LICENSE-EXCEPTION in the project root.
+// This notice MUST be kept with copies or substantial portions of this code.
 // ================= </copyright> ======================
 
 // File: Localization/LocalePT_BR.cs
-// Purpose: Brazilian Portuguese pt-BR locale entries for Fast Boarding.
+// Purpose: Brazilian Portuguese pt-BR locale entries for Boarding Now.
 
-namespace FastBoarding
+namespace BoardingNow
 {
-    using Colossal;
     using System.Collections.Generic;
+    using Colossal;
 
     /// <summary>
     /// Brazilian Portuguese localization source.
@@ -176,12 +176,12 @@ namespace FastBoarding
                 // Status buttons
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatsToLog)), "Stats para log" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatsToLog)),
-                    "Escreve um relatório detalhado único em **FastBoarding.log**.\n" +
+                    "Escreve um relatório detalhado único em **BoardingNow.log**.\n" +
                     "Inclui totais de espera, top 3 piores paradas por modo, exemplos de cims pulados, IDs de entidades e dicas de linha."
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenLog)), "Abrir log" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenLog)),
-                    "Abre **FastBoarding.log** se existir.\n" +
+                    "Abre **BoardingNow.log** se existir.\n" +
                     "Se o arquivo ainda não for encontrado, abre a pasta Logs."
                 },
 
@@ -197,7 +197,7 @@ namespace FastBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableVerboseLogging)), "Ativar log detalhado" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableVerboseLogging)),
                     "**Somente debug / teste**\n" +
-                    "Adiciona detalhes <live> a <Logs/FastBoarding.log> enquanto a cidade roda.\n" +
+                    "Adiciona detalhes <live> a <Logs/BoardingNow.log> enquanto a cidade roda.\n" +
                     "**Não ative para jogo normal.**\n" +
                     "Deixar isso ligado pode reduzir o desempenho e criar arquivos de log enormes.\n" +
                     "Você pode excluir logs antigos depois.\n" +
@@ -220,8 +220,8 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyStatusRunSoonerOff, "correr antes OFF" },
 
                 // Stats-to-log report strings
-                { TransitWaitStatus.KeyReportNoCityLoaded, "[FB] Relatório solicitado, mas nenhuma cidade está carregada." },
-                { TransitWaitStatus.KeyReportTitle, "Snapshot Stats para log - Fast Boarding" },
+                { TransitWaitStatus.KeyReportNoCityLoaded, "[BN] Relatório solicitado, mas nenhuma cidade está carregada." },
+                { TransitWaitStatus.KeyReportTitle, "Snapshot Stats para log - Boarding Now" },
                 { TransitWaitStatus.KeyReportSettings, "Configurações: {0}" },
                 { TransitWaitStatus.KeyReportNote, "A dica de linha vem do waypoint com maior espera nessa parada." },
                 { TransitWaitStatus.KeyReportTesterHintsHeader, "Dicas para testes" },

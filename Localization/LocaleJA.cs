@@ -1,18 +1,18 @@
 // <copyright file="LocaleJA.cs" company="River-Mochi">
 // Copyright (c) 2026 River-Mochi. All rights reserved.
-// Licensed under the MIT License. You may not use this file except in compliance with this License.
-// See LICENSE file in the project root for full license information.
-// This notice and the MIT License notice must be kept with
-// all copies or substantial portions of this code.
+// Licensed under the GNU General Public License v3.0 or later,
+// with the Cities: Skylines II Linking Exception.
+// See LICENSE and LICENSE-EXCEPTION in the project root.
+// This notice MUST be kept with copies or substantial portions of this code.
 // ================= </copyright> ======================
 
 // File: Localization/LocaleJA.cs
-// Purpose: Japanese ja-JP locale entries for Fast Boarding.
+// Purpose: Japanese ja-JP locale entries for Boarding Now.
 
-namespace FastBoarding
+namespace BoardingNow
 {
-    using Colossal;
     using System.Collections.Generic;
+    using Colossal;
 
     /// <summary>
     /// Japanese localization source.
@@ -176,12 +176,12 @@ namespace FastBoarding
                 // Status buttons
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatsToLog)), "Statsをログへ" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatsToLog)),
-                    "**FastBoarding.log** に1回限りの詳細レポートを書き込みます。\n" +
+                    "**BoardingNow.log** に1回限りの詳細レポートを書き込みます。\n" +
                     "待機合計、モードごとのワースト停留所上位3件、スキップされた cim 例、エンティティID、路線ヒントを含みます。"
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenLog)), "ログを開く" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenLog)),
-                    "存在する場合は **FastBoarding.log** を開きます。\n" +
+                    "存在する場合は **BoardingNow.log** を開きます。\n" +
                     "ファイルがまだ見つからない場合は、代わりに Logs フォルダーを開きます。"
                 },
 
@@ -197,7 +197,7 @@ namespace FastBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableVerboseLogging)), "詳細ログを有効化" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableVerboseLogging)),
                     "**デバッグ / テスト専用**\n" +
-                    "都市実行中に <Logs/FastBoarding.log> へ <live> 詳細を追加します。\n" +
+                    "都市実行中に <Logs/BoardingNow.log> へ <live> 詳細を追加します。\n" +
                     "**通常プレイでは有効にしないでください。**\n" +
                     "有効のままにすると、性能が下がり、巨大なログファイルが作成されることがあります。\n" +
                     "古いログファイルは後で削除できます。\n" +
@@ -220,8 +220,8 @@ namespace FastBoarding
                 { TransitWaitStatus.KeyStatusRunSoonerOff, "早走りOFF" },
 
                 // Stats-to-log report strings
-                { TransitWaitStatus.KeyReportNoCityLoaded, "[FB] 統計レポートが要求されましたが、都市が読み込まれていません。" },
-                { TransitWaitStatus.KeyReportTitle, "Statsをログへ snapshot - Fast Boarding" },
+                { TransitWaitStatus.KeyReportNoCityLoaded, "[BN] 統計レポートが要求されましたが、都市が読み込まれていません。" },
+                { TransitWaitStatus.KeyReportTitle, "Statsをログへ snapshot - Boarding Now" },
                 { TransitWaitStatus.KeyReportSettings, "設定: {0}" },
                 { TransitWaitStatus.KeyReportNote, "路線ヒントは、その停留所で最も待ち時間が高い waypoint から取得されます。" },
                 { TransitWaitStatus.KeyReportTesterHintsHeader, "テスター向けヒント" },
