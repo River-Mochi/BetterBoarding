@@ -95,6 +95,6 @@ tags: boarding time, bus stop, slow transit, debunching, unbunching
 - updated for game patch 1.6.2
 </ChangeLog>
 	<!--External link. supported types are discord, github, youtube, twitch, x, paypal, patreon, buymeacoffee, kofi, crowdin, gitlab-->
-	<ExternalLink Type="github" Url="https://github.com/River-Mochi/BoardingNow"/>
+	<ExternalLink Type="github" Url="https://github.com/River-Mochi/BetterBoarding"/>
 	<ExternalLink Type="discord" Url="https://discord.gg/gwXgvtyhjc"/>
 </Publish>
