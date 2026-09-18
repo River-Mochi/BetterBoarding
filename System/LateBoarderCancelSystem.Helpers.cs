@@ -11,14 +11,14 @@
 
 namespace BetterBoarding
 {
+    using System; // Math
+    using System.Collections.Generic; // HashSet
     using Game; // GameSystemBase
     using Game.Common; // Deleted, Destroyed, Overridden
     using Game.Creatures; // Human, CurrentVehicle, group checks
     using Game.Pathfind; // PathOwner, PathElement
     using Game.Tools; // ToolBaseSystem
     using Game.Vehicles; // CargoTransport, LayoutElement, Passenger
-    using System; // Math
-    using System.Collections.Generic; // HashSet
     using Unity.Entities; // DynamicBuffer, Entity, EntityCommandBuffer
     using Unity.Mathematics; // math
     using PrefabRef = Game.Prefabs.PrefabRef; // prefab lookup
@@ -64,15 +64,15 @@ namespace BetterBoarding
                 return false;
             }
 
-            var pathOwner = EntityManager.GetComponentData<PathOwner>(passenger);
-            var pathElements = EntityManager.GetBuffer<PathElement>(passenger);
+            PathOwner pathOwner = EntityManager.GetComponentData<PathOwner>(passenger);
+            DynamicBuffer<PathElement> pathElements = EntityManager.GetBuffer<PathElement>(passenger);
 
             // Only inspect the remaining path from the current cursor forward.
             // Older elements before m_ElementIndex are already behind the cim.
             int startIndex = Math.Max(0, pathOwner.m_ElementIndex);
 
             // Only cancel when the remaining path still contains this exact vehicle.
-            for (var i = startIndex; i < pathElements.Length; i++)
+            for (int i = startIndex; i < pathElements.Length; i++)
             {
                 if (pathElements[i].m_Target == vehicleEntity)
                 {
@@ -413,8 +413,8 @@ namespace BetterBoarding
                 return false;
             }
 
-            var pathOwner = EntityManager.GetComponentData<PathOwner>(passenger);
-            var pathElements = EntityManager.GetBuffer<PathElement>(passenger);
+            PathOwner pathOwner = EntityManager.GetComponentData<PathOwner>(passenger);
+            DynamicBuffer<PathElement> pathElements = EntityManager.GetBuffer<PathElement>(passenger);
 
             // Match vanilla's "search from the current path cursor onward" behavior.
             int startIndex = Math.Max(0, pathOwner.m_ElementIndex);
@@ -422,7 +422,7 @@ namespace BetterBoarding
             // -1 is a sentinel meaning "vehicle not found yet".
             // It is never used as an array index; the < 0 check below aborts first.
             int vehiclePathIndex = -1;
-            for (var i = startIndex; i < pathElements.Length; i++)
+            for (int i = startIndex; i < pathElements.Length; i++)
             {
                 if (pathElements[i].m_Target == vehicleEntity)
                 {
@@ -440,12 +440,12 @@ namespace BetterBoarding
             ecb.RemoveComponent<CurrentVehicle>(passenger);
 
             // Clear "in vehicle" state so the cim is treated as no longer attached to this vehicle.
-            var resident = EntityManager.GetComponentData<Game.Creatures.Resident>(passenger);
+            Resident resident = EntityManager.GetComponentData<Game.Creatures.Resident>(passenger);
             resident.m_Flags &= ~ResidentFlags.InVehicle;
             resident.m_Timer = 0;
             ecb.SetComponent(passenger, resident);
 
-            var human = EntityManager.GetComponentData<Human>(passenger);
+            Human human = EntityManager.GetComponentData<Human>(passenger);
             // Clear urgency from the missed boarding attempt before vanilla resumes control.
             human.m_Flags &= ~(HumanFlags.Run | HumanFlags.Emergency);
             ecb.SetComponent(passenger, human);
@@ -453,7 +453,7 @@ namespace BetterBoarding
             // Replace the path buffer during ECB playback so vanilla can continue from the next leg.
             // Copy starts after the missed vehicle, so the missed leg is removed.
             DynamicBuffer<PathElement> newPath = ecb.SetBuffer<PathElement>(passenger);
-            for (var i = vehiclePathIndex + 1; i < pathElements.Length; i++)
+            for (int i = vehiclePathIndex + 1; i < pathElements.Length; i++)
             {
                 newPath.Add(pathElements[i]);
             }
@@ -472,7 +472,7 @@ namespace BetterBoarding
         {
             // Rebuild the passenger buffer once so entries are not removed while iterating it.
             DynamicBuffer<Passenger> newPassengers = ecb.SetBuffer<Passenger>(vehicleEntity);
-            for (var i = 0; i < passengers.Length; i++)
+            for (int i = 0; i < passengers.Length; i++)
             {
                 if (!canceledPassengers.Contains(passengers[i].m_Passenger))
                 {

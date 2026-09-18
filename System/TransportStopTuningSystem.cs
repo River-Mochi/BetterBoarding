@@ -17,8 +17,8 @@ namespace BetterBoarding
     using Game;
     using Game.Common;
     using Game.Prefabs;
-    using Game.SceneFlow;
-    using Game.Simulation;
+    // using Game.SceneFlow;
+    // using Game.Simulation;
     using Game.Tools;
     using Unity.Collections;
     using Unity.Entities;
@@ -74,14 +74,14 @@ namespace BetterBoarding
             // Query first, then apply changes by entity so prefab tuning does not mutate during query enumeration.
             // This stays a one-shot main-thread pass because slider changes are rare.
             m_StopPrefabQuery.CompleteDependency();
-            var entities = m_StopPrefabQuery.ToEntityArray(Allocator.Temp);
-            var updatedPrefabs = 0;
+            NativeArray<Entity> entities = m_StopPrefabQuery.ToEntityArray(Allocator.Temp);
+            int updatedPrefabs = 0;
 
-            foreach (var prefabEntity in entities)
+            foreach (Entity prefabEntity in entities)
             {
                 if (m_PrefabSystem == null ||
-                    !m_PrefabSystem.TryGetPrefab<PrefabBase>(prefabEntity, out var prefab) ||
-                    !prefab.TryGet<TransportStop>(out var authoringStop))
+                    !m_PrefabSystem.TryGetPrefab<PrefabBase>(prefabEntity, out PrefabBase? prefab) ||
+                    !prefab.TryGet<TransportStop>(out TransportStop? authoringStop))
                 {
                     continue;
                 }
@@ -102,8 +102,8 @@ namespace BetterBoarding
 
                 float speedMultiplier = speedFactor;
                 // Authoring loading factor is stored as delta-from-1; runtime tuning uses the effective value.
-                var baseEffectiveLoading = math.max(0f, 1f + authoringStop.m_LoadingFactor);
-                var tunedStop = EntityManager.GetComponentData<TransportStopData>(prefabEntity);
+                float baseEffectiveLoading = math.max(0f, 1f + authoringStop.m_LoadingFactor);
+                TransportStopData tunedStop = EntityManager.GetComponentData<TransportStopData>(prefabEntity);
 
                 // Always recompute from prefab authoring values so repeated slider changes never double-scale.
                 // Higher loading factor helps passengers board faster; lower boarding time shortens dwell.
@@ -122,7 +122,7 @@ namespace BetterBoarding
                     EntityManager.SetComponentData(prefabEntity, tunedStop);
                     updatedPrefabs++;
 
-                    var marker = new TransportStopTuningMarker
+                    TransportStopTuningMarker marker = new TransportStopTuningMarker
                     {
                         // Marker lets us restore only prefabs Better Boarding previously touched.
                         m_LoadingFactor = tunedStop.m_LoadingFactor,
@@ -131,7 +131,7 @@ namespace BetterBoarding
 
                     if (hasMarker)
                     {
-                        var currentMarker = EntityManager.GetComponentData<TransportStopTuningMarker>(prefabEntity);
+                        TransportStopTuningMarker currentMarker = EntityManager.GetComponentData<TransportStopTuningMarker>(prefabEntity);
                         if (math.abs(currentMarker.m_LoadingFactor - marker.m_LoadingFactor) > FloatEpsilon ||
                             math.abs(currentMarker.m_BoardingTime - marker.m_BoardingTime) > FloatEpsilon)
                         {

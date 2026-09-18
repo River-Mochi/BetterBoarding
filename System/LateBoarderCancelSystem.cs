@@ -11,17 +11,17 @@
 
 namespace BetterBoarding
 {
+    using System;
+    using System.Collections.Generic;
     using Colossal.Serialization.Entities;
     using Game;
     using Game.Common;
     using Game.Creatures;
     using Game.Pathfind;
-    using Game.SceneFlow;
+   // using Game.SceneFlow;
     using Game.Simulation;
     using Game.Tools;
     using Game.Vehicles;
-    using System;
-    using System.Collections.Generic;
     using Unity.Collections;
     using Unity.Entities;
     using TransportType = Game.Prefabs.TransportType;
@@ -186,8 +186,8 @@ namespace BetterBoarding
             uint frame = m_SimulationSystem?.frameIndex ?? 0;
             bool cancelLateBoarders = BoardingRuntimeSettings.CancelLateBoarders;
             bool cimsRunSoonerToCatchBuses = BoardingRuntimeSettings.CimsRunSoonerToCatchBuses;
-            var pendingCancellation = new HashSet<Entity>();
-            var canceledPassengers = new HashSet<Entity>();
+            HashSet<Entity> pendingCancellation = new HashSet<Entity>();
+            HashSet<Entity> canceledPassengers = new HashSet<Entity>();
 
             try
             {
@@ -198,7 +198,7 @@ namespace BetterBoarding
                 ecb = new EntityCommandBuffer(Allocator.Temp);
                 hasCommandBuffer = true;
 
-                foreach (var vehicleEntity in vehicles)
+                foreach (Entity vehicleEntity in vehicles)
                 {
                     vehiclesScanned++;
 
@@ -209,7 +209,7 @@ namespace BetterBoarding
                         continue;
                     }
 
-                    var publicTransport = EntityManager.GetComponentData<Game.Vehicles.PublicTransport>(vehicleEntity);
+                    PublicTransport publicTransport = EntityManager.GetComponentData<Game.Vehicles.PublicTransport>(vehicleEntity);
                     if ((publicTransport.m_State & PublicTransportFlags.Boarding) == 0)
                     {
                         // Only intervene while vanilla says the vehicle is in a boarding state.
@@ -273,10 +273,10 @@ namespace BetterBoarding
                     // Reused managed sets avoid per-vehicle GC while staying simple for this main-thread pass.
                     pendingCancellation.Clear();
 
-                    for (var i = 0; i < passengers.Length; i++)
+                    for (int i = 0; i < passengers.Length; i++)
                     {
                         passengersScanned++;
-                        var passenger = passengers[i].m_Passenger;
+                        Entity passenger = passengers[i].m_Passenger;
                         if (!EntityManager.Exists(passenger) ||
                             EntityManager.HasComponent<Deleted>(passenger) ||
                             EntityManager.HasComponent<Destroyed>(passenger) ||
@@ -287,7 +287,7 @@ namespace BetterBoarding
                             continue;
                         }
 
-                        var currentVehicle = EntityManager.GetComponentData<CurrentVehicle>(passenger);
+                        CurrentVehicle currentVehicle = EntityManager.GetComponentData<CurrentVehicle>(passenger);
                         if (currentVehicle.m_Vehicle != vehicleEntity)
                         {
                             continue;
@@ -317,7 +317,7 @@ namespace BetterBoarding
 
                     int canceledForVehicle = 0;
                     canceledPassengers.Clear();
-                    foreach (var passenger in pendingCancellation)
+                    foreach (Entity passenger in pendingCancellation)
                     {
                         if (cancellationsThisUpdate >= MaxCancellationsPerUpdate)
                         {

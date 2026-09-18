@@ -15,9 +15,9 @@ namespace BetterBoarding
     using System.Text;
     using CS2Shared.RiverMochi;
     using Game;
-    using Game.Common;
+  //  using Game.Common;
     using Game.Creatures;
-    using Game.Pathfind;
+   // using Game.Pathfind;
     using Game.Prefabs;
     using Game.SceneFlow;
     using Game.Simulation;
@@ -113,20 +113,20 @@ namespace BetterBoarding
         private static FollowUpOutcomeCounts s_ShipFollowUpOutcomes;
         private static FollowUpOutcomeCounts s_FerryFollowUpOutcomes;
         private static FollowUpOutcomeCounts s_AirFollowUpOutcomes;
-        private static readonly SkippedPassengerSampleRing s_BusSkippedSamples = new SkippedPassengerSampleRing();
-        private static readonly SkippedPassengerSampleRing s_TrainSkippedSamples = new SkippedPassengerSampleRing();
-        private static readonly SkippedPassengerSampleRing s_TramSkippedSamples = new SkippedPassengerSampleRing();
-        private static readonly SkippedPassengerSampleRing s_SubwaySkippedSamples = new SkippedPassengerSampleRing();
-        private static readonly SkippedPassengerSampleRing s_ShipSkippedSamples = new SkippedPassengerSampleRing();
-        private static readonly SkippedPassengerSampleRing s_FerrySkippedSamples = new SkippedPassengerSampleRing();
-        private static readonly SkippedPassengerSampleRing s_AirSkippedSamples = new SkippedPassengerSampleRing();
-        private static readonly LateBoarderFollowUpSampleRing s_BusFollowUpSamples = new LateBoarderFollowUpSampleRing();
-        private static readonly LateBoarderFollowUpSampleRing s_TrainFollowUpSamples = new LateBoarderFollowUpSampleRing();
-        private static readonly LateBoarderFollowUpSampleRing s_TramFollowUpSamples = new LateBoarderFollowUpSampleRing();
-        private static readonly LateBoarderFollowUpSampleRing s_SubwayFollowUpSamples = new LateBoarderFollowUpSampleRing();
-        private static readonly LateBoarderFollowUpSampleRing s_ShipFollowUpSamples = new LateBoarderFollowUpSampleRing();
-        private static readonly LateBoarderFollowUpSampleRing s_FerryFollowUpSamples = new LateBoarderFollowUpSampleRing();
-        private static readonly LateBoarderFollowUpSampleRing s_AirFollowUpSamples = new LateBoarderFollowUpSampleRing();
+        private static readonly SkippedPassengerSampleRing s_BusSkippedSamples = new();
+        private static readonly SkippedPassengerSampleRing s_TrainSkippedSamples = new();
+        private static readonly SkippedPassengerSampleRing s_TramSkippedSamples = new();
+        private static readonly SkippedPassengerSampleRing s_SubwaySkippedSamples = new();
+        private static readonly SkippedPassengerSampleRing s_ShipSkippedSamples = new();
+        private static readonly SkippedPassengerSampleRing s_FerrySkippedSamples = new();
+        private static readonly SkippedPassengerSampleRing s_AirSkippedSamples = new();
+        private static readonly LateBoarderFollowUpSampleRing s_BusFollowUpSamples = new();
+        private static readonly LateBoarderFollowUpSampleRing s_TrainFollowUpSamples = new();
+        private static readonly LateBoarderFollowUpSampleRing s_TramFollowUpSamples = new();
+        private static readonly LateBoarderFollowUpSampleRing s_SubwayFollowUpSamples = new();
+        private static readonly LateBoarderFollowUpSampleRing s_ShipFollowUpSamples = new();
+        private static readonly LateBoarderFollowUpSampleRing s_FerryFollowUpSamples = new();
+        private static readonly LateBoarderFollowUpSampleRing s_AirFollowUpSamples = new();
 
         private readonly struct SkippedPassengerSample
         {

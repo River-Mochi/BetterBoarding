@@ -51,7 +51,7 @@ namespace BetterBoarding
                 LogUtils.Info(s_Log, () => $"{ModName} v{ModVersion} OnLoad");
             }
 
-            BBoardSettings setting = new BBoardSettings(this);
+            BBoardSettings setting = new(this);
             Settings = setting;
           
 

@@ -18,7 +18,7 @@ namespace BetterBoarding
     using Game.Modding;
     using Game.SceneFlow;
     using Game.Settings;
-    using Game.UI;
+   // using Game.UI;
     using Unity.Entities;
     using UnityEngine;
 
@@ -420,7 +420,7 @@ namespace BetterBoarding
 
         private static void TryEnableStopTuningSystem()
         {
-            if (!TryGetLoadedWorld(out var world))
+            if (!TryGetLoadedWorld(out World? world))
             {
                 return;
             }
@@ -443,7 +443,7 @@ namespace BetterBoarding
 
         private static void TrySetLateBoarderSystemEnabled(bool enabled)
         {
-            if (!TryGetLoadedWorld(out var world))
+            if (!TryGetLoadedWorld(out World? world))
             {
                 return;
             }
