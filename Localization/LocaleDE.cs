@@ -135,14 +135,14 @@ namespace BetterBoarding
                     "Gruppen sind nur ein kleiner Teil der Menge; der meiste Nutzen kommt vom Überspringen verspäteter Solo-Cims.\n" +
                     "Übersprungene verspätete Bürger werden nicht gelöscht; das Spiel weist sie natürlich neu zu."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cims laufen früher: Busse + Trams" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cims laufen früher: Busse + Trams + Züge" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
                     "Bürger, die <spät> sind, beginnen <früher zu laufen>, um es **vor** der Abfahrtszeit zu schaffen.\n" +
-                    "Hilft, Busse/Trams im Zeitplan zu halten.\n" +
+                    "Hilft Bussen, Trams und Zügen, im Zeitplan zu bleiben, besonders an langen Bahnsteigen.\n" +
                     "Betrifft nur Cims, die bereits einem Fahrzeug zugewiesen sind, das gerade einsteigen lässt.\n" +
                     "Vanilla lässt Cims erst zur Abfahrtszeit laufen, was zu spät sein kann.\n" +
                     $"Passt gut zu <{ToggleName}>, weil es reduzieren kann, wie viele Cims das Fahrzeug verpassen und neu zugewiesen werden müssen.\n" +
-                    "Erzwingt kein Einsteigen und teleportiert keine Bürger."
+                    "Ändert die Abfahrtszeit des Fahrzeugs nicht, erzwingt kein Einsteigen und teleportiert keine Bürger."
                 },
 
                 // Status overview
@@ -153,7 +153,7 @@ namespace BetterBoarding
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)), "Cims laufen früher" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)),
-                    "Wenn aktiviert [x], zählt alle Cims (heute), die **früher laufen**, um Bus/Tram vor der Abfahrt zu erreichen.\n" +
+                    "Wenn aktiviert [x], zählt alle Cims (heute), die **früher laufen**, um Bus, Tram oder Zug vor der Abfahrt zu erreichen.\n" +
                     "Cims laufen 512 Frames früher als in Vanilla (~2-8 Sekunden früher in Echtzeit, ~2 Minuten im Spiel)."
                 },
 

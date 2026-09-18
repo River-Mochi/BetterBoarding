@@ -135,14 +135,14 @@ namespace BetterBoarding
                     "Los grupos son una parte pequeña de la multitud; la mayor parte del beneficio viene de omitir cims solo que llegan tarde.\n" +
                     "Los ciudadanos tarde omitidos no se eliminan; el juego los reasigna de forma natural."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cims corren antes: buses + tranvías" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cims corren antes: buses + tranvías + trenes" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
                     "Los ciudadanos <tarde> empiezan a <correr antes> para intentar llegar **antes** de la hora de salida.\n" +
-                    "Ayuda a mantener buses/tranvías a horario.\n" +
+                    "Ayuda a mantener buses, tranvías y trenes a horario, especialmente en andenes largos.\n" +
                     "Solo afecta a cims ya asignados a un vehículo que está embarcando.\n" +
                     "Vanilla solo hace que los cims corran en la hora de salida, lo que puede ser demasiado tarde.\n" +
                     $"Funciona bien con <{ToggleName}> porque puede reducir cuántos cims pierden el vehículo y necesitan reasignarse.\n" +
-                    "No fuerza el embarque ni teletransporta ciudadanos."
+                    "No cambia la hora de salida del vehículo, no fuerza el embarque ni teletransporta ciudadanos."
                 },
 
                 // Status overview
@@ -153,7 +153,7 @@ namespace BetterBoarding
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)), "Cims corren antes" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)),
-                    "Si está activado [x], cuenta todos los cims (hoy) que empezaron a **correr antes** para intentar alcanzar un bus/tranvía antes de la salida.\n" +
+                    "Si está activado [x], cuenta todos los cims (hoy) que empezaron a **correr antes** para intentar alcanzar un bus, tranvía o tren antes de la salida.\n" +
                     "Los cims corren 512 frames antes que en vanilla (~2-8 segundos antes en tiempo real, ~2 minutos en el juego)."
                 },
 

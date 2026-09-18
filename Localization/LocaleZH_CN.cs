@@ -135,14 +135,14 @@ namespace BetterBoarding
                     "团体只占人群的一小部分；主要收益来自跳过迟到奔跑的单独 cim。\n" +
                     "被跳过的迟到市民不会被删除；游戏会自然重新分配他们。"
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "提前奔跑：公交+有轨电车" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "提前奔跑：公交+有轨电车+火车" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
                     "<迟到>市民会<提前奔跑>，尝试在发车时间**之前**赶到。\n" +
-                    "帮助公交/有轨电车保持准点。\n" +
+                    "帮助公交、有轨电车和火车保持准点，尤其适合较长的火车站台。\n" +
                     "只影响已分配到当前正在上客车辆的市民。\n" +
                     "原版只会在发车时间才让市民开始奔跑，这可能已经太晚。\n" +
                     $"和 <{ToggleName}> 配合很好，因为它可能减少错过车辆并需要重新分配的市民数量。\n" +
-                    "不会强制上车，也不会传送市民。"
+                    "不会更改车辆发车时间、强制上车或传送市民。"
                 },
 
                 // Status overview
@@ -153,7 +153,7 @@ namespace BetterBoarding
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)), "市民提前奔跑" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)),
-                    "启用 [x] 时，统计今天开始**提前奔跑**、尝试在发车前赶上公交/有轨电车的市民。\n" +
+                    "启用 [x] 时，统计今天开始**提前奔跑**、尝试在发车前赶上公交、有轨电车或火车的市民。\n" +
                     "市民会比 vanilla 提前 512 帧奔跑（现实时间约提前 2-8 秒，游戏内约 2 分钟）。"
                 },
 

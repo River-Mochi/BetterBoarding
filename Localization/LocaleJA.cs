@@ -135,14 +135,14 @@ namespace BetterBoarding
                     "グループは群衆の一部にすぎません。主な効果は、遅れて走っている単独 cim のスキップから得られます。\n" +
                     "スキップされた遅れた市民は削除されません。ゲームにより自然に再割り当てされます。"
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "早めに走る: バス+トラム" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "早めに走る: バス+トラム+列車" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
                     "<遅れている>市民が出発時刻**前**に間に合うよう、<早めに走り始め>ます。\n" +
-                    "バス/トラムの定時運行を助けます。\n" +
+                    "バス、トラム、列車の定時運行を助けます。特に長い列車ホームで役立ちます。\n" +
                     "現在乗車中の車両にすでに割り当てられている cim だけに影響します。\n" +
                     "vanilla では出発時刻になってから cim が走り始めるため、遅すぎる場合があります。\n" +
                     $"<{ToggleName}> と相性がよく、車両を逃して再割り当てが必要になる cim を減らせる場合があります。\n" +
-                    "強制乗車や市民のテレポートは行いません。"
+                    "車両の出発時刻を変更せず、強制乗車や市民のテレポートも行いません。"
                 },
 
                 // Status overview
@@ -153,7 +153,7 @@ namespace BetterBoarding
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)), "早めに走る cim" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)),
-                    "有効 [x] の場合、今日、出発前にバス/トラムへ間に合うよう **早めに走り始めた** cim を数えます。\n" +
+                    "有効 [x] の場合、今日、出発前にバス、トラム、列車へ間に合うよう **早めに走り始めた** cim を数えます。\n" +
                     "cim は vanilla より 512 フレーム早く走ります（実時間で約 2～8 秒早く、ゲーム内で約 2 分）。"
                 },
 

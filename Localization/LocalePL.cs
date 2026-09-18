@@ -135,14 +135,14 @@ namespace BetterBoarding
                     "Grupy to mała część tłumu; większość korzyści pochodzi z pomijania spóźnionych solo cims.\n" +
                     "Pominięci spóźnieni mieszkańcy nie są usuwani; gra naturalnie przydziela ich ponownie."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cimy biegną wcześniej: autobusy + tramwaje" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cimy biegną wcześniej: autobusy + tramwaje + pociągi" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
                     "Obywatele, którzy są <spóźnieni>, zaczynają <biec wcześniej>, aby zdążyć **przed** czasem odjazdu.\n" +
-                    "Pomaga utrzymać autobusy/tramwaje w rozkładzie.\n" +
+                    "Pomaga utrzymać autobusy, tramwaje i pociągi w rozkładzie, szczególnie na długich peronach kolejowych.\n" +
                     "Dotyczy tylko cimów już przypisanych do pojazdu, który aktualnie wpuszcza pasażerów.\n" +
                     "Vanilla każe cimom biec dopiero w chwili odjazdu, co może być za późno.\n" +
                     $"Dobrze działa z <{ToggleName}>, bo może zmniejszyć liczbę cimów, które przegapią pojazd i muszą zostać przypisane ponownie.\n" +
-                    "Nie wymusza wejścia na pokład ani nie teleportuje obywateli."
+                    "Nie zmienia czasu odjazdu pojazdu, nie wymusza wejścia na pokład ani nie teleportuje obywateli."
                 },
 
                 // Status overview
@@ -153,7 +153,7 @@ namespace BetterBoarding
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)), "Cimy biegną wcześniej" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)),
-                    "Gdy włączone [x], liczy wszystkie cimy (dzisiaj), które zaczęły **biec wcześniej**, aby spróbować złapać autobus/tramwaj przed odjazdem.\n" +
+                    "Gdy włączone [x], liczy wszystkie cimy (dzisiaj), które zaczęły **biec wcześniej**, aby spróbować złapać autobus, tramwaj lub pociąg przed odjazdem.\n" +
                     "Cimy biegną 512 klatek wcześniej niż w vanilla (~2-8 sekund wcześniej w czasie rzeczywistym, ~2 minuty w grze)."
                 },
 

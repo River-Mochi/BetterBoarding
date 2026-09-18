@@ -135,14 +135,14 @@ namespace BetterBoarding
                     "그룹은 군중의 작은 부분입니다. 대부분의 효과는 늦게 뛰어오는 혼자 cim을 건너뛰는 데서 옵니다.\n" +
                     "건너뛴 늦은 시민은 삭제되지 않으며, 게임이 자연스럽게 다시 배정합니다."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "더 일찍 달리기: 버스+트램" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "더 일찍 달리기: 버스+트램+기차" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
                     "<늦은> 시민이 출발 시간 **전**에 도착해 보도록 <더 일찍 달리기> 시작합니다.\n" +
-                    "버스/트램이 일정대로 움직이는 데 도움을 줍니다.\n" +
+                    "버스, 트램, 기차가 일정대로 움직이는 데 도움을 주며, 특히 긴 기차 승강장에서 유용합니다.\n" +
                     "현재 승차 중인 차량에 이미 배정된 cim에게만 적용됩니다.\n" +
                     "바닐라는 출발 시간이 되어야 cim이 달리기 시작해서 너무 늦을 수 있습니다.\n" +
                     $"<{ToggleName}>와 잘 맞으며, 차량을 놓쳐 다시 배정되어야 하는 cim 수를 줄일 수 있습니다.\n" +
-                    "강제 승차나 시민 텔레포트는 하지 않습니다."
+                    "차량 출발 시간을 바꾸거나 강제 승차 또는 시민 텔레포트를 하지 않습니다."
                 },
 
                 // Status overview
@@ -153,7 +153,7 @@ namespace BetterBoarding
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)), "cim 더 일찍 달리기" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)),
-                    "켜져 있으면 [x], 오늘 출발 전에 버스/트램을 잡으려고 **더 일찍 달리기 시작한** cim을 셉니다.\n" +
+                    "켜져 있으면 [x], 오늘 출발 전에 버스, 트램 또는 기차를 잡으려고 **더 일찍 달리기 시작한** cim을 셉니다.\n" +
                     "cim은 vanilla보다 512프레임 일찍 달립니다(실시간 약 2-8초 빠름, 게임 내 약 2분)."
                 },
 

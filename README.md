@@ -6,7 +6,7 @@ Better Boarding helps public transport board faster without replacing the game's
 
 - Faster boarding/loading sliders for bus, rail, ship + ferry, and airplane.
 - `Skip Late Passengers`: solo cims who are still late after departure time can miss that vehicle instead of holding everyone.
-- `Cims Run Sooner: Buses + Trams`: assigned late bus/tram passengers start running before departure, so more of them can catch the ride.
+- `Cims Run Sooner: Bus + Tram + Train`: assigned late passengers start running before departure, which is especially helpful on long train platforms.
 - Compact Options status for current waits, worst stops, `late today`, and run-sooner counts.
 - `Stats to Log` writes a detailed troubleshooting report with stop names, entity IDs, line hints, and worst stops.
 

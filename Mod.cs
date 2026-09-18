@@ -43,7 +43,7 @@ namespace BetterBoarding
 
         public void OnLoad(UpdateSystem updateSystem)
         {
-            LogUtils.Configure(ModId);
+            ShellOpen.Configure(s_Log, ModId, ModTag);
 
             if (!s_BannerLogged)
             {
@@ -72,11 +72,16 @@ namespace BetterBoarding
             {
                 // CS2 persists ModSetting values in the mod .coc file.
                 // Locales + load settings before register in OptionsUI so it shows localized+saved settings.
+                bool betterBoardingSettingsExisted =
+                    BoardingSettingsMigration.BetterBoardingSettingsFileExists();
                 AssetDatabase.global.LoadSettings(ModId, setting, new BBoardSettings(this));
 
                 // Clamp old saved values before Options UI sees them.
                 // Example: helps legacy 6x-10x values become new 5x max after this update.
                 setting.RepairLoadedValues();
+                BoardingSettingsMigration.TryMigrateFromFastBoarding(
+                    setting,
+                    betterBoardingSettingsExisted);
                 setting.RegisterInOptionsUI();
                 BoardingRuntimeSettings.Apply(setting);
             }
@@ -108,7 +113,7 @@ namespace BetterBoarding
                 // Ensure the one-shot prefab retune pass runs on startup/load without needing the player
                 // to open Options first.
                 updateSystem.World.GetOrCreateSystemManaged<TransportStopTuningSystem>().Enabled = true;
-                // Start the late-cim skip system in the same ON/OFF state saved in the mod settings file.
+                // Start the boarding-assist system in the same ON/OFF state saved in the mod settings file.
                 updateSystem.World.GetOrCreateSystemManaged<LateBoarderCancelSystem>().Enabled =
                     BoardingRuntimeSettings.BoardingAssistEnabled;
             }

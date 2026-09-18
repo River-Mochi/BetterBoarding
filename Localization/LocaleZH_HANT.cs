@@ -135,14 +135,14 @@ namespace BetterBoarding
                     "團體只占人群的一小部分；主要收益來自跳過遲到奔跑的單獨 cim。\n" +
                     "被跳過的遲到市民不會被刪除；遊戲會自然重新分配他們。"
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "提早奔跑：公車+路面電車" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "提早奔跑：公車+路面電車+火車" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
                     "<遲到>市民會<提早奔跑>，嘗試在發車時間**之前**趕到。\n" +
-                    "幫助公車/路面電車保持準點。\n" +
+                    "幫助公車、路面電車和火車保持準點，尤其適合較長的火車月台。\n" +
                     "只影響已分配到目前正在上客車輛的市民。\n" +
                     "原版只會在發車時間才讓市民開始奔跑，這可能已經太晚。\n" +
                     $"和 <{ToggleName}> 搭配很好，因為它可能減少錯過車輛並需要重新分配的市民數量。\n" +
-                    "不會強制上車，也不會傳送市民。"
+                    "不會更改車輛發車時間、強制上車或傳送市民。"
                 },
 
                 // Status overview
@@ -153,7 +153,7 @@ namespace BetterBoarding
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)), "市民提早奔跑" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)),
-                    "啟用 [x] 時，統計今天開始**提早奔跑**、嘗試在發車前趕上公車/路面電車的市民。\n" +
+                    "啟用 [x] 時，統計今天開始**提早奔跑**、嘗試在發車前趕上公車、路面電車或火車的市民。\n" +
                     "市民會比 vanilla 提早 512 幀奔跑（現實時間約提早 2-8 秒，遊戲內約 2 分鐘）。"
                 },
 

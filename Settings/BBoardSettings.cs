@@ -91,9 +91,15 @@ namespace BetterBoarding
         [SettingsUISetter(typeof(BBoardSettings), nameof(SetCancelLateBoardersLive))]
         public bool CancelLateBoarders { get; set; }
 
+        // Historical property name retained for .coc compatibility; applies to bus, tram, and train.
         [SettingsUISection(ActionsTab, BehaviorGroup)]
         [SettingsUISetter(typeof(BBoardSettings), nameof(SetCimsRunSoonerToCatchBusesLive))]
         public bool CimsRunSoonerToCatchBuses { get; set; }
+
+        // Force-save the one-time gate even when every player-facing option is at its default.
+        [SettingsUIHidden]
+        [SettingsUIForceSave]
+        public bool FastBoardingSettingsMigrationComplete { get; set; }
 
         [SettingsUISection(ActionsTab, StatusGroup)]
         public string StatusOverview
@@ -264,6 +270,7 @@ namespace BetterBoarding
             CancelLateBoarders = true;
             CimsRunSoonerToCatchBuses = true;
             EnableVerboseLogging = false;
+            FastBoardingSettingsMigrationComplete = false;
         }
 
         public override void Apply()
@@ -349,7 +356,7 @@ namespace BetterBoarding
         {
             if (BoardingRuntimeSettings.SetCimsRunSoonerToCatchBuses(value))
             {
-                // This only sets vanilla's Run flag a little before bus departure.
+                // This only sets vanilla's Run flag a little before bus/tram/train departure.
                 LogUtils.Info(
                     Mod.s_Log,
                     () => DescribeBehaviorForLog(BoardingRuntimeSettings.CancelLateBoarders, value));

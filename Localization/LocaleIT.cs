@@ -135,14 +135,14 @@ namespace BetterBoarding
                     "I gruppi sono una piccola parte della folla; il beneficio principale viene dal saltare i cim soli in ritardo.\n" +
                     "I cittadini in ritardo saltati non vengono eliminati; il gioco li riassegna naturalmente."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cim corrono prima: bus + tram" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cim corrono prima: bus + tram + treni" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
                     "I cittadini <in ritardo> iniziano a <correre prima> per provare ad arrivare **prima** dell’orario di partenza.\n" +
-                    "Aiuta a tenere bus/tram in orario.\n" +
+                    "Aiuta a tenere bus, tram e treni in orario, soprattutto sulle banchine ferroviarie lunghe.\n" +
                     "Riguarda solo i cim già assegnati a un veicolo che sta imbarcando.\n" +
                     "Vanilla fa iniziare a correre i cim solo all’orario di partenza, cosa che può essere troppo tardi.\n" +
                     $"Funziona bene con <{ToggleName}> perché può ridurre quanti cim perdono il veicolo e devono essere riassegnati.\n" +
-                    "Non forza l’imbarco né teletrasporta i cittadini."
+                    "Non modifica l’orario di partenza del veicolo, non forza l’imbarco né teletrasporta i cittadini."
                 },
 
                 // Status overview
@@ -153,7 +153,7 @@ namespace BetterBoarding
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)), "Cim corrono prima" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)),
-                    "Se attivo [x], conta tutti i cim (oggi) che hanno iniziato a **correre prima** per provare a prendere un bus/tram prima della partenza.\n" +
+                    "Se attivo [x], conta tutti i cim (oggi) che hanno iniziato a **correre prima** per provare a prendere un bus, tram o treno prima della partenza.\n" +
                     "I cim corrono 512 frame prima rispetto a vanilla (~2-8 secondi prima in tempo reale, ~2 minuti in gioco)."
                 },
 

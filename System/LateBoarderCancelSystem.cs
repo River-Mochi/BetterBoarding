@@ -30,7 +30,7 @@ namespace BetterBoarding
     {
         // High-level flow:
         // 1. Scan vehicles while vanilla still has them in the boarding state.
-        // 2. Optionally set vanilla's Run flag shortly before bus/tram departure so assigned cims hurry sooner.
+        // 2. Optionally set vanilla's Run flag shortly before bus/tram/train departure so assigned cims hurry sooner.
         // 3. After departure, optionally detach safe solo late passengers whose remaining path still contains that exact vehicle.
         // 4. Optionally record delayed "what happened next?" samples for verbose diagnostics.
         // 2048/day means every 128 simulation frames (~42 game seconds); cancellation work is also capped below.
@@ -162,6 +162,7 @@ namespace BetterBoarding
             int ferryCanceled = 0;
             int airCanceled = 0;
             int busRunSoonerAssists = 0;
+            int trainRunSoonerAssists = 0;
             int tramRunSoonerAssists = 0;
             int sampledRunSoonerPassengerCount = 0;
             int busSampleCount = 0;
@@ -217,7 +218,7 @@ namespace BetterBoarding
 
                     if (cimsRunSoonerToCatchBuses)
                     {
-                        int queuedRunSooner = QueueRoadTransitPassengersRunSooner(
+                        int queuedRunSooner = QueueTransitPassengersRunSooner(
                             ref ecb,
                             vehicleEntity,
                             transportType,
@@ -230,6 +231,10 @@ namespace BetterBoarding
                         if (transportType == TransportType.Bus)
                         {
                             busRunSoonerAssists += queuedRunSooner;
+                        }
+                        else if (transportType == TransportType.Train)
+                        {
+                            trainRunSoonerAssists += queuedRunSooner;
                         }
                         else if (transportType == TransportType.Tram)
                         {
@@ -369,6 +374,7 @@ namespace BetterBoarding
                     ferryCanceled,
                     airCanceled);
                 TransitWaitStatus.RecordRunSoonerAssists(World, TransportType.Bus, busRunSoonerAssists);
+                TransitWaitStatus.RecordRunSoonerAssists(World, TransportType.Train, trainRunSoonerAssists);
                 TransitWaitStatus.RecordRunSoonerAssists(World, TransportType.Tram, tramRunSoonerAssists);
 
                 if (sampledCanceledPassengers != null)

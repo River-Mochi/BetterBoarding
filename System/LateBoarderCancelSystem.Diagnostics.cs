@@ -265,7 +265,7 @@ namespace BetterBoarding
             s_RunSoonerFollowUpLegendLogged = true;
             LogUtils.Info(
                 Mod.s_Log,
-                () => "Run sooner follow-up legend: result=made same vehicle means the sampled runner caught the original bus/tram; different vehicle/has path means vanilla reassigned or is still routing; no path yet means unresolved. These are sampled verbose diagnostics, not every runner.");
+                () => "Run sooner follow-up legend: result=made same vehicle means the sampled runner caught the original bus/tram/train; different vehicle/has path means vanilla reassigned or is still routing; no path yet means unresolved. These are sampled verbose diagnostics, not every runner.");
         }
 
         private static string EntityText(Entity entity)

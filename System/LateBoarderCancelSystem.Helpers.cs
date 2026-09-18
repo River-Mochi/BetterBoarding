@@ -26,8 +26,8 @@ namespace BetterBoarding
 
     public partial class LateBoarderCancelSystem : GameSystemBase
     {
-        // Vanilla sets HumanFlags.Run at departure time. This beta assist starts that
-        // same behavior a little earlier for road transit passengers who are already assigned.
+        // Vanilla sets HumanFlags.Run at departure time. This assist starts that same behavior
+        // a little earlier for supported transit passengers who are already assigned.
         private const uint RunSoonerLeadFrames = 512u;
 
         private bool IsGroupPassenger(Entity passenger)
@@ -120,7 +120,7 @@ namespace BetterBoarding
             return latestDepartureFrame;
         }
 
-        private int QueueRoadTransitPassengersRunSooner(
+        private int QueueTransitPassengersRunSooner(
             ref EntityCommandBuffer ecb,
             Entity vehicleEntity,
             TransportType transportType,
@@ -130,7 +130,9 @@ namespace BetterBoarding
             ref int sampledRunSoonerPassengers)
         {
             if (!BoardingRuntimeSettings.CimsRunSoonerToCatchBuses ||
-                (transportType != TransportType.Bus && transportType != TransportType.Tram) ||
+                (transportType != TransportType.Bus &&
+                 transportType != TransportType.Tram &&
+                 transportType != TransportType.Train) ||
                 latestDepartureFrame == 0 ||
                 frame >= latestDepartureFrame ||
                 latestDepartureFrame - frame > RunSoonerLeadFrames)
@@ -150,7 +152,7 @@ namespace BetterBoarding
                 return 0;
             }
 
-            // Layout support is needed for trams and harmless for buses.
+            // Layout support covers multi-car trams and trains and is harmless for buses.
             if (EntityManager.HasBuffer<LayoutElement>(vehicleEntity))
             {
                 int queued = 0;

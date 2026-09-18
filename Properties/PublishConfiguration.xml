@@ -4,13 +4,13 @@
 	<!--Name of the mod to display to players-->
 	<DisplayName Value="Better Boarding"/>
 	<!--Short description of the mod-->
-	<ShortDescription Value="Faster Transit Boarding. Late solo passengers stop holding up vehicles, and cims may start running earlier to catch their bus or tram. "/>
+	<ShortDescription Value="Faster Transit Boarding. Late solo passengers stop holding up vehicles, and cims may start running earlier to catch their bus, tram, or train. "/>
 	<!--Long description of the mod. Single line or multi line. Supports minimal markdown subset-->
 	<!--LongDescription Value="This is a long description" /-->
 	<LongDescription>
 ## Faster public transit boarding
 
-Still useful post patch 1.5.7-1.6.0
+Updated and verified for CS2 1.6.2.
 
 The game has a fallback for stuck transit and releases them if it's ~10 minutes past scheduled departure time.
 Better Boarding helps before that by making boarding faster and reducing late-passenger delays to keep things smooth and on time.
@@ -19,7 +19,7 @@ Better Boarding helps before that by making boarding faster and reducing late-pa
 - The larger your city, the more this mod will help.
 - ✅ Speeds up public transit boarding/loading with simple sliders.
 - ✅ Lets late solo cims miss a vehicle (if it's after departure time) so everyone else is not held up.
-- ✅ Late cims can also start running sooner so they have a chance to catch their ride (bus + tram currently).
+- ✅ Late cims can also start running sooner so they have a chance to catch their ride (bus + tram + train).
 - ✅ Adds compact Status info in Options menu and a detailed [Stats to Log] report.
 
 ### Skip Late Passengers
@@ -27,12 +27,12 @@ Better Boarding helps before that by making boarding faster and reducing late-pa
 - The cim is not deleted and the game can naturally reassign them.
 - Future: Groups/families traveling together are left to vanilla methods so they are not split up (they are few in number and could still cause delays, more research needed before adding group handling).
 
-### Cims Run sooner: Bus + Tram
+### Cims Run sooner: Bus + Tram + Train
 
 - ✅ When **Cims Run Sooner** is ON, the assigned but late passengers can start running a little sooner.
 - Vanilla starts cims running at departure time, which can be too late to help if they are not already near the stop.
 - Like real life, people start running from a block away, not just at the stop.
-- It reduces how many cims need to be reassigned later. Currently only works for bus/trams; does not force boarding or teleport citizens.
+- It reduces how many cims need to be reassigned later. Works for bus, tram, and train; does not change departure time, force boarding, or teleport citizens.
 
 
 ### Status report included
