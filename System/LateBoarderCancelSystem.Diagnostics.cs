@@ -27,8 +27,11 @@ namespace BetterBoarding
 
         private const int MaxSampledCimsPerModePerUpdate = 3;
         private const int MaxSampledCimsPerUpdate = MaxSampledCimsPerModePerUpdate * 7;
-        private const int MaxRunSoonerFollowUpSamplesPerUpdate = 4;
-        private const uint FollowUpDelayFrames = 2048; // ~11.25 in-game minutes.
+        private const int MaxRunSoonerSoloFollowUpSamplesPerUpdate = 2;
+        private const int MaxRunSoonerGroupFollowUpSamplesPerUpdate = 2;
+        private const uint SkippedPassengerFollowUpDelayFrames = 2048; // ~11.25 in-game minutes after cancellation.
+        private const uint RunSoonerDepartureGraceFrames = 128; // One assist interval after scheduled departure.
+        private const uint RunSoonerPreVanillaTimeoutFrames = 1536; // ~8.44 in-game minutes after departure, before vanilla's 1800-frame cutoff.
         private const int MaxFollowUpSamples = 256;
         private const int MaxFollowUpLogsPerUpdate = 6;
 
@@ -133,7 +136,15 @@ namespace BetterBoarding
             }
         }
 
-        private void TrackRunSoonerFollowUpSample(TransportType transportType, Entity vehicle, Entity passenger)
+        private void TrackRunSoonerFollowUpSample(
+            TransportType transportType,
+            Entity controllerVehicle,
+            Entity vehicle,
+            Entity passenger,
+            uint departureFrame,
+            Entity groupLeader,
+            int groupSize,
+            float maxStraightDistanceAtRun)
         {
             uint frame = m_SimulationSystem?.frameIndex ?? 0;
             int slot = FindFollowUpSampleSlot();
@@ -142,7 +153,7 @@ namespace BetterBoarding
                 return;
             }
 
-            m_FollowUpSamples[slot] =
+            FollowUpSample sample =
                 new FollowUpSample(
                     FollowUpSampleKind.RunSoonerPassenger,
                     transportType,
@@ -150,6 +161,12 @@ namespace BetterBoarding
                     passenger,
                     frame,
                     DateTime.Now);
+            sample.ControllerVehicle = controllerVehicle;
+            sample.DepartureFrame = departureFrame;
+            sample.GroupLeader = groupLeader;
+            sample.GroupSizeAtRun = groupSize;
+            sample.MaxStraightDistanceAtRun = maxStraightDistanceAtRun;
+            m_FollowUpSamples[slot] = sample;
 
             if (m_FollowUpCount < m_FollowUpSamples.Length)
             {
@@ -176,12 +193,14 @@ namespace BetterBoarding
 
         private void LogFollowUps(uint frame)
         {
-            if (!ShouldLogDiagnostics())
+            if (!ShouldLogDiagnostics() || m_FollowUpCount == 0)
             {
                 return;
             }
 
-            // Follow-up logs answer the "what did vanilla do next?" question after a cim is detached.
+            // The tool-paused path can reach diagnostics without running the main assist pass first.
+            CompleteBoardingAssistDependencies();
+
             TransitWaitStatusSystem followUpStatusSystem = World.GetOrCreateSystemManaged<TransitWaitStatusSystem>();
             int loggedThisUpdate = 0;
             for (int i = 0; i < m_FollowUpCount; i++)
@@ -197,9 +216,72 @@ namespace BetterBoarding
                     continue;
                 }
 
+                if (sample.Kind == FollowUpSampleKind.RunSoonerPassenger)
+                {
+                    bool departureCheckpoint =
+                        sample.RunSoonerCheckpoint == RunSoonerFollowUpCheckpoint.DepartureGrace;
+                    bool stillBoarding = IsRunSoonerVehicleStillBoarding(sample.ControllerVehicle);
+                    bool boardingEndedCheckpoint = !departureCheckpoint && !stillBoarding;
+                    if (!IsRunSoonerFollowUpDue(sample, frame) && !boardingEndedCheckpoint)
+                    {
+                        continue;
+                    }
+
+                    DateTime followUpLocalTime = DateTime.Now;
+                    TransitWaitStatusSystem.FollowUpSnapshot followUpSnapshot =
+                        followUpStatusSystem.BuildLateBoarderFollowUpSnapshot(
+                            sample.Passenger,
+                            sample.TransportType,
+                            sample.Vehicle);
+
+                    uint leadFrames = sample.DepartureFrame >= sample.Frame
+                        ? sample.DepartureFrame - sample.Frame
+                        : 0u;
+                    uint framesPastDeparture = frame >= sample.DepartureFrame
+                        ? frame - sample.DepartureFrame
+                        : 0u;
+                    string checkpoint = departureCheckpoint
+                        ? "departure-grace"
+                        : boardingEndedCheckpoint
+                            ? "boarding-ended"
+                            : "pre-vanilla-timeout";
+                    string passengerState =
+                        DescribeRunSoonerFollowUpState(followUpSnapshot, sample.Vehicle);
+                    string vehicleState =
+                        DescribeRunSoonerVehicleState(sample.ControllerVehicle, sample.DepartureFrame, frame);
+                    string groupState = DescribeRunSoonerGroupState(sample);
+                    string distanceAtRun = sample.MaxStraightDistanceAtRun >= 0f
+                        ? sample.MaxStraightDistanceAtRun.ToString("F1") + "m"
+                        : "n/a";
+
+                    LogRunSoonerFollowUpLegendOnce();
+                    LogUtils.Info(
+                        Mod.s_Log,
+                        () => $"Run Sooner Checkpoint: {sample.TransportType} | checkpoint={checkpoint} | cim={sample.Passenger} | target={sample.Vehicle} | controller={sample.ControllerVehicle} | lead={leadFrames}f/{FramesToGameMinutes(leadFrames):F2}m | maxStraightDistanceAtRun={distanceAtRun} | checked={framesPastDeparture}f/{FramesToGameMinutes(framesPastDeparture):F2}m after departure | ran={sample.LocalTime:HH:mm:ss} | followUp={followUpLocalTime:HH:mm:ss} | result={passengerState} | vehicle={vehicleState} | {groupState}");
+
+                    loggedThisUpdate++;
+                    bool madeOriginalVehicle =
+                        followUpSnapshot.CurrentVehicle == sample.Vehicle &&
+                        (followUpSnapshot.CurrentVehicleFlags & CreatureVehicleFlags.Ready) != 0;
+
+                    if (departureCheckpoint && stillBoarding && !madeOriginalVehicle)
+                    {
+                        sample.RunSoonerCheckpoint = RunSoonerFollowUpCheckpoint.PreVanillaTimeout;
+                        m_FollowUpSamples[i] = sample;
+                    }
+                    else
+                    {
+                        sample.Logged = true;
+                        sample.Active = false;
+                        m_FollowUpSamples[i] = sample;
+                    }
+
+                    continue;
+                }
+
                 if ((frame >= sample.Frame
                         ? frame - sample.Frame
-                        : uint.MaxValue) < FollowUpDelayFrames)
+                        : uint.MaxValue) < SkippedPassengerFollowUpDelayFrames)
                 {
                     continue;
                 }
@@ -209,22 +291,12 @@ namespace BetterBoarding
                 m_FollowUpSamples[i] = sample;
                 loggedThisUpdate++;
 
-                DateTime followUpLocalTime = DateTime.Now;
-                TransitWaitStatusSystem.FollowUpSnapshot followUpSnapshot =
+                DateTime canceledFollowUpLocalTime = DateTime.Now;
+                TransitWaitStatusSystem.FollowUpSnapshot canceledFollowUpSnapshot =
                     followUpStatusSystem.BuildLateBoarderFollowUpSnapshot(
                         sample.Passenger,
                         sample.TransportType,
                         sample.Vehicle);
-
-                if (sample.Kind == FollowUpSampleKind.RunSoonerPassenger)
-                {
-                    LogRunSoonerFollowUpLegendOnce();
-                    LogUtils.Info(
-                        Mod.s_Log,
-                        () => $"Run Sooner Follow-up: {sample.TransportType} | cim={sample.Passenger} | target={sample.Vehicle} | ran={sample.LocalTime:HH:mm:ss} | followUp={followUpLocalTime:HH:mm:ss} | result={DescribeRunSoonerFollowUpState(followUpSnapshot, sample.Vehicle)}");
-
-                    continue;
-                }
 
                 LogFollowUpLegendOnce();
                 TransitWaitStatus.RecordLateBoarderFollowUp(
@@ -233,13 +305,28 @@ namespace BetterBoarding
                     sample.Vehicle,
                     sample.Passenger,
                     sample.LocalTime,
-                    followUpLocalTime,
-                    followUpSnapshot);
+                    canceledFollowUpLocalTime,
+                    canceledFollowUpSnapshot);
 
                 LogUtils.Info(
                     Mod.s_Log,
-                    () => $"Skipped Late Passenger: {sample.TransportType} | cim={sample.Passenger} | missed={sample.Vehicle} | skipped={sample.LocalTime:HH:mm:ss} | followUp={followUpLocalTime:HH:mm:ss} | state={DescribeFollowUpState(followUpSnapshot, sample.Vehicle, sample.Passenger, frame)}");
+                    () => $"Skipped Late Passenger: {sample.TransportType} | cim={sample.Passenger} | missed={sample.Vehicle} | skipped={sample.LocalTime:HH:mm:ss} | followUp={canceledFollowUpLocalTime:HH:mm:ss} | state={DescribeFollowUpState(canceledFollowUpSnapshot, sample.Vehicle, sample.Passenger, frame)}");
             }
+        }
+
+        private static bool IsRunSoonerFollowUpDue(FollowUpSample sample, uint frame)
+        {
+            if (sample.DepartureFrame == 0 || frame < sample.DepartureFrame)
+            {
+                return false;
+            }
+
+            uint checkpointFrames =
+                sample.RunSoonerCheckpoint == RunSoonerFollowUpCheckpoint.DepartureGrace
+                    ? RunSoonerDepartureGraceFrames
+                    : RunSoonerPreVanillaTimeoutFrames;
+
+            return frame - sample.DepartureFrame >= checkpointFrames;
         }
 
         private static void LogFollowUpLegendOnce()
@@ -265,7 +352,7 @@ namespace BetterBoarding
             s_RunSoonerFollowUpLegendLogged = true;
             LogUtils.Info(
                 Mod.s_Log,
-                () => "Run sooner follow-up legend: result=made same vehicle means the sampled runner caught the original bus/tram/train; different vehicle/has path means vanilla reassigned or is still routing; no path yet means unresolved. These are sampled verbose diagnostics, not every runner.");
+                () => "Run sooner checkpoint legend: departure-grace checks one assist interval after scheduled departure. Unresolved passengers still holding a boarding vehicle are logged again when boarding ends or shortly before vanilla's 1800-frame timeout. maxStraightDistanceAtRun is a position estimate, not path distance. Group counts show exact target-carriage readiness; these are sampled verbose diagnostics, not every runner.");
         }
 
         private static string EntityText(Entity entity)
@@ -330,6 +417,152 @@ namespace BetterBoarding
             }
 
             return "no path yet";
+        }
+
+        private bool IsRunSoonerVehicleStillBoarding(Entity controllerVehicle)
+        {
+            return EntityManager.Exists(controllerVehicle) &&
+                !EntityManager.HasComponent<Deleted>(controllerVehicle) &&
+                !EntityManager.HasComponent<Destroyed>(controllerVehicle) &&
+                EntityManager.HasComponent<Game.Vehicles.PublicTransport>(controllerVehicle) &&
+                (EntityManager.GetComponentData<Game.Vehicles.PublicTransport>(controllerVehicle).m_State &
+                    PublicTransportFlags.Boarding) != 0;
+        }
+
+        private string DescribeRunSoonerVehicleState(
+            Entity controllerVehicle,
+            uint departureFrame,
+            uint frame)
+        {
+            if (!EntityManager.Exists(controllerVehicle))
+            {
+                return "gone";
+            }
+
+            if (EntityManager.HasComponent<Deleted>(controllerVehicle) ||
+                EntityManager.HasComponent<Destroyed>(controllerVehicle))
+            {
+                return "deleted/destroyed";
+            }
+
+            if (!EntityManager.HasComponent<Game.Vehicles.PublicTransport>(controllerVehicle))
+            {
+                return "noPublicTransport";
+            }
+
+            Game.Vehicles.PublicTransport publicTransport =
+                EntityManager.GetComponentData<Game.Vehicles.PublicTransport>(controllerVehicle);
+            string boarding = (publicTransport.m_State & PublicTransportFlags.Boarding) != 0
+                ? "stillBoarding"
+                : "notBoarding";
+            uint framesPastDeparture = frame >= departureFrame
+                ? frame - departureFrame
+                : 0u;
+
+            return $"{boarding}, pastDeparture={framesPastDeparture}f/{FramesToGameMinutes(framesPastDeparture):F2}m, state={publicTransport.m_State}";
+        }
+
+        private string DescribeRunSoonerGroupState(FollowUpSample sample)
+        {
+            if (sample.GroupLeader == Entity.Null)
+            {
+                return "group=solo";
+            }
+
+            if (!EntityManager.Exists(sample.GroupLeader))
+            {
+                return $"group=leader {sample.GroupLeader}, sizeAtRun={sample.GroupSizeAtRun}, leader=gone";
+            }
+
+            int sizeNow = 1;
+            int existing = 0;
+            int missingEntities = 0;
+            int targetReady = 0;
+            int targetNotReady = 0;
+            int otherVehicle = 0;
+            int noVehicle = 0;
+            int running = 0;
+
+            CountRunSoonerGroupEntity(
+                sample.GroupLeader,
+                sample.Vehicle,
+                ref existing,
+                ref missingEntities,
+                ref targetReady,
+                ref targetNotReady,
+                ref otherVehicle,
+                ref noVehicle,
+                ref running);
+
+            if (EntityManager.HasBuffer<GroupCreature>(sample.GroupLeader))
+            {
+                DynamicBuffer<GroupCreature> group =
+                    EntityManager.GetBuffer<GroupCreature>(sample.GroupLeader);
+                sizeNow += group.Length;
+                for (int i = 0; i < group.Length; i++)
+                {
+                    CountRunSoonerGroupEntity(
+                        group[i].m_Creature,
+                        sample.Vehicle,
+                        ref existing,
+                        ref missingEntities,
+                        ref targetReady,
+                        ref targetNotReady,
+                        ref otherVehicle,
+                        ref noVehicle,
+                        ref running);
+                }
+            }
+
+            return
+                $"group=leader {sample.GroupLeader}, sizeAtRun={sample.GroupSizeAtRun}, sizeNow={sizeNow}, existing={existing}, missing={missingEntities}, targetReady={targetReady}, targetNotReady={targetNotReady}, otherVehicle={otherVehicle}, noVehicle={noVehicle}, running={running}";
+        }
+
+        private void CountRunSoonerGroupEntity(
+            Entity passenger,
+            Entity targetVehicle,
+            ref int existing,
+            ref int missingEntities,
+            ref int targetReady,
+            ref int targetNotReady,
+            ref int otherVehicle,
+            ref int noVehicle,
+            ref int running)
+        {
+            if (!EntityManager.Exists(passenger) ||
+                EntityManager.HasComponent<Deleted>(passenger) ||
+                EntityManager.HasComponent<Destroyed>(passenger))
+            {
+                missingEntities++;
+                return;
+            }
+
+            existing++;
+            if (EntityManager.HasComponent<Human>(passenger) &&
+                (EntityManager.GetComponentData<Human>(passenger).m_Flags & HumanFlags.Run) != 0)
+            {
+                running++;
+            }
+
+            if (!EntityManager.HasComponent<CurrentVehicle>(passenger))
+            {
+                noVehicle++;
+                return;
+            }
+
+            CurrentVehicle currentVehicle = EntityManager.GetComponentData<CurrentVehicle>(passenger);
+            if (currentVehicle.m_Vehicle != targetVehicle)
+            {
+                otherVehicle++;
+            }
+            else if ((currentVehicle.m_Flags & CreatureVehicleFlags.Ready) != 0)
+            {
+                targetReady++;
+            }
+            else
+            {
+                targetNotReady++;
+            }
         }
 
         private string AppendMissedVehicleProof(string summary, Entity missedVehicle, Entity passenger, uint frame)

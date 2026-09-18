@@ -20,6 +20,7 @@ namespace BetterBoarding
     using System; // Math
     using System.Collections.Generic; // HashSet
     using Unity.Entities; // DynamicBuffer, Entity, EntityCommandBuffer
+    using Unity.Mathematics; // math
     using PrefabRef = Game.Prefabs.PrefabRef; // prefab lookup
     using PublicTransportVehicleData = Game.Prefabs.PublicTransportVehicleData; // transport type source
     using TransportType = Game.Prefabs.TransportType; // bus/train/etc.
@@ -127,7 +128,8 @@ namespace BetterBoarding
             Game.Vehicles.PublicTransport publicTransport,
             uint frame,
             uint latestDepartureFrame,
-            ref int sampledRunSoonerPassengers)
+            ref int sampledRunSoonerSoloPassengers,
+            ref int sampledRunSoonerGroups)
         {
             if (!BoardingRuntimeSettings.CimsRunSoonerToCatchBuses ||
                 (transportType != TransportType.Bus &&
@@ -161,9 +163,12 @@ namespace BetterBoarding
                 {
                     queued += QueueRunForPassengersOnVehicle(
                         ref ecb,
+                        vehicleEntity,
                         layout[i].m_Vehicle,
                         transportType,
-                        ref sampledRunSoonerPassengers);
+                        latestDepartureFrame,
+                        ref sampledRunSoonerSoloPassengers,
+                        ref sampledRunSoonerGroups);
                 }
 
                 return queued;
@@ -172,15 +177,21 @@ namespace BetterBoarding
             return QueueRunForPassengersOnVehicle(
                 ref ecb,
                 vehicleEntity,
+                vehicleEntity,
                 transportType,
-                ref sampledRunSoonerPassengers);
+                latestDepartureFrame,
+                ref sampledRunSoonerSoloPassengers,
+                ref sampledRunSoonerGroups);
         }
 
         private int QueueRunForPassengersOnVehicle(
             ref EntityCommandBuffer ecb,
+            Entity controllerVehicle,
             Entity vehicleEntity,
             TransportType transportType,
-            ref int sampledRunSoonerPassengers)
+            uint departureFrame,
+            ref int sampledRunSoonerSoloPassengers,
+            ref int sampledRunSoonerGroups)
         {
             if (!EntityManager.Exists(vehicleEntity) ||
                 !EntityManager.HasBuffer<Passenger>(vehicleEntity))
@@ -221,15 +232,77 @@ namespace BetterBoarding
                 ecb.SetComponent(passenger, human);
                 queued++;
 
-                if (sampledRunSoonerPassengers < MaxRunSoonerFollowUpSamplesPerUpdate &&
-                    ShouldLogDiagnostics())
+                if (!ShouldLogDiagnostics())
                 {
-                    TrackRunSoonerFollowUpSample(transportType, vehicleEntity, passenger);
-                    sampledRunSoonerPassengers++;
+                    continue;
+                }
+
+                if (EntityManager.HasBuffer<GroupCreature>(passenger))
+                {
+                    DynamicBuffer<GroupCreature> group = EntityManager.GetBuffer<GroupCreature>(passenger);
+                    if (group.Length > 0 &&
+                        sampledRunSoonerGroups < MaxRunSoonerGroupFollowUpSamplesPerUpdate)
+                    {
+                        TrackRunSoonerFollowUpSample(
+                            transportType,
+                            controllerVehicle,
+                            vehicleEntity,
+                            passenger,
+                            departureFrame,
+                            passenger,
+                            group.Length + 1,
+                            GetGroupMaxStraightDistance(vehicleEntity, passenger, group));
+                        sampledRunSoonerGroups++;
+                    }
+                }
+                else if (!EntityManager.HasComponent<GroupMember>(passenger) &&
+                    sampledRunSoonerSoloPassengers < MaxRunSoonerSoloFollowUpSamplesPerUpdate)
+                {
+                    TrackRunSoonerFollowUpSample(
+                        transportType,
+                        controllerVehicle,
+                        vehicleEntity,
+                        passenger,
+                        departureFrame,
+                        Entity.Null,
+                        1,
+                        GetStraightDistance(vehicleEntity, passenger));
+                    sampledRunSoonerSoloPassengers++;
                 }
             }
 
             return queued;
+        }
+
+        private float GetGroupMaxStraightDistance(
+            Entity vehicle,
+            Entity groupLeader,
+            DynamicBuffer<GroupCreature> group)
+        {
+            float maxDistance = GetStraightDistance(vehicle, groupLeader);
+            for (int i = 0; i < group.Length; i++)
+            {
+                maxDistance = math.max(
+                    maxDistance,
+                    GetStraightDistance(vehicle, group[i].m_Creature));
+            }
+
+            return maxDistance;
+        }
+
+        private float GetStraightDistance(Entity vehicle, Entity passenger)
+        {
+            if (!EntityManager.HasComponent<Game.Objects.Transform>(vehicle) ||
+                !EntityManager.HasComponent<Game.Objects.Transform>(passenger))
+            {
+                return -1f;
+            }
+
+            Game.Objects.Transform vehicleTransform =
+                EntityManager.GetComponentData<Game.Objects.Transform>(vehicle);
+            Game.Objects.Transform passengerTransform =
+                EntityManager.GetComponentData<Game.Objects.Transform>(passenger);
+            return math.distance(vehicleTransform.m_Position, passengerTransform.m_Position);
         }
 
         private static void AccumulateCanceledCount(

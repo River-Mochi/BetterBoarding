@@ -49,6 +49,8 @@ namespace BetterBoarding
         private EntityQuery m_HumanResidentQuery;
         private EntityQuery m_PassengerBufferQuery;
         private EntityQuery m_PathBufferQuery;
+        private EntityQuery m_GroupCreatureQuery;
+        private EntityQuery m_TransformQuery;
         private SimulationSystem? m_SimulationSystem;
         private ToolSystem? m_ToolSystem;
         private DefaultToolSystem? m_DefaultToolSystem;
@@ -84,6 +86,12 @@ namespace BetterBoarding
                 .Build();
             m_PathBufferQuery = SystemAPI.QueryBuilder()
                 .WithAll<PathOwner, PathElement>()
+                .Build();
+            m_GroupCreatureQuery = SystemAPI.QueryBuilder()
+                .WithAll<GroupCreature>()
+                .Build();
+            m_TransformQuery = SystemAPI.QueryBuilder()
+                .WithAll<Game.Objects.Transform>()
                 .Build();
 
             RequireForUpdate(m_VehicleQuery);
@@ -164,7 +172,8 @@ namespace BetterBoarding
             int busRunSoonerAssists = 0;
             int trainRunSoonerAssists = 0;
             int tramRunSoonerAssists = 0;
-            int sampledRunSoonerPassengerCount = 0;
+            int sampledRunSoonerSoloPassengerCount = 0;
+            int sampledRunSoonerGroupCount = 0;
             int busSampleCount = 0;
             int trainSampleCount = 0;
             int tramSampleCount = 0;
@@ -225,7 +234,8 @@ namespace BetterBoarding
                             publicTransport,
                             frame,
                             latestDepartureFrame,
-                            ref sampledRunSoonerPassengerCount);
+                            ref sampledRunSoonerSoloPassengerCount,
+                            ref sampledRunSoonerGroupCount);
                         runSoonerAssists += queuedRunSooner;
 
                         if (transportType == TransportType.Bus)
@@ -418,6 +428,8 @@ namespace BetterBoarding
             m_HumanResidentQuery.CompleteDependency();
             m_PassengerBufferQuery.CompleteDependency();
             m_PathBufferQuery.CompleteDependency();
+            m_GroupCreatureQuery.CompleteDependency();
+            m_TransformQuery.CompleteDependency();
         }
 
         private static bool IsRealGameLoad(Purpose purpose, GameMode mode)

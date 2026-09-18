@@ -46,6 +46,12 @@ namespace BetterBoarding
             RunSoonerPassenger,
         }
 
+        private enum RunSoonerFollowUpCheckpoint
+        {
+            DepartureGrace,
+            PreVanillaTimeout,
+        }
+
         private readonly struct CanceledPassengerSample
         {
             public CanceledPassengerSample(TransportType transportType, Entity vehicle, Entity passenger)
@@ -77,8 +83,14 @@ namespace BetterBoarding
                 Kind = kind;
                 TransportType = transportType;
                 Vehicle = vehicle;
+                ControllerVehicle = vehicle;
                 Passenger = passenger;
                 Frame = frame;
+                DepartureFrame = 0;
+                GroupLeader = Entity.Null;
+                GroupSizeAtRun = 1;
+                MaxStraightDistanceAtRun = -1f;
+                RunSoonerCheckpoint = RunSoonerFollowUpCheckpoint.DepartureGrace;
                 LocalTime = localTime;
             }
 
@@ -92,9 +104,21 @@ namespace BetterBoarding
 
             public Entity Vehicle;
 
+            public Entity ControllerVehicle;
+
             public Entity Passenger;
 
             public uint Frame;
+
+            public uint DepartureFrame;
+
+            public Entity GroupLeader;
+
+            public int GroupSizeAtRun;
+
+            public float MaxStraightDistanceAtRun;
+
+            public RunSoonerFollowUpCheckpoint RunSoonerCheckpoint;
 
             public DateTime LocalTime;
         }

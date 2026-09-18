@@ -22,6 +22,7 @@ Better Boarding does not use Harmony and does not replace vanilla transport syst
 ### Tips
 
 - If a stop still has huge waits, use `Stats to Log` and inspect the worst stops for traffic, bad stop placement, or not enough vehicles.
+- Verbose logging samples Run Sooner passengers just after departure and again before vanilla's timeout when a vehicle is still boarding. Group samples include readiness for the leader and followers.
 - Keep verbose logging OFF during normal gameplay; it is for testing. Leaving it on can cause performance issues and huge log file spam.
 
 ### Compatibility
