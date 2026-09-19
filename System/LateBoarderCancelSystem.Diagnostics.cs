@@ -299,7 +299,7 @@ namespace BetterBoarding
                         sample.Vehicle);
 
                 LogFollowUpLegendOnce();
-                TransitWaitStatus.RecordLateBoarderFollowUp(
+                WaitStatus.RecordLateBoarderFollowUp(
                     World,
                     sample.TransportType,
                     sample.Vehicle,

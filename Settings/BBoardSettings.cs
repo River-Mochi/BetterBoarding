@@ -106,8 +106,8 @@ namespace BetterBoarding
         {
             get
             {
-                try { TransitWaitStatus.RefreshIfNeeded(); } catch { }
-                return TransitWaitStatus.OverviewSummary ?? string.Empty;
+                try { WaitStatus.RefreshIfNeeded(); } catch { }
+                return WaitStatus.OverviewSummary ?? string.Empty;
             }
         }
 
@@ -116,8 +116,8 @@ namespace BetterBoarding
         {
             get
             {
-                try { TransitWaitStatus.RefreshIfNeeded(); } catch { }
-                return TransitWaitStatus.CimsRunSoonerSummary ?? string.Empty;
+                try { WaitStatus.RefreshIfNeeded(); } catch { }
+                return WaitStatus.CimsRunSoonerSummary ?? string.Empty;
             }
         }
 
@@ -127,8 +127,8 @@ namespace BetterBoarding
             get
             {
                 // Options UI polls status rows separately; the cache prevents duplicate work.
-                try { TransitWaitStatus.RefreshIfNeeded(); } catch { }
-                return TransitWaitStatus.BusSummary ?? string.Empty;
+                try { WaitStatus.RefreshIfNeeded(); } catch { }
+                return WaitStatus.BusSummary ?? string.Empty;
             }
         }
 
@@ -137,8 +137,8 @@ namespace BetterBoarding
         {
             get
             {
-                try { TransitWaitStatus.RefreshIfNeeded(); } catch { }
-                return TransitWaitStatus.TramSummary ?? string.Empty;
+                try { WaitStatus.RefreshIfNeeded(); } catch { }
+                return WaitStatus.TramSummary ?? string.Empty;
             }
         }
 
@@ -147,8 +147,8 @@ namespace BetterBoarding
         {
             get
             {
-                try { TransitWaitStatus.RefreshIfNeeded(); } catch { }
-                return TransitWaitStatus.TrainSummary ?? string.Empty;
+                try { WaitStatus.RefreshIfNeeded(); } catch { }
+                return WaitStatus.TrainSummary ?? string.Empty;
             }
         }
 
@@ -157,8 +157,8 @@ namespace BetterBoarding
         {
             get
             {
-                try { TransitWaitStatus.RefreshIfNeeded(); } catch { }
-                return TransitWaitStatus.SubwaySummary ?? string.Empty;
+                try { WaitStatus.RefreshIfNeeded(); } catch { }
+                return WaitStatus.SubwaySummary ?? string.Empty;
             }
         }
 
@@ -167,8 +167,8 @@ namespace BetterBoarding
         {
             get
             {
-                try { TransitWaitStatus.RefreshIfNeeded(); } catch { }
-                return TransitWaitStatus.FerrySummary ?? string.Empty;
+                try { WaitStatus.RefreshIfNeeded(); } catch { }
+                return WaitStatus.FerrySummary ?? string.Empty;
             }
         }
 
@@ -177,8 +177,8 @@ namespace BetterBoarding
         {
             get
             {
-                try { TransitWaitStatus.RefreshIfNeeded(); } catch { }
-                return TransitWaitStatus.ShipSummary ?? string.Empty;
+                try { WaitStatus.RefreshIfNeeded(); } catch { }
+                return WaitStatus.ShipSummary ?? string.Empty;
             }
         }
 
@@ -187,8 +187,8 @@ namespace BetterBoarding
         {
             get
             {
-                try { TransitWaitStatus.RefreshIfNeeded(); } catch { }
-                return TransitWaitStatus.AirSummary ?? string.Empty;
+                try { WaitStatus.RefreshIfNeeded(); } catch { }
+                return WaitStatus.AirSummary ?? string.Empty;
             }
         }
 
@@ -205,7 +205,7 @@ namespace BetterBoarding
                 }
 
                 // Detailed report belongs in the log so the UI rows can stay compact.
-                TransitWaitStatus.LogDetailedReport();
+                WaitStatus.LogDetailedReport();
             }
         }
 

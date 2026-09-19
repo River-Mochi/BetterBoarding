@@ -1,4 +1,4 @@
-// <copyright file="TransitWaitStatus.cs" company="River-Mochi">
+// <copyright file="WaitStatus.cs" company="River-Mochi">
 // Copyright (c) 2026 River-Mochi. All rights reserved.
 // Licensed under the GNU General Public License v3.0 or later,
 // with the Cities: Skylines II Linking Exception.
@@ -6,7 +6,7 @@
 // This notice MUST be kept with copies or substantial portions of this code.
 // ================= </copyright> ======================
 
-// File: System/Status/TransitWaitStatus.cs
+// File: System/Status/WaitStatus.cs
 // Purpose: Cached Options UI status text for current transit wait snapshots.
 
 namespace BetterBoarding
@@ -24,7 +24,7 @@ namespace BetterBoarding
     using Unity.Entities;
     using UnityEngine;
 
-    public static class TransitWaitStatus
+    public static class WaitStatus
     {
         public const string KeyStatusNotLoaded = "FB_STATUS_NOT_LOADED";
         public const string KeyNoCityLoaded = "FB_STATUS_NO_CITY_LOADED";

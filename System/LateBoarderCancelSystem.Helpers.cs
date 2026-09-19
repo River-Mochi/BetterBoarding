@@ -393,13 +393,13 @@ namespace BetterBoarding
             int ferryCanceled,
             int airCanceled)
         {
-            TransitWaitStatus.RecordLateBoardersCanceled(World, TransportType.Bus, busCanceled);
-            TransitWaitStatus.RecordLateBoardersCanceled(World, TransportType.Train, trainCanceled);
-            TransitWaitStatus.RecordLateBoardersCanceled(World, TransportType.Tram, tramCanceled);
-            TransitWaitStatus.RecordLateBoardersCanceled(World, TransportType.Subway, subwayCanceled);
-            TransitWaitStatus.RecordLateBoardersCanceled(World, TransportType.Ship, shipCanceled);
-            TransitWaitStatus.RecordLateBoardersCanceled(World, TransportType.Ferry, ferryCanceled);
-            TransitWaitStatus.RecordLateBoardersCanceled(World, TransportType.Airplane, airCanceled);
+            WaitStatus.RecordLateBoardersCanceled(World, TransportType.Bus, busCanceled);
+            WaitStatus.RecordLateBoardersCanceled(World, TransportType.Train, trainCanceled);
+            WaitStatus.RecordLateBoardersCanceled(World, TransportType.Tram, tramCanceled);
+            WaitStatus.RecordLateBoardersCanceled(World, TransportType.Subway, subwayCanceled);
+            WaitStatus.RecordLateBoardersCanceled(World, TransportType.Ship, shipCanceled);
+            WaitStatus.RecordLateBoardersCanceled(World, TransportType.Ferry, ferryCanceled);
+            WaitStatus.RecordLateBoardersCanceled(World, TransportType.Airplane, airCanceled);
         }
 
         private bool QueuePassengerCancellation(ref EntityCommandBuffer ecb, Entity vehicleEntity, Entity passenger)

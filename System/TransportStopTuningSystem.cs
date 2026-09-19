@@ -57,7 +57,7 @@ namespace BetterBoarding
             // City switch/load gives us a fresh prefab world. Re-run the one-shot pass even when
             // slider revisions did not change, and reset cached status text for the new city.
             m_AppliedRevision = -1;
-            TransitWaitStatus.ResetForCityLoad();
+            WaitStatus.ResetForCityLoad();
             Enabled = true;
         }
 

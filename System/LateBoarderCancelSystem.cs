@@ -383,16 +383,16 @@ namespace BetterBoarding
                     shipCanceled,
                     ferryCanceled,
                     airCanceled);
-                TransitWaitStatus.RecordRunSoonerAssists(World, TransportType.Bus, busRunSoonerAssists);
-                TransitWaitStatus.RecordRunSoonerAssists(World, TransportType.Train, trainRunSoonerAssists);
-                TransitWaitStatus.RecordRunSoonerAssists(World, TransportType.Tram, tramRunSoonerAssists);
+                WaitStatus.RecordRunSoonerAssists(World, TransportType.Bus, busRunSoonerAssists);
+                WaitStatus.RecordRunSoonerAssists(World, TransportType.Train, trainRunSoonerAssists);
+                WaitStatus.RecordRunSoonerAssists(World, TransportType.Tram, tramRunSoonerAssists);
 
                 if (sampledCanceledPassengers != null)
                 {
                     for (int i = 0; i < sampledCanceledPassengerCount; i++)
                     {
                         CanceledPassengerSample sample = sampledCanceledPassengers[i];
-                        TransitWaitStatus.RecordLateBoarderSample(
+                        WaitStatus.RecordLateBoarderSample(
                             World,
                             sample.TransportType,
                             sample.Vehicle,
