@@ -4,17 +4,15 @@
 <!--Name of the mod to display to players-->
 <DisplayName Value="Better Boarding"/>
 <!--Short description of the mod-->
-<ShortDescription Value="Faster Transit Boarding. Late solo passengers stop holding up vehicles, and cims may start running earlier to catch their bus, tram, or train. "/>
+<ShortDescription Value="Better Transit Boarding. Late solo passengers stop holding up vehicles, and cims may start running earlier to catch their bus, tram, or train. "/>
 <!--Long description of the mod. Single line or multi line. Supports minimal markdown subset-->
 <!--LongDescription Value="This is a long description" /-->
 <LongDescription>
-## Faster public transit boarding
-
-Updated and tested for 1.6.2.
+### Better public transit boarding
 
 The game does not end boarding based on departure time, but rather waits for cims assigned to the vehicle (even if the cim is still far away). This leads to stuck transit vehicles. The game has a fallback for stuck transit and releases them if it's ~10 minutes past scheduled departure time.
 
-**Better Boarding helps before that by reducing late-passenger delays to keep things smooth and on time.**
+#### Better Boarding helps before that by reducing late-passenger delays to keep things smooth and on time.
 
 - Improve traffic, increase transit usage, reduce bunching of vehicles.
 - The larger your city, the more this mod will help.
@@ -26,7 +24,7 @@ The game does not end boarding based on departure time, but rather waits for cim
 ### Skip Late Passengers
 - ✅ When **Skip Late Passengers** is enabled, late solo cims who are still **not ready** even after **departure time** can miss that vehicle instead of making everyone wait.
 - The cim is not deleted and the game can naturally reassign them.
-- Future: Groups/families traveling together are left to vanilla methods so they are not split up (they are few in number and could still cause delays, more research needed before adding group handling).
+- Future: Groups/families traveling together are left to vanilla methods so they are not split up (they are few in number and could still cause delays, more research needed for groups).
 
 ### Cims Run sooner 🏃‍➡️🏃‍♀️‍➡️🏃‍♂️‍➡️ 🚍
 Bus + Tram (Train support is COMING SOON)
@@ -60,15 +58,15 @@ Some players report no issues with Smart Transportation + Better Boarding togeth
 - Feedback on: Github, Discord links (buttons on the right). PRs welcome.
 
 ### Credits and Thanks
-*   River-Mochi - mod author
-*   Inspiration and thanks to bcallender's All Aboard mod and Wayze's InstantBoarding.
-*   yenyang - code review/feedback and testing.
-*   Empiiey, MayorCheeks, Neco1996, Gagaxm - testing
-*   elGendo87 - Thumbnail straightener
+- River-Mochi - mod author
+- Inspiration and thanks to bcallender's All Aboard mod and Wayze's InstantBoarding.
+- yenyang (Anarchy) - code review/feedback and testing.
+- Empiiey, MayorCheeks, Neco1996, Gagaxm - testing
+- elGendo87 - Thumbnail straightener
 
 If you got this far, congrats, say hi, there is a senryu poem I wrote just for you in images. Click Like button, it's hard, I know, and so tiny.
 
-### 15+ Languages supported
+### 15+ Languages
 Hello, Bonjour, Hallo, Hola, Ciao, 你好, 안녕하세요, Olá, 你好, こんにちは, Cześć, สวัสดี, Xin chào, Merhaba, Привіт
 
 tags: boarding time, bus stop, slow stuck transit, debunching, unbunching
