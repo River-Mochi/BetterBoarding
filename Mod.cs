@@ -32,11 +32,11 @@ namespace BetterBoarding
         public static readonly string ModVersion =
             Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.0.0";
 
-        // Register a dedicated BetterBoarding.log, then use LogUtils for popup-safe writes.
+        // Dedicated mod log without game popup errors.
         public static readonly ILog s_Log =
             LogManager.GetLogger(ModId).SetShowsErrorsInUI(false);
 
-        // OnLoad may run more than once during mod reload tests; keep the banner once per process.
+        // Mod reloads can call OnLoad again; only print the banner once.
         private static bool s_BannerLogged;
 
         public static BBoardSettings? Settings;
@@ -53,9 +53,8 @@ namespace BetterBoarding
 
             BBoardSettings setting = new(this);
             Settings = setting;
-          
 
-            // Register languages here so future locale files only need one new AddLocaleSource line.
+            // Register shipped languages before Options UI is created.
             AddLocaleSource("en-US", new LocaleEN(setting));
             AddLocaleSource("fr-FR", new LocaleFR(setting));
             AddLocaleSource("es-ES", new LocaleES(setting));
@@ -65,38 +64,47 @@ namespace BetterBoarding
             AddLocaleSource("ko-KR", new LocaleKO(setting));
             AddLocaleSource("pl-PL", new LocalePL(setting));
             AddLocaleSource("pt-BR", new LocalePT_BR(setting));
+            AddLocaleSource("pt-PT", new LocalePT_PT(setting));
+            AddLocaleSource("th-TH", new LocaleTH(setting));
+            AddLocaleSource("tr-TR", new LocaleTR(setting));
+            AddLocaleSource("uk-UA", new LocaleUK(setting));
+            AddLocaleSource("vi-VN", new LocaleVI(setting));
             AddLocaleSource("zh-HANS", new LocaleZH_CN(setting));    // Simplified Chinese
             AddLocaleSource("zh-HANT", new LocaleZH_HANT(setting));  // Traditional Chinese
 
             try
             {
-                // CS2 persists ModSetting values in mod .coc file.
-                // Locales + load settings before register in OptionsUI so it shows localized+saved settings.
+                // Existing BetterBoarding settings always win over old FastBoarding settings.
                 bool betterBoardingSettingsExisted =
                     BoardingSettingsMigration.BetterBoardingSettingsFileExists();
+
                 AssetDatabase.global.LoadSettings(ModId, setting, new BBoardSettings(this));
 
-                // Clamp old saved values before Options UI sees them.
-                // Example: helps legacy 6x-10x values become new 5x max after this update.
+                // Old FastBoarding values could be above the new 5x max.
                 setting.RepairLoadedValues();
+
                 BoardingSettingsMigration.TryMigrateFromFastBoarding(
                     setting,
                     betterBoardingSettingsExisted);
+
                 setting.RegisterInOptionsUI();
                 BoardingRuntimeSettings.Apply(setting);
             }
             catch (Exception ex)
             {
-                LogUtils.Warn(s_Log, () => $"Settings/UI init failed: {ex.GetType().Name}: {ex.Message}", ex);
+                LogUtils.Warn(
+                    s_Log,
+                    () => $"Settings/UI init failed: {ex.GetType().Name}: {ex.Message}",
+                    ex);
             }
 
             try
             {
-                // Stop tuning is one-shot; boarding assist runs only while a behavior option is enabled.
-                // Run after vanilla transport AI has decided whether the vehicle is still boarding, then
-                // before cim movement consumes the passenger/path edits.
+                // Tune stop data before vanilla uses it.
                 updateSystem.UpdateBefore<TransportStopTuningSystem, TransportStopSystem>(
                     SystemUpdatePhase.GameSimulation);
+
+                // Let vanilla decide boarding first, then help late cims before they move.
                 updateSystem.UpdateAfter<LateBoarderCancelSystem, TransportCarAISystem>(
                     SystemUpdatePhase.GameSimulation);
                 updateSystem.UpdateAfter<LateBoarderCancelSystem, TransportTrainAISystem>(
@@ -110,16 +118,19 @@ namespace BetterBoarding
                 updateSystem.UpdateBefore<LateBoarderCancelSystem, HumanMoveSystem>(
                     SystemUpdatePhase.GameSimulation);
 
-                // Ensure the one-shot prefab retune pass runs on startup/load without needing the player
-                // to open Options first.
+                // Retune once on load even if Options was never opened.
                 updateSystem.World.GetOrCreateSystemManaged<TransportStopTuningSystem>().Enabled = true;
-                // Start the boarding-assist system in the same ON/OFF state saved in the mod settings file.
+
+                // Start boarding assist in the player's saved ON/OFF state.
                 updateSystem.World.GetOrCreateSystemManaged<LateBoarderCancelSystem>().Enabled =
                     BoardingRuntimeSettings.BoardingAssistEnabled;
             }
             catch (Exception ex)
             {
-                LogUtils.Warn(s_Log, () => $"System scheduling failed: {ex.GetType().Name}: {ex.Message}", ex);
+                LogUtils.Warn(
+                    s_Log,
+                    () => $"System scheduling failed: {ex.GetType().Name}: {ex.Message}",
+                    ex);
             }
         }
 
@@ -131,12 +142,15 @@ namespace BetterBoarding
             {
                 try
                 {
-                    // Keep the Options UI clean if the mod is unloaded/reloaded.
+                    // Remove our Options page on unload/reload.
                     Settings.UnregisterInOptionsUI();
                 }
                 catch (Exception ex)
                 {
-                    LogUtils.Warn(s_Log, () => $"UnregisterInOptionsUI failed: {ex.GetType().Name}: {ex.Message}", ex);
+                    LogUtils.Warn(
+                        s_Log,
+                        () => $"UnregisterInOptionsUI failed: {ex.GetType().Name}: {ex.Message}",
+                        ex);
                 }
 
                 Settings = null;
@@ -158,7 +172,9 @@ namespace BetterBoarding
             LocalizationManager? localizationManager = GameManager.instance.localizationManager;
             if (localizationManager == null)
             {
-                LogUtils.Warn(s_Log, () => $"AddLocaleSource: No LocalizationManager; cannot add source for '{localeId}'.");
+                LogUtils.Warn(
+                    s_Log,
+                    () => $"AddLocaleSource: No LocalizationManager; cannot add source for '{localeId}'.");
                 return;
             }
 
@@ -168,8 +184,12 @@ namespace BetterBoarding
             }
             catch (Exception ex)
             {
-                LogUtils.Warn(s_Log, () => $"AddLocaleSource: AddSource for '{localeId}' failed: {ex.GetType().Name}: {ex.Message}", ex);
+                LogUtils.Warn(
+                    s_Log,
+                    () => $"AddLocaleSource: AddSource for '{localeId}' failed: {ex.GetType().Name}: {ex.Message}",
+                    ex);
             }
         }
     }
 }
+

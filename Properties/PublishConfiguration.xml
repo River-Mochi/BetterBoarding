@@ -17,23 +17,21 @@ The game does not end boarding based on departure time, but rather waits for cim
 - Improve traffic, increase transit usage, reduce bunching of vehicles.
 - The larger your city, the more this mod will help.
 - ✅ Speeds up public transit boarding/loading with simple sliders.
-- ✅ Lets late solo cims miss a vehicle (if it's after departure time) so everyone else is not held up.
+- ✅ Lets late solo cims miss a vehicle (if it's after departure time) so others are not held up.
 - ✅ Late cims can also start running sooner so they have a chance to catch their ride (bus + tram + train).
 - ✅ Adds compact Status info in Options menu and a detailed [Stats to Log] report.
 
 ### Skip Late Passengers
 - ✅ When **Skip Late Passengers** is enabled, late solo cims who are still **not ready** even after **departure time** can miss that vehicle instead of making everyone wait.
 - The cim is not deleted and the game can naturally reassign them.
-- Future: Groups/families traveling together are left to vanilla methods so they are not split up (they are few in number and could still cause delays, more research needed for groups).
 
 ### Cims Run sooner 🏃‍➡️🏃‍♀️‍➡️🏃‍♂️‍➡️ 🚍
 Bus + Tram (Train support is COMING SOON)
 
 - ✅ When **Cims Run Sooner** is ON, the assigned but late passengers can start running a little sooner.
-- Vanilla starts cims running at departure time, which can be too late to help if they are not already near the stop.
+- Vanilla starts cims running at departure time, which can be too late to help if they are not already at the stop/station.
 - Like real life, people start running from a block away, not just at the stop.
 - It reduces how many cims need to be reassigned later. Works for bus, tram, and train; does not change departure time, force boarding, or teleport citizens.
-
 
 ### Status report included
 After the city runs a bit, check the Options menu to see current status.
@@ -44,14 +42,12 @@ After the city runs a bit, check the Options menu to see current status.
 - Use [Stats to Log] button for more detailed snapshot data than what is shown in Options menu.
 
 ### Notes
-- Important compatibility: conflicts possible with mods that change boarding, like All-Aboard, so Only Choose One.
+- Important Compatibility: conflicts possible with mods that change boarding, like All-Aboard - Only Choose One.
 Some players report no issues with Smart Transportation + Better Boarding together.
-- Mod is intended to be a lighter, safer alternative than replacing the game's transport system files approach.
-- This mod works nicely with `Public Works Plus` to solve many transit issues.
-- Group boarding is left to normal vanilla handling to avoid splitting groups (they are few compared to the many single travelers).
-- Save-game safe. Safe to remove anytime.
-- No Harmony patches; lightweight design for low overhead.
-- Supports 11 languages.
+- Mod is intended to be a lighter, safer alternative than replacing the game's whole transport system files approach.
+- This mod works nicely with [All Transit + Trucks](https://mods.paradoxplaza.com/mods/138390/Windows) to solve many transit issues.
+- Future: Groups/families traveling together are left to vanilla methods so they are not split up (they are few in number and could still cause delays, more research needed for groups).
+- Safe to remove anytime. No Harmony patches; lightweight design for low overhead.
 
 ### Support and feedback
 - Support by clicking Like 👍 (top right); helps people know about the mod. No donations requested.
