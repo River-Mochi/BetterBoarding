@@ -1,19 +1,20 @@
 <Publish>
-	<!--Id must be set in order to update existed mod. it is not required for publishing mod for the first time-->
-	<ModId Value="141997"/>
-	<!--Name of the mod to display to players-->
-	<DisplayName Value="Better Boarding"/>
-	<!--Short description of the mod-->
-	<ShortDescription Value="Faster Transit Boarding. Late solo passengers stop holding up vehicles, and cims may start running earlier to catch their bus, tram, or train. "/>
-	<!--Long description of the mod. Single line or multi line. Supports minimal markdown subset-->
-	<!--LongDescription Value="This is a long description" /-->
-	<LongDescription>
+<!--Id must be set in order to update existed mod. it is not required for publishing mod for the first time-->
+<ModId Value="141997"/>
+<!--Name of the mod to display to players-->
+<DisplayName Value="Better Boarding"/>
+<!--Short description of the mod-->
+<ShortDescription Value="Faster Transit Boarding. Late solo passengers stop holding up vehicles, and cims may start running earlier to catch their bus, tram, or train. "/>
+<!--Long description of the mod. Single line or multi line. Supports minimal markdown subset-->
+<!--LongDescription Value="This is a long description" /-->
+<LongDescription>
 ## Faster public transit boarding
 
-Updated and verified for CS2 1.6.2.
+Updated and tested for 1.6.2.
 
-The game has a fallback for stuck transit and releases them if it's ~10 minutes past scheduled departure time.
-Better Boarding helps before that by making boarding faster and reducing late-passenger delays to keep things smooth and on time.
+The game does not end boarding based on departure time, but rather waits for cims assigned to the vehicle (even if the cim is still far away). This leads to stuck transit vehicles. The game has a fallback for stuck transit and releases them if it's ~10 minutes past scheduled departure time.
+
+**Better Boarding helps before that by reducing late-passenger delays to keep things smooth and on time.**
 
 - Improve traffic, increase transit usage, reduce bunching of vehicles.
 - The larger your city, the more this mod will help.
@@ -27,7 +28,8 @@ Better Boarding helps before that by making boarding faster and reducing late-pa
 - The cim is not deleted and the game can naturally reassign them.
 - Future: Groups/families traveling together are left to vanilla methods so they are not split up (they are few in number and could still cause delays, more research needed before adding group handling).
 
-### Cims Run sooner: Bus + Tram + Train
+### Cims Run sooner 🏃‍➡️🏃‍♀️‍➡️🏃‍♂️‍➡️ 🚍
+Bus + Tram (Train support is COMING SOON)
 
 - ✅ When **Cims Run Sooner** is ON, the assigned but late passengers can start running a little sooner.
 - Vanilla starts cims running at departure time, which can be too late to help if they are not already near the stop.
@@ -54,47 +56,46 @@ Some players report no issues with Smart Transportation + Better Boarding togeth
 - Supports 11 languages.
 
 ### Support and feedback
-- If mods make the game better, give it a Like. It's an easy way to show support for free mods :)
-- Feedback on: Github, Discord, etc., link icons on this page.
+- Support by clicking Like 👍 (top right); helps people know about the mod. No donations requested.
+- Feedback on: Github, Discord links (buttons on the right). PRs welcome.
 
-### Credits
-- River-Mochi.......mod author
-- Inspiration and thanks to bcallender's All Aboard mod and Wayze's old InstantBoarding.
-- yenyang...........testing and code feedback
-- Neco1996..........testing
-- MayorCheeks.......testing
-- gagaxm............testing
-- Empiiey...........testing
-- elGendo87.........thumbnail straightener
+### Credits and Thanks
+*   River-Mochi - mod author
+*   Inspiration and thanks to bcallender's All Aboard mod and Wayze's InstantBoarding.
+*   yenyang - code review/feedback and testing.
+*   Empiiey, MayorCheeks, Neco1996, Gagaxm - testing
+*   elGendo87 - Thumbnail straightener
 
 If you got this far, congrats, say hi, there is a senryu poem I wrote just for you in images. Click Like button, it's hard, I know, and so tiny.
 
-tags: boarding time, bus stop, slow transit, debunching, unbunching
+### 12+ Languages supported
+Hello, Bonjour, Hallo, Hola, Ciao, 你好, 안녕하세요, Olá, 你好, こんにちは, Cześć, สวัสดี, Xin chào, Merhaba, Привіт
+
+tags: boarding time, bus stop, slow stuck transit, debunching, unbunching
 
 </LongDescription>
-	<!--Thumbnail-->
-	<Thumbnail Value="Properties/Thumbnail-Boarding.jpg"/>
-	<!--Screenshot, can be set multiple times-->
-	<Screenshot Value="Properties/image10-BoardingSpeed.jpg"/>
-	<Screenshot Value="Properties/image30-Status.jpg"/>
-    <Screenshot Value="Properties/image40-11Languages.jpg"/>
-    <Screenshot Value="Properties/image60-senryu-BoardingFix.jpg"/>
+<!--Thumbnail-->
+<Thumbnail Value="Properties/Thumbnail-Boarding.jpg"/>
+<!--Screenshot, can be set multiple times-->
+<Screenshot Value="Properties/image10-BoardingSpeed.jpg"/>
+<Screenshot Value="Properties/image30-Status.jpg"/>
+<Screenshot Value="Properties/image60-senryu-BoardingFix.jpg"/>
 
-	<!--Tag, can be set multiple times-->
-	<Tag Value=""/>
-	<!--Link to the forum post where the mod can be discussed-->
-	<ForumLink Value="https://forum.paradoxplaza.com/forum/threads/fast-boarding.1918695/"/>
-	<!--Version of the mod-->
-	<ModVersion Value="1.1.3"/>
-	<!--Recommended version of the base game to use the mod-->
-	<GameVersion Value="1.6.*"/>
-	<!--Dependency for the mod, can be set multiple times-->
-	<Dependency Id=""/>
-	<!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
-	<ChangeLog>
+<!--Tag, can be set multiple times-->
+<Tag Value=""/>
+<!--Link to the forum post where the mod can be discussed-->
+<ForumLink Value="https://forum.paradoxplaza.com/forum/threads/fast-boarding.1918695/"/>
+<!--Version of the mod-->
+<ModVersion Value="1.1.3"/>
+<!--Recommended version of the base game to use the mod-->
+<GameVersion Value="1.6.*"/>
+<!--Dependency for the mod, can be set multiple times-->
+<Dependency Id=""/>
+<!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
+<ChangeLog>
 - updated for game patch 1.6.2
 </ChangeLog>
-	<!--External link. supported types are discord, github, youtube, twitch, x, paypal, patreon, buymeacoffee, kofi, crowdin, gitlab-->
-	<ExternalLink Type="github" Url="https://github.com/River-Mochi/BetterBoarding"/>
-	<ExternalLink Type="discord" Url="https://discord.gg/gwXgvtyhjc"/>
+<!--External link. supported types are discord, github, youtube, twitch, x, paypal, patreon, buymeacoffee, kofi, crowdin, gitlab-->
+<ExternalLink Type="github" Url="https://github.com/River-Mochi/BetterBoarding"/>
+<ExternalLink Type="discord" Url="https://discord.gg/gwXgvtyhjc"/>
 </Publish>
