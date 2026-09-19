@@ -1,13 +1,13 @@
 // <copyright file="LogUtils.cs" company="River-Mochi">
-// Copyright (c) 2026 River-Mochi. All rights reserved.
+// Copyright (C) 2026 River-Mochi.
 // Licensed under the GNU General Public License v3.0 or later,
 // with the Cities: Skylines II Linking Exception.
 // See LICENSE and LICENSE-EXCEPTION in the project root.
-// This notice MUST be kept with copies or substantial portions of this code.
+// Copyright and license notices MUST be preserved.
 // ================= </copyright> ======================
 
 // File: Utils/LogUtils.cs
-// Version: 0.7.2 based on River-Mochi shared CS2 utilities.
+// Version: 0.7.3 based on River-Mochi shared CS2 utilities.
 // Purpose: reduce Colossal logger NRE popups with direct .NET file logging.
 // Why: routine mod logs bypass Colossal's logger write path.
 //

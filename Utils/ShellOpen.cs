@@ -1,13 +1,13 @@
 // <copyright file="ShellOpen.cs" company="River-Mochi">
-// Copyright (c) 2026 River-Mochi. All rights reserved.
+// Copyright (C) 2026 River-Mochi.
 // Licensed under the GNU General Public License v3.0 or later,
 // with the Cities: Skylines II Linking Exception.
 // See LICENSE and LICENSE-EXCEPTION in the project root.
-// This notice MUST be kept with copies or substantial portions of this code.
+// Copyright and license notices MUST be preserved.
 // ================= </copyright> ======================
 
 // File: Utils/ShellOpen.cs
-// Version: 0.3.5
+// Version: 0.3.6
 // Purpose: File/folder opening helpers for CS2 Options UI buttons.
 // Based on River-Mochi shared CS2 utilities.
     using System;
