@@ -70,7 +70,7 @@ namespace BetterBoarding
 
             try
             {
-                // CS2 persists ModSetting values in the mod .coc file.
+                // CS2 persists ModSetting values in mod .coc file.
                 // Locales + load settings before register in OptionsUI so it shows localized+saved settings.
                 bool betterBoardingSettingsExisted =
                     BoardingSettingsMigration.BetterBoardingSettingsFileExists();
