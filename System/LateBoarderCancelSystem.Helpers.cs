@@ -134,7 +134,8 @@ namespace BetterBoarding
             if (!BoardingRuntimeSettings.CimsRunSoonerToCatchBuses ||
                 (transportType != TransportType.Bus &&
                  transportType != TransportType.Tram &&
-                 transportType != TransportType.Train) ||
+                 transportType != TransportType.Train &&
+                 transportType != TransportType.Subway) ||
                 latestDepartureFrame == 0 ||
                 frame >= latestDepartureFrame ||
                 latestDepartureFrame - frame > kRunSoonerLeadFrames)

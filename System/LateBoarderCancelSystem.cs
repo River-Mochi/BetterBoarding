@@ -173,6 +173,7 @@ namespace BetterBoarding
             int busRunSoonerAssists = 0;
             int trainRunSoonerAssists = 0;
             int tramRunSoonerAssists = 0;
+            int subwayRunSoonerAssists = 0;
             int sampledRunSoonerSoloPassengerCount = 0;
             int sampledRunSoonerGroupCount = 0;
             int busSampleCount = 0;
@@ -239,18 +240,22 @@ namespace BetterBoarding
                             ref sampledRunSoonerGroupCount);
                         runSoonerAssists += queuedRunSooner;
 
-                        if (transportType == TransportType.Bus)
-                        {
-                            busRunSoonerAssists += queuedRunSooner;
-                        }
-                        else if (transportType == TransportType.Train)
-                        {
-                            trainRunSoonerAssists += queuedRunSooner;
-                        }
-                        else if (transportType == TransportType.Tram)
-                        {
-                            tramRunSoonerAssists += queuedRunSooner;
-                        }
+                    if (transportType == TransportType.Bus)
+                    {
+                        busRunSoonerAssists += queuedRunSooner;
+                    }
+                    else if (transportType == TransportType.Train)
+                    {
+                        trainRunSoonerAssists += queuedRunSooner;
+                    }
+                    else if (transportType == TransportType.Tram)
+                    {
+                        tramRunSoonerAssists += queuedRunSooner;
+                    }
+                    else if (transportType == TransportType.Subway)
+                    {
+                        subwayRunSoonerAssists += queuedRunSooner;
+                    }
                     }
 
                     if (m_SimulationSystem == null ||
@@ -387,6 +392,7 @@ namespace BetterBoarding
                 WaitStatus.RecordRunSoonerAssists(World, TransportType.Bus, busRunSoonerAssists);
                 WaitStatus.RecordRunSoonerAssists(World, TransportType.Train, trainRunSoonerAssists);
                 WaitStatus.RecordRunSoonerAssists(World, TransportType.Tram, tramRunSoonerAssists);
+                WaitStatus.RecordRunSoonerAssists(World, TransportType.Subway, subwayRunSoonerAssists);
 
                 if (sampledCanceledPassengers != null)
                 {

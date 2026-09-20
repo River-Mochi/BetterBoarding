@@ -134,10 +134,10 @@ namespace BetterBoarding
                     "- Group travelers are a small number; most benefits are from skipping solo cims who are running late.\n" +
                     "- Skipped late citizens are not deleted; they are naturally reassigned by the game."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cims Run Sooner: Bus + Tram + Train" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cims Run Sooner: Bus + All Rail" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
                     "Citizens who are <late> start <running sooner> to try to make it **before** departure time.\n" +
-                    "- Works for buses, trams, and trains, especially on long train platforms.\n" +
+                    "- Works for buses, trams, trains, and subways, especially on long platforms.\n" +
                     "- Only affects cims already assigned to a vehicle that is currently boarding.\n" +
                     "- Vanilla only starts cims running at departure time, which can be too late to help.\n" +
                     $"- Pairs well with <{ToggleName}> because it may reduce how many cims miss the vehicle and need to be reassigned.\n" +
@@ -148,7 +148,7 @@ namespace BetterBoarding
                 },
                 { m_Setting.GetOptionDescLocaleID( nameof(BBoardSettings.PassengerRunSpeedFactor)),
                     "<1x = vanilla running speed>\n" +
-                    "Makes BetterBoarding passengers run faster while hurrying to their assigned bus, tram, or train.\n" +
+                    "Makes BetterBoarding passengers run faster while hurrying to their assigned bus, tram, train, or subway.\n" +
                     "Only affects passengers currently trying to board those vehicles. Other citizens are unchanged.\n" +
                     "Higher values can look unrealistic; 4x is intentionally extreme."
                 },
@@ -161,7 +161,7 @@ namespace BetterBoarding
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)), "Cims run earlier" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)),
-                    "If enabled [x], counts all cims (today) that started **running sooner** to try and catch a bus, tram, or train before departure time.\n" +
+                    "If enabled [x], counts all cims (today) that started **running sooner** to try and catch a bus, tram, train, or subway before departure time.\n" +
                     "Cims run 512 frames earlier than they would in vanilla (~2-8 seconds sooner in real time, ~2 minutes in game)."
                 },
 

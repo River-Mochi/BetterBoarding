@@ -7,7 +7,7 @@
 // ================= </copyright> ======================
 
 // File: System/RunSoonerSpeedSystem.cs
-// Purpose: Boost only active bus/tram/train passengers that are hurrying to board.
+// Purpose: Boost only active bus/tram/train/subway passengers that are hurrying to board.
 
 namespace BetterBoarding
 {
@@ -250,7 +250,8 @@ namespace BetterBoarding
                             out Game.Prefabs.TransportType transportType) ||
                         (transportType != Game.Prefabs.TransportType.Bus &&
                          transportType != Game.Prefabs.TransportType.Tram &&
-                         transportType != Game.Prefabs.TransportType.Train))
+                         transportType != Game.Prefabs.TransportType.Train &&
+                         transportType != Game.Prefabs.TransportType.Subway))
                     {
                         continue;
                     }

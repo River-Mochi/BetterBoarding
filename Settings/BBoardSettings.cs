@@ -92,7 +92,7 @@ namespace BetterBoarding
         [SettingsUISetter(typeof(BBoardSettings), nameof(SetCancelLateBoardersLive))]
         public bool CancelLateBoarders { get; set; }
 
-        // Historical property name retained for .coc compatibility; applies to bus, tram, and train.
+        // Historical property name retained for .coc compatibility; applies to bus, tram, train, and subway.
         [SettingsUISection(ActionsTab, BehaviorGroup)]
         [SettingsUISetter(typeof(BBoardSettings), nameof(SetCimsRunSoonerToCatchBusesLive))]
         public bool CimsRunSoonerToCatchBuses { get; set; }
@@ -335,7 +335,7 @@ namespace BetterBoarding
         {
             if (BoardingRuntimeSettings.SetCimsRunSoonerToCatchBuses(value))
             {
-                // This only sets vanilla's Run flag a little before bus/tram/train departure.
+                // This only sets vanilla's Run flag a little before bus/tram/train/subway departure.
                 LogUtils.Info(
                     Mod.s_Log,
                     () => DescribeBehaviorForLog(BoardingRuntimeSettings.CancelLateBoarders, value));
