@@ -41,7 +41,7 @@ namespace BetterBoarding
         public static bool EnableVerboseLogging { get; private set; } = false;
 
 
-        public static void Apply(BBoardSettings settings)
+        public static void LoadFromSettings(BBoardSettings settings)
         {
             // Clamp loaded .coc values before systems see them.
             int bus = ClampSpeedFactor(settings.BusBoardingSpeedFactor);

@@ -296,7 +296,7 @@ namespace BetterBoarding
         {
             if (BoardingRuntimeSettings.SetCancelLateBoarders(value))
             {
-                // SettingsUISetter applies immediate live behavior without adding an Apply button.
+                // SettingsUISetter applies immediate live behavior without adding an LoadFromSettings button.
                 LogUtils.Info(
                     Mod.s_Log,
                     () => DescribeBehaviorForLog(value, BoardingRuntimeSettings.CimsRunSoonerToCatchBuses));

@@ -99,7 +99,7 @@ namespace BetterBoarding
                 setting.RepairLoadedValues();
 
                 setting.RegisterInOptionsUI();
-                BoardingRuntimeSettings.Apply(setting);
+                BoardingRuntimeSettings.LoadFromSettings(setting);
             }
             catch (Exception ex)
             {
