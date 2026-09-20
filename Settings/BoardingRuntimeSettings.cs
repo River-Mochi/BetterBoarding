@@ -36,6 +36,7 @@ namespace BetterBoarding
             int rail = ClampSpeedFactor(settings.RailBoardingSpeedFactor);
             int water = ClampSpeedFactor(settings.WaterBoardingSpeedFactor);
             int air = ClampSpeedFactor(settings.AirBoardingSpeedFactor);
+            int passengerRun = ClampSpeedFactor(settings.PassengerRunSpeedFactor);
 
             bool stopChanged = false;
 
@@ -86,11 +87,9 @@ namespace BetterBoarding
             {
                 LateBoarderRevision++;
             }
-
+            PassengerRunSpeedFactor = passengerRun;
             EnableVerboseLogging = settings.EnableVerboseLogging;
         }
-
-
         public static bool SetBusBoardingSpeedFactor(int value)
         {
             value = ClampSpeedFactor(value);
@@ -144,6 +143,13 @@ namespace BetterBoarding
             return true;
         }
 
+        public static int PassengerRunSpeedFactor { get; private set; } =
+            BBoardSettings.DefaultPassengerRunSpeedFactor;
+
+        public static bool RunSoonerSpeedBoostEnabled =>
+            CimsRunSoonerToCatchBuses &&
+            PassengerRunSpeedFactor > BBoardSettings.VanillaSpeedFactor;
+
         public static bool SetCancelLateBoarders(bool value)
         {
             if (CancelLateBoarders == value)
@@ -179,13 +185,29 @@ namespace BetterBoarding
             return true;
         }
 
+        public static bool SetPassengerRunSpeedFactor(int value)
+        {
+            value = ClampSpeedFactor(value);
+
+            if (PassengerRunSpeedFactor == value)
+            {
+                return false;
+            }
+
+            PassengerRunSpeedFactor = value;
+            return true;
+        }
+
         public static string DescribeForLog()
         {
             // Keep this compact because it is reused in support logs and report headers.
             return
                 $"bus={BusBoardingSpeedFactor}x, rail={RailBoardingSpeedFactor}x, " +
                 $"ship+ferry={WaterBoardingSpeedFactor}x, air={AirBoardingSpeedFactor}x, " +
-                $"skipLateSoloCim={CancelLateBoarders}, runSooner={CimsRunSoonerToCatchBuses}";
+
+                $"skipLateSoloCim={CancelLateBoarders}, " +
+                $"runSooner={CimsRunSoonerToCatchBuses}, " +
+                $"passengerRun={PassengerRunSpeedFactor}x";
         }
 
         public static string DescribeVerboseForLog(bool enabled)

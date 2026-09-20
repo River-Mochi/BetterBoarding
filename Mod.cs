@@ -128,12 +128,27 @@ namespace BetterBoarding
                 updateSystem.UpdateBefore<LateBoarderCancelSystem, HumanMoveSystem>(
                     SystemUpdatePhase.GameSimulation);
 
+                // Apply the passenger-only run boost after vanilla navigation and
+                // BetterBoarding's Run flag, but before vanilla moves the cim.
+                updateSystem.UpdateAfter<RunSoonerSpeedSystem, HumanNavigationSystem>(
+                    SystemUpdatePhase.GameSimulation);
+
+                updateSystem.UpdateAfter<RunSoonerSpeedSystem, LateBoarderCancelSystem>(
+                    SystemUpdatePhase.GameSimulation);
+
+                updateSystem.UpdateBefore<RunSoonerSpeedSystem, HumanMoveSystem>(
+                    SystemUpdatePhase.GameSimulation);
+
                 // Retune once on load even if Options was never opened.
                 updateSystem.World.GetOrCreateSystemManaged<TransportStopTuningSystem>().Enabled = true;
 
                 // Start boarding assist in the saved ON/OFF state.
                 updateSystem.World.GetOrCreateSystemManaged<LateBoarderCancelSystem>().Enabled =
                     BoardingRuntimeSettings.BoardingAssistEnabled;
+
+                updateSystem.World.GetOrCreateSystemManaged<RunSoonerSpeedSystem>().Enabled =
+                    BoardingRuntimeSettings.RunSoonerSpeedBoostEnabled;
+
             }
             catch (Exception ex)
             {
