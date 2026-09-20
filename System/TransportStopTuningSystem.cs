@@ -177,9 +177,10 @@ namespace BetterBoarding
             }
             catch (Exception ex)
             {
-                Mod.WarnOnce(
+                LogUtils.WarnOnce(
                     "FB_WAKE_LATE_BOARDER_FAILED",
-                    () => $"{Mod.ModTag} Failed waking late-cim skip system: {ex.GetType().Name}: {ex.Message}");
+                    () => $"{Mod.ModTag} Failed waking late-cim skip system: {ex.GetType().Name}: {ex.Message}",
+                    ex);
             }
         }
 

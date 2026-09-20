@@ -14,6 +14,7 @@ namespace BetterBoarding
     using System;
     using System.Collections.Generic;
     using Colossal.Serialization.Entities;
+    using CS2Shared.RiverMochi;
     using Game;
     using Game.Common;
     using Game.Creatures;
@@ -146,9 +147,10 @@ namespace BetterBoarding
                 BoardingRuntimeSettings.SetCancelLateBoarders(false);
                 BoardingRuntimeSettings.SetCimsRunSoonerToCatchBuses(false);
 
-                Mod.WarnOnce(
+                LogUtils.WarnOnce(
                     "FB_LATE_BOARDER_CANCEL_EXCEPTION",
-                    () => $"{Mod.ModTag} Boarding assist disabled after {ex.GetType().Name}: {ex.Message}");
+                    () => $"{Mod.ModTag} Boarding assist disabled after {ex.GetType().Name}: {ex.Message}",
+                    ex);
             }
         }
 

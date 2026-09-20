@@ -391,13 +391,13 @@ namespace BetterBoarding
         {
             // Vanilla wait data lives on line waypoints, not on the stop entities themselves.
             // We group those waypoint queues back onto the connected stop so the UI reads like a stop report.
-            Dictionary<Entity, StopAggregate> busStops = new Dictionary<Entity, StopAggregate>();
-            Dictionary<Entity, StopAggregate> trainStops = new Dictionary<Entity, StopAggregate>();
-            Dictionary<Entity, StopAggregate> tramStops = new Dictionary<Entity, StopAggregate>();
-            Dictionary<Entity, StopAggregate> subwayStops = new Dictionary<Entity, StopAggregate>();
-            Dictionary<Entity, StopAggregate> shipStops = new Dictionary<Entity, StopAggregate>();
-            Dictionary<Entity, StopAggregate> ferryStops = new Dictionary<Entity, StopAggregate>();
-            Dictionary<Entity, StopAggregate> airStops = new Dictionary<Entity, StopAggregate>();
+            Dictionary<Entity, StopAggregate> busStops = new();
+            Dictionary<Entity, StopAggregate> trainStops = new();
+            Dictionary<Entity, StopAggregate> tramStops = new();
+            Dictionary<Entity, StopAggregate> subwayStops = new();
+            Dictionary<Entity, StopAggregate> shipStops = new();
+            Dictionary<Entity, StopAggregate> ferryStops = new();
+            Dictionary<Entity, StopAggregate> airStops = new();
             LateGroupStats busLateGroups = default;
             LateGroupStats trainLateGroups = default;
             LateGroupStats tramLateGroups = default;

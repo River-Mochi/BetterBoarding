@@ -7,37 +7,45 @@
 // ================= </copyright> ======================
 
 // File: Settings/BoardingSettingsMigration.cs
-// Purpose: One-time carry-over from the published FastBoarding settings identity.
+// Purpose: Carry published FastBoarding settings into BetterBoarding.
 
 namespace BetterBoarding
 {
     using System;
     using System.IO;
     using Colossal.IO.AssetDatabase;
+    using Colossal.PSI.Environment;
     using CS2Shared.RiverMochi;
-    using UnityEngine;
 
     internal static class BoardingSettingsMigration
     {
         private const string LegacyModId = "FastBoarding";
-        private const string LegacySettingsRelativePath =
-            "ModsSettings/FastBoarding/FastBoarding.coc";
-        private const string CurrentSettingsRelativePath =
-            "ModsSettings/BetterBoarding/BetterBoarding.coc";
+
+        private static string LegacySettingsFilePath => Path.Combine(
+            EnvPath.kUserDataPath,
+            "ModsSettings",
+            LegacyModId,
+            $"{LegacyModId}.coc");
+
+        private static string BetterBoardingSettingsFilePath => Path.Combine(
+            EnvPath.kUserDataPath,
+            "ModsSettings",
+            Mod.ModId,
+            $"{Mod.ModId}.coc");
 
         internal static bool BetterBoardingSettingsFileExists()
         {
             try
             {
-                return File.Exists(GetUserDataPath(CurrentSettingsRelativePath));
+                return File.Exists(BetterBoardingSettingsFilePath);
             }
             catch (Exception ex)
             {
-                // When existence cannot be established, preserving current settings is safer than importing.
+                // If unsure, don't risk replacing current BetterBoarding settings.
                 LogUtils.Warn(
-                    Mod.s_Log,
-                    () => $"Could not check BetterBoarding settings before migration: {ex.GetType().Name}: {ex.Message}",
+                    () => $"Could not check BetterBoarding settings: {ex.GetType().Name}: {ex.Message}",
                     ex);
+
                 return true;
             }
         }
@@ -53,26 +61,27 @@ namespace BetterBoarding
 
             try
             {
+                // Current BetterBoarding settings always win.
                 if (betterBoardingSettingsExisted)
                 {
-                    // A settings file from an earlier BetterBoarding run always wins over legacy data.
                     CompleteMigration(settings);
                     return;
                 }
 
-                if (!File.Exists(GetUserDataPath(LegacySettingsRelativePath)))
+                // Fresh install: remember that there was nothing to import.
+                if (!File.Exists(LegacySettingsFilePath))
                 {
-                    // Mark clean installs so a stale legacy file cannot be imported on a later launch.
                     CompleteMigration(settings);
                     return;
                 }
 
                 LegacyFastBoardingSettings? legacy = null;
+
                 AssetDatabase.global.LoadSettings<LegacyFastBoardingSettings>(
                     LegacyModId,
                     (candidate, meta) =>
                     {
-                        if (legacy == null && IsExpectedLegacySource(meta))
+                        if (legacy == null && IsLegacySettingsFile(meta))
                         {
                             legacy = candidate;
                         }
@@ -81,8 +90,7 @@ namespace BetterBoarding
                 if (legacy == null)
                 {
                     LogUtils.Warn(
-                        Mod.s_Log,
-                        () => "FastBoarding settings file exists, but no compatible FastBoarding settings block was found.");
+                        "FastBoarding settings file exists, but compatible settings were not found.");
                     return;
                 }
 
@@ -93,18 +101,17 @@ namespace BetterBoarding
                 settings.CancelLateBoarders = legacy.CancelLateBoarders;
                 settings.CimsRunSoonerToCatchBuses = legacy.CimsRunSoonerToCatchBuses;
                 settings.EnableVerboseLogging = legacy.EnableVerboseLogging;
+
                 settings.RepairLoadedValues();
                 CompleteMigration(settings);
 
                 LogUtils.Info(
-                    Mod.s_Log,
-                    () => "Imported legacy FastBoarding settings and queued them for saving as BetterBoarding settings.");
+                    "Imported FastBoarding settings into BetterBoarding.");
             }
             catch (Exception ex)
             {
-                // Migration is optional compatibility work and must never prevent the mod from loading.
+                // Migration failure should never stop the mod from loading.
                 LogUtils.Warn(
-                    Mod.s_Log,
                     () => $"FastBoarding settings migration failed: {ex.GetType().Name}: {ex.Message}",
                     ex);
             }
@@ -112,38 +119,29 @@ namespace BetterBoarding
 
         private static void CompleteMigration(BBoardSettings settings)
         {
-            // Force-saving this hidden marker keeps the one-time gate even when every visible
-            // setting equals its default and CS2 would otherwise delete the empty .coc file.
+            // Keep this marker even when every visible option is at its default.
             settings.FastBoardingSettingsMigrationComplete = true;
             settings.ApplyAndSave();
         }
 
-        private static bool IsExpectedLegacySource(SourceMeta meta)
+        private static bool IsLegacySettingsFile(SourceMeta meta)
         {
             if (string.IsNullOrWhiteSpace(meta.path))
             {
                 return false;
             }
 
-            string normalizedPath = meta.path.Replace('\\', '/').TrimEnd('/');
-            string normalizedUserPath = GetUserDataPath(LegacySettingsRelativePath)
-                .Replace('\\', '/')
-                .TrimEnd('/');
-
-            return string.Equals(
-                    normalizedPath,
-                    normalizedUserPath,
-                    StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(
-                    normalizedPath.TrimStart('/'),
-                    LegacySettingsRelativePath,
+            try
+            {
+                return string.Equals(
+                    Path.GetFullPath(meta.path),
+                    Path.GetFullPath(LegacySettingsFilePath),
                     StringComparison.OrdinalIgnoreCase);
-        }
-
-        private static string GetUserDataPath(string relativePath)
-        {
-            string platformPath = relativePath.Replace('/', Path.DirectorySeparatorChar);
-            return Path.Combine(Application.persistentDataPath, platformPath);
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

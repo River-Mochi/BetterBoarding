@@ -434,9 +434,10 @@ namespace BetterBoarding
                 FerrySummary = string.Empty;
                 AirSummary = string.Empty;
 
-                Mod.WarnOnce(
-                    "FB_STATUS_SNAPSHOT_EXCEPTION",
-                    () => $"{Mod.ModTag} Transit status snapshot failed: {ex.GetType().Name}: {ex.Message}");
+            LogUtils.WarnOnce(
+                "FB_STATUS_SNAPSHOT_EXCEPTION",
+                () => $"{Mod.ModTag} Transit status snapshot failed: {ex.GetType().Name}: {ex.Message}",
+                ex);
             }
         }
 
