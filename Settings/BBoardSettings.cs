@@ -204,6 +204,7 @@ namespace BetterBoarding
         }
 
         [SettingsUISection(ActionsTab, StatusGroup)]
+        [SettingsUISection(AboutTab, DebugGroup)]
         [SettingsUIButtonGroup(StatusButtonsRow)]
         [SettingsUIButton]
         public bool OpenLog
