@@ -12,6 +12,7 @@
 namespace BetterBoarding
 {
     using System;           // DateTime
+    using System.Collections.Generic; // HashSet
     using CS2Shared.RiverMochi; // LogUtils
     using Game;             // GameSystemBase
     using Game.Common;      // Deleted, Destroyed
@@ -46,9 +47,10 @@ namespace BetterBoarding
 
         // Fixed-size storage for delayed follow-up checks. Reuse slots instead of allocating every update.
         private readonly FollowUpSample[] m_FollowUpSamples = new FollowUpSample[kMaxFollowUpSamples];
+        private readonly HashSet<Entity> m_LoggedRunSoonerSpeedPrefabs = new HashSet<Entity>();
         private int m_FollowUpCount;
         private int m_NextFollowUpSample;
-
+   
         private static double FramesToGameMinutes(uint frames)
         {
             return frames * 1440.0 / 262144.0;
@@ -153,6 +155,8 @@ namespace BetterBoarding
                 return;
             }
 
+            LogRunSoonerSpeedSample(transportType, passenger);
+
             FollowUpSample sample =
                 new FollowUpSample(
                     FollowUpSampleKind.RunSoonerPassenger,
@@ -175,6 +179,75 @@ namespace BetterBoarding
             {
                 m_FollowUpCount++;
             }
+        }
+
+        private void LogRunSoonerSpeedSample(
+            TransportType transportType,
+            Entity passenger)
+        {
+            if (!EntityManager.Exists(passenger) ||
+                !EntityManager.HasComponent<Game.Prefabs.PrefabRef>(passenger))
+            {
+                return;
+            }
+
+            Game.Prefabs.PrefabRef prefabRef =
+                EntityManager.GetComponentData<Game.Prefabs.PrefabRef>(passenger);
+
+            Entity humanPrefab = prefabRef.m_Prefab;
+            if (humanPrefab == Entity.Null ||
+                !EntityManager.Exists(humanPrefab) ||
+                !EntityManager.HasComponent<Game.Prefabs.HumanData>(humanPrefab))
+            {
+                return;
+            }
+
+            // Log each loaded human prefab only once per city.
+            if (!m_LoggedRunSoonerSpeedPrefabs.Add(humanPrefab))
+            {
+                return;
+            }
+
+            Game.Prefabs.HumanData humanData =
+                EntityManager.GetComponentData<Game.Prefabs.HumanData>(humanPrefab);
+
+            float navigationMaxSpeed = -1f;
+            if (EntityManager.HasComponent<HumanNavigation>(passenger))
+            {
+                navigationMaxSpeed =
+                    EntityManager.GetComponentData<HumanNavigation>(passenger).m_MaxSpeed;
+            }
+
+            float movingSpeed = -1f;
+            if (EntityManager.HasComponent<Game.Objects.Moving>(passenger))
+            {
+                Game.Objects.Moving moving =
+                    EntityManager.GetComponentData<Game.Objects.Moving>(passenger);
+
+                movingSpeed = Unity.Mathematics.math.length(moving.m_Velocity);
+            }
+
+            LogUtils.Info(
+                Mod.s_Log,
+                () =>
+                    $"Run Sooner Runtime Speed: {transportType} | " +
+                    $"cim={passenger} | " +
+                    $"humanPrefab={humanPrefab} | " +
+                    $"runtimeWalk={FormatRuntimeSpeed(humanData.m_WalkSpeed)} | " +
+                    $"runtimeRun={FormatRuntimeSpeed(humanData.m_RunSpeed)} | " +
+                    $"acceleration={humanData.m_Acceleration:F2}m/s2 | " +
+                    $"navMaxBeforeBBRun={FormatRuntimeSpeed(navigationMaxSpeed)} | " +
+                    $"movingAtBBRun={FormatRuntimeSpeed(movingSpeed)}");
+        }
+
+        private static string FormatRuntimeSpeed(float metersPerSecond)
+        {
+            if (metersPerSecond < 0f)
+            {
+                return "n/a";
+            }
+
+            return $"{metersPerSecond:F3}m/s ({metersPerSecond * 3.6f:F1}km/h)";
         }
 
         private int FindFollowUpSampleSlot()
@@ -725,6 +798,7 @@ namespace BetterBoarding
             m_LoggedActive = false;
             m_FollowUpCount = 0;
             m_NextFollowUpSample = 0;
+            m_LoggedRunSoonerSpeedPrefabs.Clear();
         }
     }
 }
