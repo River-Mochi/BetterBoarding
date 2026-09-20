@@ -18,7 +18,6 @@ namespace BetterBoarding
     using Game.Modding;
     using Game.SceneFlow;
     using Game.Settings;
-   // using Game.UI;
     using Unity.Entities;
     using UnityEngine;
 
@@ -296,7 +295,7 @@ namespace BetterBoarding
         {
             if (BoardingRuntimeSettings.SetCancelLateBoarders(value))
             {
-                // SettingsUISetter applies immediate live behavior without adding an LoadFromSettings button.
+                // Apply this toggle immediately without waking unrelated systems.
                 LogUtils.Info(
                     Mod.s_Log,
                     () => DescribeBehaviorForLog(value, BoardingRuntimeSettings.CimsRunSoonerToCatchBuses));

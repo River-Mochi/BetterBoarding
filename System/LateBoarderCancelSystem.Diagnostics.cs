@@ -154,20 +154,20 @@ namespace BetterBoarding
             }
 
             FollowUpSample sample =
-            new FollowUpSample(
-                FollowUpSampleKind.RunSoonerPassenger,
-                transportType,
-                vehicle,
-                passenger,
-                frame,
-                DateTime.Now)
-            {
-                ControllerVehicle = controllerVehicle,
-                DepartureFrame = departureFrame,
-                GroupLeader = groupLeader,
-                GroupSizeAtRun = groupSize,
-                MaxStraightDistanceAtRun = maxStraightDistanceAtRun
-            };
+                new FollowUpSample(
+                    FollowUpSampleKind.RunSoonerPassenger,
+                    transportType,
+                    vehicle,
+                    passenger,
+                    frame,
+                    DateTime.Now)
+                {
+                    ControllerVehicle = controllerVehicle,
+                    DepartureFrame = departureFrame,
+                    GroupLeader = groupLeader,
+                    GroupSizeAtRun = groupSize,
+                    MaxStraightDistanceAtRun = maxStraightDistanceAtRun
+                };
 
             m_FollowUpSamples[slot] = sample;
 

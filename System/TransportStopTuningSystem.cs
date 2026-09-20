@@ -17,8 +17,6 @@ namespace BetterBoarding
     using Game;
     using Game.Common;
     using Game.Prefabs;
-    // using Game.SceneFlow;
-    // using Game.Simulation;
     using Game.Tools;
     using Unity.Collections;
     using Unity.Entities;

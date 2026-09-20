@@ -13,32 +13,22 @@ namespace BetterBoarding
 {
     /// <summary>
     /// Runtime snapshot of the current mod settings for ECS systems.
-    /// This mirrors the applied options into simple static values
-    /// and exposes separate revision counters so each system
-    /// only wakes when its own inputs changed.
+    /// Mirrors applied options into simple static values
+    /// and exposes separate revised counters so each system
+    /// Only Wakes when its own inputs changed.
     /// </summary>
     public static class BoardingRuntimeSettings
     {
         public static int StopTuningRevision { get; private set; }
-
         public static int LateBoarderRevision { get; private set; }
-
         public static int BusBoardingSpeedFactor { get; private set; } = BBoardSettings.DefaultSpeedFactor;
-
         public static int RailBoardingSpeedFactor { get; private set; } = BBoardSettings.DefaultSpeedFactor;
-
         public static int WaterBoardingSpeedFactor { get; private set; } = BBoardSettings.DefaultSpeedFactor;
-
         public static int AirBoardingSpeedFactor { get; private set; } = BBoardSettings.DefaultSpeedFactor;
-
         public static bool CancelLateBoarders { get; private set; } = false;
-
         public static bool CimsRunSoonerToCatchBuses { get; private set; } = false;
-
         public static bool BoardingAssistEnabled => CancelLateBoarders || CimsRunSoonerToCatchBuses;
-
         public static bool EnableVerboseLogging { get; private set; } = false;
-
         public static void LoadFromSettings(BBoardSettings settings)
         {
             // Clamp loaded .coc values before systems see them.

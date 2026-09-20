@@ -19,7 +19,6 @@ namespace BetterBoarding
     using Game.Common;
     using Game.Creatures;
     using Game.Pathfind;
-   // using Game.SceneFlow;
     using Game.Simulation;
     using Game.Tools;
     using Game.Vehicles;
