@@ -204,7 +204,6 @@ namespace BetterBoarding
         }
 
         [SettingsUISection(ActionsTab, StatusGroup)]
-        [SettingsUISection(AboutTab, DebugGroup)]
         [SettingsUIButtonGroup(StatusButtonsRow)]
         [SettingsUIButton]
         public bool OpenLog
@@ -262,6 +261,22 @@ namespace BetterBoarding
                 // Live setters let the relevant system react immediately instead of waking every system.
                 LogSpeedChange();
                 TryEnableStopTuningSystem();
+            }
+        }
+        [SettingsUISection(AboutTab, DebugGroup)]
+        [SettingsUIDisplayName("BetterBoarding.BetterBoarding.Mod.BBoardSettings.OpenLog")]
+        [SettingsUIDescription("BetterBoarding.BetterBoarding.Mod.BBoardSettings.OpenLog")]
+        [SettingsUIButton]
+        public bool OpenLogAbout
+        {
+            set
+            {
+                if (!value)
+                {
+                    return;
+                }
+
+                ShellOpen.OpenModLogOrLogsFolder();
             }
         }
 
