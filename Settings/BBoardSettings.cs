@@ -263,6 +263,8 @@ namespace BetterBoarding
                 TryEnableStopTuningSystem();
             }
         }
+
+        // Use the same Locale infor for both Open Log buttons.
         [SettingsUISection(AboutTab, DebugGroup)]
         [SettingsUIDisplayName("BetterBoarding.BetterBoarding.Mod.BBoardSettings.OpenLog")]
         [SettingsUIDescription("BetterBoarding.BetterBoarding.Mod.BBoardSettings.OpenLog")]
@@ -338,6 +340,11 @@ namespace BetterBoarding
                 LogUtils.Info(Mod.s_Log, () => BoardingRuntimeSettings.DescribeVerboseForLog(value));
             }
         }
+
+
+
+
+
 
         private static void LogSpeedChange()
         {
