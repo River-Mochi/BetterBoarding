@@ -26,7 +26,7 @@ namespace BetterBoarding
     public partial class RunSoonerSpeedSystem : GameSystemBase
     {
         // Only boost when vanilla is already allowing full running speed.
-        // this avoids overriding braking, queues, blockers, or stop/connection behavior.
+        // This avoids overriding braking, queues, blockers, or stop/connection behavior.
         private const float kFullRunThreshold = 0.95f;
 
         private const CreatureLaneFlags kNoBoostLaneFlags =
@@ -121,7 +121,7 @@ namespace BetterBoarding
                     SystemAPI.GetComponentLookup<Game.Prefabs.HumanData>(isReadOnly: true),
 
                 m_SpeedFactor = BoardingRuntimeSettings.PassengerRunSpeedFactor,
-            }.ScheduleParallel(m_PassengerQuery, Dependency);
+            }.Schedule(m_PassengerQuery, Dependency);
 
             Dependency = handle;
         }

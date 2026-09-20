@@ -66,9 +66,8 @@ namespace BetterBoarding
 
         [SettingsUISlider(
             min = MinSpeedFactor,
-            max = MaxPassengerRunSpeedFactor,
+            max = MaxSpeedFactor,
             step = SpeedStepFactor)]
-
         [SettingsUISection(ActionsTab, SpeedGroup)]
         [SettingsUISetter(typeof(BBoardSettings), nameof(SetRailBoardingSpeedFactorLive))]
         public int RailBoardingSpeedFactor { get; set; }
@@ -100,7 +99,7 @@ namespace BetterBoarding
 
         [SettingsUISlider(
             min = MinSpeedFactor,
-            max = MaxSpeedFactor,
+            max = MaxPassengerRunSpeedFactor,
             step = SpeedStepFactor)]
         [SettingsUISection(ActionsTab, BehaviorGroup)]
         [SettingsUISetter(typeof(BBoardSettings), nameof(SetPassengerRunSpeedFactorLive))]
@@ -275,7 +274,7 @@ namespace BetterBoarding
             }
         }
 
-        // Use the same Locale infor for both Open Log buttons.
+        // Use the same locale info for both Open Log buttons.
         [SettingsUISection(AboutTab, DebugGroup)]
         [SettingsUIDisplayName("BetterBoarding.BetterBoarding.Mod.BBoardSettings.OpenLog")]
         [SettingsUIDescription("BetterBoarding.BetterBoarding.Mod.BBoardSettings.OpenLog")]
@@ -350,7 +349,6 @@ namespace BetterBoarding
         {
             if (BoardingRuntimeSettings.SetPassengerRunSpeedFactor(
                     ClampPassengerRunSpeedFactor(value)))
-
             {
                 LogSpeedChange();
 
@@ -423,7 +421,6 @@ namespace BetterBoarding
 
             return value;
         }
-
 
         private static void TryEnableStopTuningSystem()
         {
