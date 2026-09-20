@@ -190,7 +190,7 @@ namespace BetterBoarding
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AboutName)), "Nome visualizzato di questa mod." },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AboutVersion)), "Versione" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AboutVersion)), "Versione attuale della mod." },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.OpenParadoxMods)), "Paradox Mods" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.OpenParadoxMods)), "Mochi's Paradox Mods" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.OpenParadoxMods)), "Apre la pagina Paradox Mods dell’autore." },
 
                 // Debug

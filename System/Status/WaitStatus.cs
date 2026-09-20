@@ -658,38 +658,12 @@ namespace BetterBoarding
                 return Localize(KeyStatusRunSoonerOff, "run sooner OFF");
             }
 
-            StringBuilder sb = new StringBuilder();
-            AppendRunSoonerPart(sb, s_BusRunSoonerToday, "bus");
-            AppendRunSoonerPart(sb, s_TramRunSoonerToday, "tram");
-            AppendRunSoonerPart(sb, s_TrainRunSoonerToday, "train");
-            AppendRunSoonerPart(sb, s_SubwayRunSoonerToday, "subway");
-            AppendRunSoonerPart(sb, s_FerryRunSoonerToday, "ferry");
-            AppendRunSoonerPart(sb, s_ShipRunSoonerToday, "ship");
-            AppendRunSoonerPart(sb, s_AirRunSoonerToday, "air");
+            string summary =
+                $"{LocaleUtils.FormatN0(s_BusRunSoonerToday)} bus | " +
+                $"{LocaleUtils.FormatN0(s_TramRunSoonerToday)} tram | " +
+                $"{LocaleUtils.FormatN0(s_TrainRunSoonerToday)} train";
 
-            if (sb.Length == 0)
-            {
-                sb.Append("0 bus");
-            }
-
-            return LocaleUtils.SafeFormat(KeyStatusRunSoonerLine, "{0}", sb.ToString());
-        }
-
-        private static void AppendRunSoonerPart(StringBuilder sb, long count, string label)
-        {
-            if (count <= 0)
-            {
-                return;
-            }
-
-            if (sb.Length > 0)
-            {
-                sb.Append(" | ");
-            }
-
-            sb.Append(LocaleUtils.FormatN0(count));
-            sb.Append(' ');
-            sb.Append(label);
+            return LocaleUtils.SafeFormat(KeyStatusRunSoonerLine, "{0}", summary);
         }
 
         private static void AppendSummaryReport(StringBuilder sb, TransitWaitStatusSystem.Snapshot snapshot)

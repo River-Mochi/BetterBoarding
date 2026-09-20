@@ -26,7 +26,7 @@ The game does not end boarding based on departure time, but rather waits for cim
 - The cim is not deleted and the game can naturally reassign them.
 
 ### Cims Run sooner 🏃‍➡️🏃‍♀️‍➡️🏃‍♂️‍➡️ 🚍
-Bus + Tram (Train support is COMING SOON)
+Bus + Tram + Train
 
 - ✅ When **Cims Run Sooner** is ON, the assigned but late passengers can start running a little sooner.
 - Vanilla starts cims running at departure time, which can be too late to help if they are not already at the stop/station.
@@ -87,7 +87,10 @@ tags: boarding time, bus stop, slow stuck transit, debunching, unbunching
 <Dependency Id=""/>
 <!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
 <ChangeLog>
-- updated for game patch 1.6.2
+- Updated for game patch 1.6.2.
+- Cims Run Sooner now supports Trains.
+- Improved boarding status and diagnostics.
+- Renamed Fast Boarding to now Better Boarding.
 </ChangeLog>
 <!--External link. supported types are discord, github, youtube, twitch, x, paypal, patreon, buymeacoffee, kofi, crowdin, gitlab-->
 <ExternalLink Type="github" Url="https://github.com/River-Mochi/BetterBoarding"/>

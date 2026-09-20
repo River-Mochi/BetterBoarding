@@ -109,7 +109,7 @@ namespace BetterBoarding
 
             LogUtils.Info(
                 Mod.s_Log,
-                () => $"Boarding assist: vehicles={stats.Vehicles}, passengersScanned={stats.Passengers}, lateSolo={stats.Candidates}, skipped={stats.Canceled}, runSooner={stats.RunSoonerAssists}, totalSkipped={m_TotalCanceled}, totalRunSooner={m_TotalRunSoonerAssists}");
+                () => $"Boarding assist: vehicles={stats.Vehicles}, passengersScanned={stats.Passengers}, lateSolo={stats.Candidates}, skipped={stats.Canceled}, runFlagsSetByBB={stats.RunSoonerAssists}, totalSkipped={m_TotalCanceled}, totalRunSooner={m_TotalRunSoonerAssists}");
         }
 
         private void TrackFollowUpSample(CanceledPassengerSample sample)
@@ -260,7 +260,7 @@ namespace BetterBoarding
                     LogRunSoonerFollowUpLegendOnce();
                     LogUtils.Info(
                         Mod.s_Log,
-                        () => $"Run Sooner Checkpoint: {sample.TransportType} | checkpoint={checkpoint} | cim={sample.Passenger} | target={sample.Vehicle} | controller={sample.ControllerVehicle} | lead={leadFrames}f/{FramesToGameMinutes(leadFrames):F2}m | maxStraightDistanceAtRun={distanceAtRun} | checked={framesPastDeparture}f/{FramesToGameMinutes(framesPastDeparture):F2}m after departure | ran={sample.LocalTime:HH:mm:ss} | followUp={followUpLocalTime:HH:mm:ss} | result={passengerState} | vehicle={vehicleState} | {groupState}");
+                        () => $"Run Sooner Checkpoint: {sample.TransportType} | checkpoint={checkpoint} | cim={sample.Passenger} | target={sample.Vehicle} | controller={sample.ControllerVehicle} | lead={leadFrames}f/{FramesToGameMinutes(leadFrames):F2}m | maxStraightDistanceAtRun={distanceAtRun} | checked={framesPastDeparture}f/{FramesToGameMinutes(framesPastDeparture):F2}m after departure | bbSetRunFlag={sample.LocalTime:HH:mm:ss} | followUp={followUpLocalTime:HH:mm:ss} | result={passengerState} | vehicle={vehicleState} | {groupState}");
 
                     loggedThisUpdate++;
                     bool madeOriginalVehicle =
