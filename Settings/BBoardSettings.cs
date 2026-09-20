@@ -39,7 +39,7 @@ namespace BetterBoarding
         public const string AboutLinksGroup = "Links";
         public const string DebugGroup = "Debug";
 
-        private const string UrlParadox =
+        private const string kUrlParadox =
             "https://mods.paradoxplaza.com/authors/River-mochi/cities_skylines_2?games=cities_skylines_2&orderBy=desc&sortBy=best&time=alltime";
 
         // 1x is the real vanilla/no-mod baseline. DefaultSpeedFactor is the first-run preset.
@@ -242,7 +242,7 @@ namespace BetterBoarding
                 try
                 {
                     // External links use Unity's URL opener; no filesystem fallback needed here.
-                    Application.OpenURL(UrlParadox);
+                    Application.OpenURL(kUrlParadox);
                 }
                 catch (Exception ex)
                 {
@@ -254,36 +254,6 @@ namespace BetterBoarding
         [SettingsUISection(AboutTab, DebugGroup)]
         [SettingsUISetter(typeof(BBoardSettings), nameof(SetEnableVerboseLoggingLive))]
         public bool EnableVerboseLogging { get; set; }
-
-        public override void Apply()
-        {
-            RepairAndClamp();
-
-            base.Apply();
-
-            // Apply() is still part of the normal auto-save path.
-            // It keeps load/reset/clamp behavior aligned with the runtime snapshot.
-            BoardingRuntimeChangeFlags changes = BoardingRuntimeSettings.Apply(this);
-
-            if ((changes & BoardingRuntimeChangeFlags.StopTuning) != 0)
-            {
-                LogUtils.Info(Mod.s_Log, () => $"Options Settings: {BoardingRuntimeSettings.DescribeForLog()}");
-                TryEnableStopTuningSystem();
-            }
-
-            if ((changes & BoardingRuntimeChangeFlags.LateBoarders) != 0)
-            {
-                LogUtils.Info(
-                    Mod.s_Log,
-                    () => DescribeBehaviorForLog());
-                TrySetLateBoarderSystemEnabled(BoardingRuntimeSettings.BoardingAssistEnabled);
-            }
-
-            if ((changes & BoardingRuntimeChangeFlags.VerboseLogging) != 0)
-            {
-                LogUtils.Info(Mod.s_Log, () => BoardingRuntimeSettings.DescribeVerboseForLog(EnableVerboseLogging));
-            }
-        }
 
         private void SetBusBoardingSpeedFactorLive(int value)
         {
@@ -358,11 +328,6 @@ namespace BetterBoarding
         {
             // Keep slider logs short because players may drag several sliders in one session.
             LogUtils.Info(Mod.s_Log, () => $"Speed changed: {BoardingRuntimeSettings.DescribeForLog()}");
-        }
-
-        private string DescribeBehaviorForLog()
-        {
-            return DescribeBehaviorForLog(CancelLateBoarders, CimsRunSoonerToCatchBuses);
         }
 
         private static string DescribeBehaviorForLog(

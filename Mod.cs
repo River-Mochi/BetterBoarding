@@ -90,7 +90,7 @@ namespace BetterBoarding
                 }
             }
 
-             try
+            try
             {
                 AssetDatabase.global.LoadSettings(
                     ModId, setting, new BBoardSettings(this));

@@ -28,7 +28,7 @@ namespace BetterBoarding
 
     public sealed partial class TransitWaitStatusSystem : GameSystemBase
     {
-        private const int TopWorstStopCount = 3;
+        private const int kTopWorstStopCount = 3;
 
         public readonly struct WorstStopSnapshot
         {
@@ -695,7 +695,7 @@ namespace BetterBoarding
             string worstLineName = string.Empty;
             int worstLineWaitSeconds = 0;
             int worstLineWaitingPassengers = 0;
-            List<WorstStopSnapshot> topWorstStops = new List<WorstStopSnapshot>(TopWorstStopCount);
+            List<WorstStopSnapshot> topWorstStops = new List<WorstStopSnapshot>(kTopWorstStopCount);
 
             foreach (KeyValuePair<Entity, StopAggregate> pair in stops)
             {
@@ -782,7 +782,7 @@ namespace BetterBoarding
 
             topWorstStops.Insert(insertAt, candidate);
 
-            if (topWorstStops.Count > TopWorstStopCount)
+            if (topWorstStops.Count > kTopWorstStopCount)
             {
                 topWorstStops.RemoveAt(topWorstStops.Count - 1);
             }

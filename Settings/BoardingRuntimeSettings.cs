@@ -11,16 +11,6 @@
 
 namespace BetterBoarding
 {
-    using System;
-
-    [Flags]
-    public enum BoardingRuntimeChangeFlags
-    {
-        None = 0,
-        StopTuning = 1 << 0,
-        LateBoarders = 1 << 1,
-        VerboseLogging = 1 << 2
-    }
 
     /// <summary>
     /// Runtime snapshot of the current mod settings for ECS systems.
@@ -50,10 +40,9 @@ namespace BetterBoarding
 
         public static bool EnableVerboseLogging { get; private set; } = false;
 
-        public static BoardingRuntimeChangeFlags Apply(BBoardSettings settings)
-        {
-            BoardingRuntimeChangeFlags changes = BoardingRuntimeChangeFlags.None;
 
+        public static void Apply(BBoardSettings settings)
+        {
             // Clamp loaded .coc values before systems see them.
             int bus = ClampSpeedFactor(settings.BusBoardingSpeedFactor);
             int rail = ClampSpeedFactor(settings.RailBoardingSpeedFactor);
@@ -88,9 +77,7 @@ namespace BetterBoarding
 
             if (stopChanged)
             {
-                // One shared revision is enough because all stop-prefab tuning is recalculated together.
                 StopTuningRevision++;
-                changes |= BoardingRuntimeChangeFlags.StopTuning;
             }
 
             bool lateBoarderChanged = false;
@@ -109,19 +96,12 @@ namespace BetterBoarding
 
             if (lateBoarderChanged)
             {
-                // The live boarding system only needs to wake when behavior toggles change.
                 LateBoarderRevision++;
-                changes |= BoardingRuntimeChangeFlags.LateBoarders;
             }
 
-            if (EnableVerboseLogging != settings.EnableVerboseLogging)
-            {
-                EnableVerboseLogging = settings.EnableVerboseLogging;
-                changes |= BoardingRuntimeChangeFlags.VerboseLogging;
-            }
-
-            return changes;
+            EnableVerboseLogging = settings.EnableVerboseLogging;
         }
+
 
         public static bool SetBusBoardingSpeedFactor(int value)
         {

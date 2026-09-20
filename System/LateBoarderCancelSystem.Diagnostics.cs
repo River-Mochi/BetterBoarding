@@ -23,17 +23,17 @@ namespace BetterBoarding
     public partial class LateBoarderCancelSystem : GameSystemBase
     {
         // Verbose summary throttles. 4096 frames is about 22.5 in-game minutes.
-        private const uint DiagnosticFrameInterval = 4096;
+        private const uint kDiagnosticFrameInterval = 4096;
 
-        private const int MaxSampledCimsPerModePerUpdate = 3;
-        private const int MaxSampledCimsPerUpdate = MaxSampledCimsPerModePerUpdate * 7;
-        private const int MaxRunSoonerSoloFollowUpSamplesPerUpdate = 2;
-        private const int MaxRunSoonerGroupFollowUpSamplesPerUpdate = 2;
-        private const uint SkippedPassengerFollowUpDelayFrames = 2048; // ~11.25 in-game minutes after cancellation.
-        private const uint RunSoonerDepartureGraceFrames = 128; // One assist interval after scheduled departure.
-        private const uint RunSoonerPreVanillaTimeoutFrames = 1536; // ~8.44 in-game minutes after departure, before vanilla's 1800-frame cutoff.
-        private const int MaxFollowUpSamples = 256;
-        private const int MaxFollowUpLogsPerUpdate = 6;
+        private const int kMaxSampledCimsPerModePerUpdate = 3;
+        private const int kMaxSampledCimsPerUpdate = kMaxSampledCimsPerModePerUpdate * 7;
+        private const int kMaxRunSoonerSoloFollowUpSamplesPerUpdate = 2;
+        private const int kMaxRunSoonerGroupFollowUpSamplesPerUpdate = 2;
+        private const uint kSkippedPassengerFollowUpDelayFrames = 2048; // ~11.25 in-game minutes after cancellation.
+        private const uint kRunSoonerDepartureGraceFrames = 128; // One assist interval after scheduled departure.
+        private const uint kRunSoonerPreVanillaTimeoutFrames = 1536; // ~8.44 in-game minutes after departure, before vanilla's 1800-frame cutoff.
+        private const int kMaxFollowUpSamples = 256;
+        private const int kMaxFollowUpLogsPerUpdate = 6;
 
         private uint m_LastDiagnosticFrame;
 
@@ -45,7 +45,7 @@ namespace BetterBoarding
         private bool m_LoggedActive;
 
         // Fixed-size storage for delayed follow-up checks. Reuse slots instead of allocating every update.
-        private readonly FollowUpSample[] m_FollowUpSamples = new FollowUpSample[MaxFollowUpSamples];
+        private readonly FollowUpSample[] m_FollowUpSamples = new FollowUpSample[kMaxFollowUpSamples];
         private int m_FollowUpCount;
         private int m_NextFollowUpSample;
 
@@ -69,7 +69,7 @@ namespace BetterBoarding
             m_LoggedActive = true;
             LogUtils.Info(
                 Mod.s_Log,
-                () => $"Boarding assist active: every {GetUpdateInterval(SystemUpdatePhase.GameSimulation)} frames, cap={MaxCancellationsPerUpdate} late solo cims/update, skipLateSoloCim={BoardingRuntimeSettings.CancelLateBoarders}, runSooner={BoardingRuntimeSettings.CimsRunSoonerToCatchBuses}");
+                () => $"Boarding assist active: every {GetUpdateInterval(SystemUpdatePhase.GameSimulation)} frames, cap={kMaxCancellationsPerUpdate} late solo cims/update, skipLateSoloCim={BoardingRuntimeSettings.CancelLateBoarders}, runSooner={BoardingRuntimeSettings.CimsRunSoonerToCatchBuses}");
         }
 
         private void LogPassSummary(uint frame, PassStats stats, string reason)
@@ -82,10 +82,10 @@ namespace BetterBoarding
                 return;
             }
 
-            bool force = stats.Canceled >= MaxCancellationsPerUpdate;
+            bool force = stats.Canceled >= kMaxCancellationsPerUpdate;
             bool intervalElapsed = m_LastDiagnosticFrame == 0 ||
                 frame < m_LastDiagnosticFrame ||
-                frame - m_LastDiagnosticFrame >= DiagnosticFrameInterval;
+                frame - m_LastDiagnosticFrame >= kDiagnosticFrameInterval;
 
             if (!force && !intervalElapsed && stats.Canceled == 0 && stats.RunSoonerAssists == 0)
             {
@@ -205,7 +205,7 @@ namespace BetterBoarding
             int loggedThisUpdate = 0;
             for (int i = 0; i < m_FollowUpCount; i++)
             {
-                if (loggedThisUpdate >= MaxFollowUpLogsPerUpdate)
+                if (loggedThisUpdate >= kMaxFollowUpLogsPerUpdate)
                 {
                     break;
                 }
@@ -281,7 +281,7 @@ namespace BetterBoarding
 
                 if ((frame >= sample.Frame
                         ? frame - sample.Frame
-                        : uint.MaxValue) < SkippedPassengerFollowUpDelayFrames)
+                        : uint.MaxValue) < kSkippedPassengerFollowUpDelayFrames)
                 {
                     continue;
                 }
@@ -323,8 +323,8 @@ namespace BetterBoarding
 
             uint checkpointFrames =
                 sample.RunSoonerCheckpoint == RunSoonerFollowUpCheckpoint.DepartureGrace
-                    ? RunSoonerDepartureGraceFrames
-                    : RunSoonerPreVanillaTimeoutFrames;
+                    ? kRunSoonerDepartureGraceFrames
+                    : kRunSoonerPreVanillaTimeoutFrames;
 
             return frame - sample.DepartureFrame >= checkpointFrames;
         }

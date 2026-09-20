@@ -1,6 +1,6 @@
-# File: .editorconfig version 0.7.4
+﻿# File: .editorconfig version 0.7.5
 # Purpose:
-#   - GPL variant of the River-Mochi shared .editorconfig.
+#   - GPL3 variant of the River-Mochi shared .editorconfig.
 #   - Consistent whitespace + LF line endings across normal repo files.
 #   - CRLF for classic Visual Studio .sln files.
 #   - LF for XML .slnx files through the global default.
@@ -112,6 +112,12 @@ csharp_style_var_for_built_in_types = false:suggestion
 csharp_style_var_when_type_is_apparent = false:suggestion
 csharp_style_var_elsewhere = false:suggestion
 
+# Keep constructor types explicit instead of suggesting target-typed new().
+csharp_style_implicit_object_creation_when_type_is_apparent = false:suggestion
+
+# Prefer normal switch blocks; they match the game code and are easier to debug.
+csharp_style_prefer_switch_expression = false:suggestion
+
 
 # =========================
 # Analyzer tuning
@@ -163,11 +169,15 @@ dotnet_naming_symbols.private_static_fields.applicable_kinds = field
 dotnet_naming_symbols.private_static_fields.applicable_accessibilities = private
 dotnet_naming_symbols.private_static_fields.required_modifiers = static
 
-# Constants at every accessibility.
-# CO/CS2 commonly uses kPascalCase for both public and non-public constants.
-dotnet_naming_symbols.const_fields.applicable_kinds = field
-dotnet_naming_symbols.const_fields.applicable_accessibilities = *
-dotnet_naming_symbols.const_fields.required_modifiers = const
+# Public constants stay normal PascalCase.
+dotnet_naming_symbols.public_const_fields.applicable_kinds = field
+dotnet_naming_symbols.public_const_fields.applicable_accessibilities = public
+dotnet_naming_symbols.public_const_fields.required_modifiers = const
+
+# Non-public implementation constants use CO-style kPascalCase.
+dotnet_naming_symbols.non_public_const_fields.applicable_kinds = field
+dotnet_naming_symbols.non_public_const_fields.applicable_accessibilities = private, internal, protected, protected_internal, private_protected
+dotnet_naming_symbols.non_public_const_fields.required_modifiers = const
 
 
 # =========================
@@ -189,7 +199,7 @@ dotnet_naming_style.m_prefix_pascal.capitalization = pascal_case
 dotnet_naming_style.s_prefix_pascal.required_prefix = s_
 dotnet_naming_style.s_prefix_pascal.capitalization = pascal_case
 
-# CO/CS2 constant: kConstantName
+# CO/CS2 non-public constant: kConstantName
 dotnet_naming_style.k_prefix_pascal.required_prefix = k
 dotnet_naming_style.k_prefix_pascal.capitalization = pascal_case
 
@@ -218,7 +228,12 @@ dotnet_naming_rule.private_static_fields_s_prefix.symbols = private_static_field
 dotnet_naming_rule.private_static_fields_s_prefix.style = s_prefix_pascal
 dotnet_naming_rule.private_static_fields_s_prefix.severity = suggestion
 
-# Constants at every accessibility: kConstantName
-dotnet_naming_rule.const_fields_k_prefix.symbols = const_fields
-dotnet_naming_rule.const_fields_k_prefix.style = k_prefix_pascal
-dotnet_naming_rule.const_fields_k_prefix.severity = suggestion
+# Public constants: NormalPascalCase
+dotnet_naming_rule.public_const_fields_pascal.symbols = public_const_fields
+dotnet_naming_rule.public_const_fields_pascal.style = pascal
+dotnet_naming_rule.public_const_fields_pascal.severity = suggestion
+
+# Non-public implementation constants: kPascalCase
+dotnet_naming_rule.non_public_const_fields_k_prefix.symbols = non_public_const_fields
+dotnet_naming_rule.non_public_const_fields_k_prefix.style = k_prefix_pascal
+dotnet_naming_rule.non_public_const_fields_k_prefix.severity = suggestion

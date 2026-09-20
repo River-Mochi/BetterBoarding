@@ -26,7 +26,7 @@ namespace BetterBoarding
 
     public partial class TransportStopTuningSystem : GameSystemBase
     {
-        private const float FloatEpsilon = 0.0001f;
+        private const float kFloatEpsilon = 0.0001f;
 
         private EntityQuery m_StopPrefabQuery;
         private PrefabSystem? m_PrefabSystem;
@@ -132,8 +132,8 @@ namespace BetterBoarding
                     if (hasMarker)
                     {
                         TransportStopTuningMarker currentMarker = EntityManager.GetComponentData<TransportStopTuningMarker>(prefabEntity);
-                        if (math.abs(currentMarker.m_LoadingFactor - marker.m_LoadingFactor) > FloatEpsilon ||
-                            math.abs(currentMarker.m_BoardingTime - marker.m_BoardingTime) > FloatEpsilon)
+                        if (math.abs(currentMarker.m_LoadingFactor - marker.m_LoadingFactor) > kFloatEpsilon ||
+                            math.abs(currentMarker.m_BoardingTime - marker.m_BoardingTime) > kFloatEpsilon)
                         {
                             EntityManager.SetComponentData(prefabEntity, marker);
                         }

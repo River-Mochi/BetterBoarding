@@ -29,7 +29,7 @@ namespace BetterBoarding
     {
         // Vanilla sets HumanFlags.Run at departure time. This assist starts that same behavior
         // a little earlier for supported transit passengers who are already assigned.
-        private const uint RunSoonerLeadFrames = 512u;
+        private const uint kRunSoonerLeadFrames = 512u;
 
         private bool IsGroupPassenger(Entity passenger)
         {
@@ -100,7 +100,7 @@ namespace BetterBoarding
         {
             return latestDepartureFrame != 0 &&
                    frame >= latestDepartureFrame &&
-                   frame - latestDepartureFrame >= LatePassengerCancelGraceFrames;
+                   frame - latestDepartureFrame >= kLatePassengerCancelGraceFrames;
         }
 
         private uint GetLatestDepartureFrame(
@@ -137,7 +137,7 @@ namespace BetterBoarding
                  transportType != TransportType.Train) ||
                 latestDepartureFrame == 0 ||
                 frame >= latestDepartureFrame ||
-                latestDepartureFrame - frame > RunSoonerLeadFrames)
+                latestDepartureFrame - frame > kRunSoonerLeadFrames)
             {
                 return 0;
             }
@@ -241,7 +241,7 @@ namespace BetterBoarding
                 {
                     DynamicBuffer<GroupCreature> group = EntityManager.GetBuffer<GroupCreature>(passenger);
                     if (group.Length > 0 &&
-                        sampledRunSoonerGroups < MaxRunSoonerGroupFollowUpSamplesPerUpdate)
+                        sampledRunSoonerGroups < kMaxRunSoonerGroupFollowUpSamplesPerUpdate)
                     {
                         TrackRunSoonerFollowUpSample(
                             transportType,
@@ -256,7 +256,7 @@ namespace BetterBoarding
                     }
                 }
                 else if (!EntityManager.HasComponent<GroupMember>(passenger) &&
-                    sampledRunSoonerSoloPassengers < MaxRunSoonerSoloFollowUpSamplesPerUpdate)
+                    sampledRunSoonerSoloPassengers < kMaxRunSoonerSoloFollowUpSamplesPerUpdate)
                 {
                     TrackRunSoonerFollowUpSample(
                         transportType,
@@ -375,7 +375,7 @@ namespace BetterBoarding
 
         private static bool TryIncrementSampleCount(ref int sampleCount)
         {
-            if (sampleCount >= MaxSampledCimsPerModePerUpdate)
+            if (sampleCount >= kMaxSampledCimsPerModePerUpdate)
             {
                 return false;
             }

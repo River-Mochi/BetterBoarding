@@ -39,11 +39,11 @@ namespace BetterBoarding
 
         // 128 keeps the old daily throughput ceiling after halving UpdatesPerDay from 4096 to 2048.
         // Higher caps process large crowds faster but can create larger one-frame edits.
-        private const int MaxCancellationsPerUpdate = 128;
+        private const int kMaxCancellationsPerUpdate = 128;
 
         // Wait one boarding-assist interval after vanilla departure before trimming paths.
         // This gives vanilla and other mods one extra assist interval to settle same-frame boarding edits.
-        private const uint LatePassengerCancelGraceFrames = 128u;
+        private const uint kLatePassengerCancelGraceFrames = 128u;
 
         private EntityQuery m_VehicleQuery;
         private EntityQuery m_CurrentVehicleQuery;
@@ -321,7 +321,7 @@ namespace BetterBoarding
                     canceledPassengers.Clear();
                     foreach (Entity passenger in pendingCancellation)
                     {
-                        if (cancellationsThisUpdate >= MaxCancellationsPerUpdate)
+                        if (cancellationsThisUpdate >= kMaxCancellationsPerUpdate)
                         {
                             // Spread very large crowds over multiple ticks instead of spiking one frame.
                             break;
@@ -333,7 +333,7 @@ namespace BetterBoarding
                             cancellationsThisUpdate++;
                             canceledForVehicle++;
 
-                            if (sampledCanceledPassengerCount < MaxSampledCimsPerUpdate &&
+                            if (sampledCanceledPassengerCount < kMaxSampledCimsPerUpdate &&
                                 TryCountCanceledSample(
                                     transportType,
                                     ref busSampleCount,
@@ -345,7 +345,7 @@ namespace BetterBoarding
                                     ref airSampleCount))
                             {
                                 // Keep a few entity IDs per mode for the on-demand troubleshooting report.
-                                sampledCanceledPassengers ??= new CanceledPassengerSample[MaxSampledCimsPerUpdate];
+                                sampledCanceledPassengers ??= new CanceledPassengerSample[kMaxSampledCimsPerUpdate];
                                 sampledCanceledPassengers[sampledCanceledPassengerCount++] =
                                     new CanceledPassengerSample(transportType, vehicleEntity, passenger);
                             }
@@ -367,7 +367,7 @@ namespace BetterBoarding
                             ref airCanceled);
                     }
 
-                    if (cancellationsThisUpdate >= MaxCancellationsPerUpdate)
+                    if (cancellationsThisUpdate >= kMaxCancellationsPerUpdate)
                     {
                         break;
                     }

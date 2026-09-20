@@ -68,9 +68,9 @@ namespace BetterBoarding
         public const string KeyReportUnknown = "FB_REPORT_UNKNOWN";
 
 
-        private const int ReportHeaderWidth = 60;
-        private const int ReportFieldWidth = 24;
-        private const int SkippedSampleCapacityPerMode = 3;
+        private const int kReportHeaderWidth = 60;
+        private const int kReportFieldWidth = 24;
+        private const int kSkippedSampleCapacityPerMode = 3;
 
         public static int RefreshIntervalSeconds { get; set; } = 15;
 
@@ -251,7 +251,7 @@ namespace BetterBoarding
         private sealed class SkippedPassengerSampleRing
         {
             private readonly SkippedPassengerSample[] m_Samples =
-                new SkippedPassengerSample[SkippedSampleCapacityPerMode];
+                new SkippedPassengerSample[kSkippedSampleCapacityPerMode];
             private int m_Count;
             private int m_NextIndex;
 
@@ -284,7 +284,7 @@ namespace BetterBoarding
         private sealed class LateBoarderFollowUpSampleRing
         {
             private readonly LateBoarderFollowUpSample[] m_Samples =
-                new LateBoarderFollowUpSample[SkippedSampleCapacityPerMode];
+                new LateBoarderFollowUpSample[kSkippedSampleCapacityPerMode];
             private int m_Count;
             private int m_NextIndex;
 
@@ -945,15 +945,15 @@ namespace BetterBoarding
 
         private static void AppendDivider(StringBuilder sb)
         {
-            sb.AppendLine(new string('=', ReportHeaderWidth));
+            sb.AppendLine(new string('=', kReportHeaderWidth));
         }
 
         private static void AppendField(StringBuilder sb, string label, string value)
         {
             sb.Append(label);
-            if (label.Length < ReportFieldWidth)
+            if (label.Length < kReportFieldWidth)
             {
-                sb.Append('.', ReportFieldWidth - label.Length);
+                sb.Append('.', kReportFieldWidth - label.Length);
             }
 
             sb.Append(": ");
