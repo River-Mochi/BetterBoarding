@@ -15,6 +15,7 @@ namespace BetterBoarding
     using Game.Common;
     using Game.Creatures;
     using Game.Simulation;
+    using Game.Tools;
     using Game.Vehicles;
     using Unity.Burst;
     using Unity.Burst.Intrinsics;
