@@ -23,7 +23,7 @@ namespace BetterBoarding
     using Unity.Entities;
     using Unity.Jobs;
 
-    public sealed class RunSoonerSpeedSystem : GameSystemBase
+    public partial class RunSoonerSpeedSystem : GameSystemBase
     {
         // Only boost when vanilla is already allowing full running speed.
         // this avoids overriding braking, queues, blockers, or stop/connection behavior.

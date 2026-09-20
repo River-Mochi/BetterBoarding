@@ -46,6 +46,7 @@ namespace BetterBoarding
         public const int DefaultSpeedFactor = 3;
         public const int MinSpeedFactor = VanillaSpeedFactor;
         public const int MaxSpeedFactor = 5;
+        public const int MaxPassengerRunSpeedFactor = 4;
         public const int SpeedStepFactor = 1;
         public const int DefaultPassengerRunSpeedFactor = VanillaSpeedFactor;
 
@@ -65,8 +66,9 @@ namespace BetterBoarding
 
         [SettingsUISlider(
             min = MinSpeedFactor,
-            max = MaxSpeedFactor,
+            max = MaxPassengerRunSpeedFactor,
             step = SpeedStepFactor)]
+
         [SettingsUISection(ActionsTab, SpeedGroup)]
         [SettingsUISetter(typeof(BBoardSettings), nameof(SetRailBoardingSpeedFactorLive))]
         public int RailBoardingSpeedFactor { get; set; }
@@ -347,7 +349,8 @@ namespace BetterBoarding
         private void SetPassengerRunSpeedFactorLive(int value)
         {
             if (BoardingRuntimeSettings.SetPassengerRunSpeedFactor(
-                    ClampSpeedFactor(value)))
+                    ClampPassengerRunSpeedFactor(value)))
+
             {
                 LogSpeedChange();
 
@@ -388,7 +391,7 @@ namespace BetterBoarding
             RailBoardingSpeedFactor = ClampSpeedFactor(RailBoardingSpeedFactor);
             WaterBoardingSpeedFactor = ClampSpeedFactor(WaterBoardingSpeedFactor);
             AirBoardingSpeedFactor = ClampSpeedFactor(AirBoardingSpeedFactor);
-            PassengerRunSpeedFactor = ClampSpeedFactor(PassengerRunSpeedFactor);
+            PassengerRunSpeedFactor = ClampPassengerRunSpeedFactor(PassengerRunSpeedFactor);
         }
 
         private static int ClampSpeedFactor(int value)
@@ -405,6 +408,22 @@ namespace BetterBoarding
 
             return value;
         }
+
+        private static int ClampPassengerRunSpeedFactor(int value)
+        {
+            if (value < MinSpeedFactor)
+            {
+                return MinSpeedFactor;
+            }
+
+            if (value > MaxPassengerRunSpeedFactor)
+            {
+                return MaxPassengerRunSpeedFactor;
+            }
+
+            return value;
+        }
+
 
         private static void TryEnableStopTuningSystem()
         {

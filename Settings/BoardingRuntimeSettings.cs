@@ -36,7 +36,7 @@ namespace BetterBoarding
             int rail = ClampSpeedFactor(settings.RailBoardingSpeedFactor);
             int water = ClampSpeedFactor(settings.WaterBoardingSpeedFactor);
             int air = ClampSpeedFactor(settings.AirBoardingSpeedFactor);
-            int passengerRun = ClampSpeedFactor(settings.PassengerRunSpeedFactor);
+            int passengerRun = ClampPassengerRunSpeedFactor(settings.PassengerRunSpeedFactor);
 
             bool stopChanged = false;
 
@@ -187,7 +187,7 @@ namespace BetterBoarding
 
         public static bool SetPassengerRunSpeedFactor(int value)
         {
-            value = ClampSpeedFactor(value);
+            value = ClampPassengerRunSpeedFactor(value);
 
             if (PassengerRunSpeedFactor == value)
             {
@@ -229,5 +229,19 @@ namespace BetterBoarding
 
             return value;
         }
+        private static int ClampPassengerRunSpeedFactor(int value)
+        {
+            if (value < BBoardSettings.MinSpeedFactor)
+            {
+                return BBoardSettings.MinSpeedFactor;
+            }
+
+            if (value > BBoardSettings.MaxPassengerRunSpeedFactor)
+            {
+                return BBoardSettings.MaxPassengerRunSpeedFactor;
+            }
+
+            return value;
+}
     }
 }

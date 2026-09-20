@@ -150,7 +150,7 @@ namespace BetterBoarding
                     "<1x = vanilla running speed>\n" +
                     "Makes BetterBoarding passengers run faster while hurrying to their assigned bus, tram, or train.\n" +
                     "Only affects passengers currently trying to board those vehicles. Other citizens are unchanged.\n" +
-                    "Higher values can look unrealistic; 5x is intentionally extreme."
+                    "Higher values can look unrealistic; 4x is intentionally extreme."
                 },
 
                 // Status overview
