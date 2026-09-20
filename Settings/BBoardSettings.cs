@@ -96,11 +96,6 @@ namespace BetterBoarding
         [SettingsUISetter(typeof(BBoardSettings), nameof(SetCimsRunSoonerToCatchBusesLive))]
         public bool CimsRunSoonerToCatchBuses { get; set; }
 
-        // Force-save the one-time gate even when every player-facing option is at its default.
-        [SettingsUIHidden]
-        [SettingsUIForceSave]
-        public bool FastBoardingSettingsMigrationComplete { get; set; }
-
         [SettingsUISection(ActionsTab, StatusGroup)]
         public string StatusOverview
         {
@@ -259,19 +254,6 @@ namespace BetterBoarding
         [SettingsUISection(AboutTab, DebugGroup)]
         [SettingsUISetter(typeof(BBoardSettings), nameof(SetEnableVerboseLoggingLive))]
         public bool EnableVerboseLogging { get; set; }
-
-        public override void SetDefaults()
-        {
-            // New installs start at a noticeable but not extreme middle value.
-            BusBoardingSpeedFactor = DefaultSpeedFactor;
-            RailBoardingSpeedFactor = DefaultSpeedFactor;
-            WaterBoardingSpeedFactor = DefaultSpeedFactor;
-            AirBoardingSpeedFactor = DefaultSpeedFactor;
-            CancelLateBoarders = true;
-            CimsRunSoonerToCatchBuses = true;
-            EnableVerboseLogging = false;
-            FastBoardingSettingsMigrationComplete = false;
-        }
 
         public override void Apply()
         {
@@ -475,6 +457,18 @@ namespace BetterBoarding
             }
 
             return true;
+        }
+
+        public override void SetDefaults()
+        {
+            // New installs start at a noticeable but not extreme middle value.
+            BusBoardingSpeedFactor = DefaultSpeedFactor;
+            RailBoardingSpeedFactor = DefaultSpeedFactor;
+            WaterBoardingSpeedFactor = DefaultSpeedFactor;
+            AirBoardingSpeedFactor = DefaultSpeedFactor;
+            CancelLateBoarders = true;
+            CimsRunSoonerToCatchBuses = true;
+            EnableVerboseLogging = false;
         }
     }
 }

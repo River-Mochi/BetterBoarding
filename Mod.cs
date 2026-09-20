@@ -90,23 +90,13 @@ namespace BetterBoarding
                 }
             }
 
-            try
+             try
             {
-                // Preserve settings from the published FastBoarding name.
-                bool betterBoardingSettingsExisted =
-                    BoardingSettingsMigration.BetterBoardingSettingsFileExists();
-
                 AssetDatabase.global.LoadSettings(
-                    ModId,
-                    setting,
-                    new BBoardSettings(this));
+                    ModId, setting, new BBoardSettings(this));
 
-                // Older versions allowed values above the current 5x max.
+                // Keep saved values inside the current slider range.
                 setting.RepairLoadedValues();
-
-                BoardingSettingsMigration.TryMigrateFromFastBoarding(
-                    setting,
-                    betterBoardingSettingsExisted);
 
                 setting.RegisterInOptionsUI();
                 BoardingRuntimeSettings.Apply(setting);
