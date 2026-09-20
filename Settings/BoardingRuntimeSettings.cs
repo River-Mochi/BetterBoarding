@@ -11,7 +11,6 @@
 
 namespace BetterBoarding
 {
-
     /// <summary>
     /// Runtime snapshot of the current mod settings for ECS systems.
     /// This mirrors the applied options into simple static values
@@ -39,7 +38,6 @@ namespace BetterBoarding
         public static bool BoardingAssistEnabled => CancelLateBoarders || CimsRunSoonerToCatchBuses;
 
         public static bool EnableVerboseLogging { get; private set; } = false;
-
 
         public static void LoadFromSettings(BBoardSettings settings)
         {
