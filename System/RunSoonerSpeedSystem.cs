@@ -44,14 +44,55 @@ namespace BetterBoarding
             CreatureLaneFlags.WaitPosition |
             CreatureLaneFlags.EmergeUnspawned;
 
+        // Temporary low-frequency diagnostics for the 1x-vs-4x Run Sooner test.
+        // Counts are job passes/writes, not unique cims.
+        private const double kDiagnosticSummaryIntervalSeconds = 60.0;
+        private const int kDiagnosticChecked = 0;
+        private const int kDiagnosticNotRunning = 1;
+        private const int kDiagnosticVehicleState = 2;
+        private const int kDiagnosticNoPublicTransport = 3;
+        private const int kDiagnosticNotActiveBoarding = 4;
+        private const int kDiagnosticUnsupportedTransport = 5;
+        private const int kDiagnosticUnsafeLane = 6;
+        private const int kDiagnosticBlocked = 7;
+        private const int kDiagnosticMissingRunSpeed = 8;
+        private const int kDiagnosticTargetActivity = 9;
+        private const int kDiagnosticNotFullRunSpeed = 10;
+        private const int kDiagnosticBoostedWrites = 11;
+        private const int kDiagnosticChangedWrites = 12;
+        private const int kDiagnosticAlreadyBoosted = 13;
+        private const int kDiagnosticBoostedBus = 14;
+        private const int kDiagnosticBoostedTram = 15;
+        private const int kDiagnosticBoostedTrain = 16;
+        private const int kDiagnosticBoostedSubway = 17;
+        private const int kDiagnosticCounterCount = 18;
+
         private EntityQuery m_PassengerQuery;
         private SimulationSystem? m_SimulationSystem;
+        private NativeArray<int> m_DiagnosticCounters;
+        private NativeArray<float> m_DiagnosticSpeedSample;
+        private double m_DiagnosticLastSummaryRealtime;
+        private int m_DiagnosticFactor;
+        private bool m_DiagnosticWasEnabled;
 
         protected override void OnCreate()
         {
             base.OnCreate();
 
             m_SimulationSystem = World.GetOrCreateSystemManaged<SimulationSystem>();
+
+            m_DiagnosticCounters = new NativeArray<int>(
+                kDiagnosticCounterCount,
+                Allocator.Persistent,
+                NativeArrayOptions.ClearMemory);
+
+            m_DiagnosticSpeedSample = new NativeArray<float>(
+                3,
+                Allocator.Persistent,
+                NativeArrayOptions.ClearMemory);
+
+            m_DiagnosticLastSummaryRealtime =
+                UnityEngine.Time.realtimeSinceStartupAsDouble;
 
             // CurrentVehicle keeps this query much smaller than an all-citizen query.
             // UpdateFrame lets us match vanilla HumanNavigation/HumanMove cadence.
@@ -70,6 +111,128 @@ namespace BetterBoarding
             RequireForUpdate(m_PassengerQuery);
         }
 
+        protected override void OnDestroy()
+        {
+            Dependency.Complete();
+
+            if (m_DiagnosticCounters.IsCreated)
+            {
+                m_DiagnosticCounters.Dispose();
+            }
+
+            if (m_DiagnosticSpeedSample.IsCreated)
+            {
+                m_DiagnosticSpeedSample.Dispose();
+            }
+
+            base.OnDestroy();
+        }
+
+        private void PrepareDiagnostics(int speedFactor, bool enabled)
+        {
+            if (m_DiagnosticFactor == speedFactor &&
+                m_DiagnosticWasEnabled == enabled)
+            {
+                return;
+            }
+
+            // The scheduled job owns these arrays while running.
+            Dependency.Complete();
+            ResetDiagnosticCounters();
+
+            m_DiagnosticFactor = speedFactor;
+            m_DiagnosticWasEnabled = enabled;
+            m_DiagnosticLastSummaryRealtime =
+                UnityEngine.Time.realtimeSinceStartupAsDouble;
+
+            if (enabled)
+            {
+                CS2Shared.RiverMochi.LogUtils.Info(
+                    Mod.s_Log,
+                    () =>
+                        $"{Mod.ModTag} Run Speed Boost diagnostics started: " +
+                        $"factor={speedFactor}x, summaryInterval=" +
+                        $"{kDiagnosticSummaryIntervalSeconds:F0}s");
+            }
+        }
+
+        private void TryLogDiagnostics(int speedFactor, bool enabled)
+        {
+            if (!enabled)
+            {
+                return;
+            }
+
+            double now = UnityEngine.Time.realtimeSinceStartupAsDouble;
+            if (now - m_DiagnosticLastSummaryRealtime <
+                kDiagnosticSummaryIntervalSeconds)
+            {
+                return;
+            }
+
+            // This happens only once per minute while verbose logging is enabled.
+            // Complete first so the job is no longer writing the diagnostic arrays.
+            Dependency.Complete();
+
+            int checkedCount = m_DiagnosticCounters[kDiagnosticChecked];
+            int notRunning = m_DiagnosticCounters[kDiagnosticNotRunning];
+            int vehicleState = m_DiagnosticCounters[kDiagnosticVehicleState];
+            int noPublicTransport = m_DiagnosticCounters[kDiagnosticNoPublicTransport];
+            int notActiveBoarding = m_DiagnosticCounters[kDiagnosticNotActiveBoarding];
+            int unsupportedTransport = m_DiagnosticCounters[kDiagnosticUnsupportedTransport];
+            int unsafeLane = m_DiagnosticCounters[kDiagnosticUnsafeLane];
+            int blocked = m_DiagnosticCounters[kDiagnosticBlocked];
+            int missingRunSpeed = m_DiagnosticCounters[kDiagnosticMissingRunSpeed];
+            int targetActivity = m_DiagnosticCounters[kDiagnosticTargetActivity];
+            int notFullRunSpeed = m_DiagnosticCounters[kDiagnosticNotFullRunSpeed];
+            int boostedWrites = m_DiagnosticCounters[kDiagnosticBoostedWrites];
+            int changedWrites = m_DiagnosticCounters[kDiagnosticChangedWrites];
+            int alreadyBoosted = m_DiagnosticCounters[kDiagnosticAlreadyBoosted];
+            int boostedBus = m_DiagnosticCounters[kDiagnosticBoostedBus];
+            int boostedTram = m_DiagnosticCounters[kDiagnosticBoostedTram];
+            int boostedTrain = m_DiagnosticCounters[kDiagnosticBoostedTrain];
+            int boostedSubway = m_DiagnosticCounters[kDiagnosticBoostedSubway];
+
+            float sampleRunSpeed = m_DiagnosticSpeedSample[0];
+            float sampleMaxBefore = m_DiagnosticSpeedSample[1];
+            float sampleMaxAfter = m_DiagnosticSpeedSample[2];
+
+            CS2Shared.RiverMochi.LogUtils.Info(
+                Mod.s_Log,
+                () =>
+                    $"{Mod.ModTag} Run Speed Boost: factor={speedFactor}x | " +
+                    $"checked={checkedCount}, boostedWrites={boostedWrites}, " +
+                    $"changedWrites={changedWrites}, alreadyAtBoost={alreadyBoosted} | " +
+                    $"rejected[notRunning={notRunning}, vehicleState={vehicleState}, " +
+                    $"noPublicTransport={noPublicTransport}, " +
+                    $"notActiveBoarding={notActiveBoarding}, " +
+                    $"unsupportedTransport={unsupportedTransport}, " +
+                    $"unsafeLaneOrQueue={unsafeLane}, blocked={blocked}, " +
+                    $"missingRunSpeed={missingRunSpeed}, targetActivity={targetActivity}, " +
+                    $"notFullRunSpeed={notFullRunSpeed}] | " +
+                    $"boostedByMode[bus={boostedBus}, tram={boostedTram}, " +
+                    $"train={boostedTrain}, subway={boostedSubway}] | " +
+                    $"sample[vanillaRun={sampleRunSpeed:F3}m/s, " +
+                    $"navMaxBefore={sampleMaxBefore:F3}m/s, " +
+                    $"navMaxAfter={sampleMaxAfter:F3}m/s]");
+
+            ResetDiagnosticCounters();
+            m_DiagnosticLastSummaryRealtime = now;
+        }
+
+        private void ResetDiagnosticCounters()
+        {
+            for (int i = 0; i < m_DiagnosticCounters.Length; i++)
+            {
+                m_DiagnosticCounters[i] = 0;
+            }
+
+            for (int i = 0; i < m_DiagnosticSpeedSample.Length; i++)
+            {
+                m_DiagnosticSpeedSample[i] = 0f;
+            }
+        }
+
         protected override void OnUpdate()
         {
             if (!BoardingRuntimeSettings.RunSoonerSpeedBoostEnabled)
@@ -77,6 +240,13 @@ namespace BetterBoarding
                 Enabled = false;
                 return;
             }
+
+            int speedFactor = BoardingRuntimeSettings.PassengerRunSpeedFactor;
+            bool collectDiagnostics =
+                BoardingRuntimeSettings.EnableVerboseLogging;
+
+            PrepareDiagnostics(speedFactor, collectDiagnostics);
+            TryLogDiagnostics(speedFactor, collectDiagnostics);
 
             uint updateFrame = (m_SimulationSystem?.frameIndex ?? 0) % 16;
 
@@ -120,7 +290,10 @@ namespace BetterBoarding
                 m_PrefabHumanData =
                     SystemAPI.GetComponentLookup<Game.Prefabs.HumanData>(isReadOnly: true),
 
-                m_SpeedFactor = BoardingRuntimeSettings.PassengerRunSpeedFactor,
+                m_SpeedFactor = speedFactor,
+                m_CollectDiagnostics = collectDiagnostics,
+                m_DiagnosticCounters = m_DiagnosticCounters,
+                m_DiagnosticSpeedSample = m_DiagnosticSpeedSample,
             }.Schedule(m_PassengerQuery, Dependency);
 
             Dependency = handle;
@@ -164,6 +337,13 @@ namespace BetterBoarding
             [ReadOnly]
             public int m_SpeedFactor;
 
+            [ReadOnly]
+            public bool m_CollectDiagnostics;
+
+            public NativeArray<int> m_DiagnosticCounters;
+
+            public NativeArray<float> m_DiagnosticSpeedSample;
+
             public void Execute(
                 in ArchetypeChunk chunk,
                 int unfilteredChunkIndex,
@@ -192,13 +372,25 @@ namespace BetterBoarding
                 NativeArray<Game.Prefabs.PrefabRef> prefabRefs =
                     chunk.GetNativeArray(ref m_PrefabRefType);
 
+                bool collectDiagnostics = m_CollectDiagnostics;
+
                 for (int i = 0; i < chunk.Count; i++)
                 {
+                    if (collectDiagnostics)
+                    {
+                        m_DiagnosticCounters[kDiagnosticChecked]++;
+                    }
+
                     Human human = humans[i];
 
                     // BetterBoarding starts this vanilla Run state sooner.
                     if ((human.m_Flags & HumanFlags.Run) == 0)
                     {
+                        if (collectDiagnostics)
+                        {
+                            m_DiagnosticCounters[kDiagnosticNotRunning]++;
+                        }
+
                         continue;
                     }
 
@@ -212,6 +404,11 @@ namespace BetterBoarding
                              CreatureVehicleFlags.Entering |
                              CreatureVehicleFlags.Exiting)) != 0)
                     {
+                        if (collectDiagnostics)
+                        {
+                            m_DiagnosticCounters[kDiagnosticVehicleState]++;
+                        }
+
                         continue;
                     }
 
@@ -232,6 +429,11 @@ namespace BetterBoarding
                             controllerVehicle,
                             out Game.Vehicles.PublicTransport publicTransport))
                     {
+                        if (collectDiagnostics)
+                        {
+                            m_DiagnosticCounters[kDiagnosticNoPublicTransport]++;
+                        }
+
                         continue;
                     }
 
@@ -241,6 +443,11 @@ namespace BetterBoarding
                              PublicTransportFlags.PrisonerTransport |
                              PublicTransportFlags.Refueling)) != 0)
                     {
+                        if (collectDiagnostics)
+                        {
+                            m_DiagnosticCounters[kDiagnosticNotActiveBoarding]++;
+                        }
+
                         continue;
                     }
 
@@ -253,6 +460,11 @@ namespace BetterBoarding
                          transportType != Game.Prefabs.TransportType.Train &&
                          transportType != Game.Prefabs.TransportType.Subway))
                     {
+                        if (collectDiagnostics)
+                        {
+                            m_DiagnosticCounters[kDiagnosticUnsupportedTransport]++;
+                        }
+
                         continue;
                     }
 
@@ -264,12 +476,22 @@ namespace BetterBoarding
                         currentLane.m_QueueEntity != Entity.Null ||
                         currentLane.m_QueueArea.radius > 0f)
                     {
+                        if (collectDiagnostics)
+                        {
+                            m_DiagnosticCounters[kDiagnosticUnsafeLane]++;
+                        }
+
                         continue;
                     }
 
                     Blocker blocker = blockers[i];
                     if (blocker.m_Blocker != Entity.Null)
                     {
+                        if (collectDiagnostics)
+                        {
+                            m_DiagnosticCounters[kDiagnosticBlocked]++;
+                        }
+
                         continue;
                     }
 
@@ -280,6 +502,11 @@ namespace BetterBoarding
                             out Game.Prefabs.HumanData humanData) ||
                         humanData.m_RunSpeed <= 0f)
                     {
+                        if (collectDiagnostics)
+                        {
+                            m_DiagnosticCounters[kDiagnosticMissingRunSpeed]++;
+                        }
+
                         continue;
                     }
 
@@ -287,6 +514,11 @@ namespace BetterBoarding
 
                     if (navigation.m_TargetActivity != 0)
                     {
+                        if (collectDiagnostics)
+                        {
+                            m_DiagnosticCounters[kDiagnosticTargetActivity]++;
+                        }
+
                         continue;
                     }
 
@@ -295,13 +527,59 @@ namespace BetterBoarding
                     if (navigation.m_MaxSpeed <
                         humanData.m_RunSpeed * kFullRunThreshold)
                     {
+                        if (collectDiagnostics)
+                        {
+                            m_DiagnosticCounters[kDiagnosticNotFullRunSpeed]++;
+                        }
+
                         continue;
                     }
 
-                    navigation.m_MaxSpeed =
+                    float maxSpeedBefore = navigation.m_MaxSpeed;
+                    float boostedMaxSpeed =
                         humanData.m_RunSpeed * m_SpeedFactor;
 
+                    navigation.m_MaxSpeed = boostedMaxSpeed;
                     navigations[i] = navigation;
+
+                    if (collectDiagnostics)
+                    {
+                        m_DiagnosticCounters[kDiagnosticBoostedWrites]++;
+
+                        if (maxSpeedBefore < boostedMaxSpeed - 0.01f ||
+                            maxSpeedBefore > boostedMaxSpeed + 0.01f)
+                        {
+                            m_DiagnosticCounters[kDiagnosticChangedWrites]++;
+                        }
+                        else
+                        {
+                            m_DiagnosticCounters[kDiagnosticAlreadyBoosted]++;
+                        }
+
+                        switch (transportType)
+                        {
+                            case Game.Prefabs.TransportType.Bus:
+                                m_DiagnosticCounters[kDiagnosticBoostedBus]++;
+                                break;
+
+                            case Game.Prefabs.TransportType.Tram:
+                                m_DiagnosticCounters[kDiagnosticBoostedTram]++;
+                                break;
+
+                            case Game.Prefabs.TransportType.Train:
+                                m_DiagnosticCounters[kDiagnosticBoostedTrain]++;
+                                break;
+
+                            case Game.Prefabs.TransportType.Subway:
+                                m_DiagnosticCounters[kDiagnosticBoostedSubway]++;
+                                break;
+                        }
+
+                        // Keep one recent proof sample showing the actual write.
+                        m_DiagnosticSpeedSample[0] = humanData.m_RunSpeed;
+                        m_DiagnosticSpeedSample[1] = maxSpeedBefore;
+                        m_DiagnosticSpeedSample[2] = boostedMaxSpeed;
+                    }
                 }
             }
 
