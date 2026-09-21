@@ -234,7 +234,7 @@ namespace BetterBoarding
         public string AboutName => Mod.ModName;
 
         [SettingsUISection(AboutTab, AboutInfoGroup)]
-        public string AboutVersion => Mod.ModVersion;
+        public string AboutVersion => $"{Mod.ModVersion} {Mod.BuildDisplayName}";
 
         [SettingsUISection(AboutTab, AboutLinksGroup)]
         [SettingsUIButtonGroup(AboutLinksGroup)]

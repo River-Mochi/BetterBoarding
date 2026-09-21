@@ -28,6 +28,17 @@ namespace BetterBoarding
         public const string ModId = "BetterBoarding";
         public const string ModTag = "[BBoard]";
 
+#if DEBUG
+        private const string kBuildType = "DEBUG";
+#else
+        private const string kBuildType = "RELEASE";
+#endif
+
+        // Release builds read as "Release" in the Options About tab; a DEBUG
+        // build stays shouty so a tester can tell at a glance which one they have.
+        public static string BuildDisplayName =>
+            kBuildType == "RELEASE" ? "Release" : kBuildType;
+
         public static readonly string ModVersion =
             Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.0.0";
 
@@ -47,7 +58,8 @@ namespace BetterBoarding
             if (!s_BannerLogged)
             {
                 s_BannerLogged = true;
-                LogUtils.Info($"{ModName} v{ModVersion} OnLoad");
+                LogUtils.Info(
+                    $"{ModName} {ModTag} v{ModVersion} [{kBuildType}] OnLoad");
             }
 
             BBoardSettings setting = new(this);
