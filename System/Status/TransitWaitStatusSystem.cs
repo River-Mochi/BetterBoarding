@@ -897,7 +897,7 @@ namespace BetterBoarding
 
             if (EntityManager.HasComponent<GroupMember>(passenger))
             {
-                // Report group members, but leave them to vanilla until group boarding is fully researched.
+                // Report group members that remain unresolved at the instant of this snapshot.
                 groupKey = EntityManager.GetComponentData<GroupMember>(passenger).m_Leader;
                 return true;
             }

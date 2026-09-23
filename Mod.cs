@@ -141,8 +141,8 @@ namespace BetterBoarding
                     SystemUpdatePhase.GameSimulation);
 
                 // Group assistance runs after navigation but before pet/resident AI. This lets
-                // vanilla consume the adjusted lane state in its normal boarding path and avoids
-                // conflicting with boarding commands those systems defer to EndFrameBarrier.
+                // vanilla consume adjusted approach/timeout state in the normal boarding path
+                // and avoids conflicting with commands those systems defer to EndFrameBarrier.
                 updateSystem.UpdateBefore<LateGroupBoardingSystem, PetAISystem>(
                     SystemUpdatePhase.GameSimulation);
 

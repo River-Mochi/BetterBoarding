@@ -28,8 +28,9 @@ namespace BetterBoarding
     ///
     /// If the leader is still outside, the leader is safely detached and vanilla cancels the
     /// followers after observing that their leader no longer has CurrentVehicle. If the leader
-    /// has boarded, lagging members are moved to the end of their current enter path so vanilla's
-    /// ResidentAISystem or PetAISystem performs the actual finish transition and its bookkeeping.
+    /// has boarded, walking members are prompted to enter and assigned members receive vanilla's
+    /// existing boarding-timeout nudge. ResidentAISystem or PetAISystem still performs every
+    /// actual enter/finish transition and its bookkeeping.
     /// </summary>
     public sealed partial class LateGroupBoardingSystem : GameSystemBase
     {
@@ -38,6 +39,9 @@ namespace BetterBoarding
         // Give groups one extra boarding-assist interval beyond the solo grace.
         // Run Sooner already begins up to 512 frames before departure for human members.
         private const uint kLateGroupGraceFrames = 256u;
+
+        // Vanilla ResidentAISystem and PetAISystem both use 250 as the group-boarding fallback.
+        private const int kVanillaBoardingTimeout = 250;
 
         // Keep work bounded in very large cities and crowded interchange stations.
         private const int kMaxGroupsPerUpdate = 32;
@@ -126,7 +130,7 @@ namespace BetterBoarding
 
                 uint frame = m_SimulationSystem.frameIndex;
                 int groupsReleased = 0;
-                int groupsAdvanced = 0;
+                int groupsAssisted = 0;
                 int membersPrompted = 0;
 
                 using NativeArray<Entity> controllers =
@@ -177,29 +181,29 @@ namespace BetterBoarding
                         continue;
                     }
 
-                    // A boarded leader has no current lane. Prompt lagging members to finish
-                    // through vanilla so fares, statistics, rendering, and vehicle state remain
-                    // exactly on the game's normal path.
+                    // A boarded leader has no current lane. Prompt walking members to join, and
+                    // raise vanilla's own timeout for members already assigned to the vehicle.
+                    // Vanilla retains every enter/finish transition and its bookkeeping.
                     if (IsBoardedHuman(candidate.Leader) &&
-                        TryAdvanceLateGroup(
+                        TryAssistLateGroup(
                             candidate.Leader,
                             candidate.ControllerVehicle,
                             group,
                             out int promptedMembers))
                     {
-                        groupsAdvanced++;
+                        groupsAssisted++;
                         membersPrompted += promptedMembers;
                     }
                 }
 
                 if (BoardingRuntimeSettings.EnableVerboseLogging &&
-                    (groupsReleased > 0 || groupsAdvanced > 0))
+                    (groupsReleased > 0 || groupsAssisted > 0))
                 {
                     LogUtils.Info(
                         Mod.s_Log,
                         () =>
                             $"{Mod.ModTag} Late groups: candidates={candidates.Length}, " +
-                            $"released={groupsReleased}, advanced={groupsAdvanced}, " +
+                            $"released={groupsReleased}, assisted={groupsAssisted}, " +
                             $"membersPrompted={membersPrompted}");
                 }
             }
@@ -414,7 +418,7 @@ namespace BetterBoarding
             return true;
         }
 
-        private bool TryAdvanceLateGroup(
+        private bool TryAssistLateGroup(
             Entity leader,
             Entity controllerVehicle,
             DynamicBuffer<GroupCreature> group,
@@ -426,7 +430,7 @@ namespace BetterBoarding
             // state is left to vanilla instead of producing a partially modified family.
             for (int i = 0; i < group.Length; i++)
             {
-                if (!CanAdvanceGroupMember(
+                if (!CanAssistGroupMember(
                         group[i].m_Creature,
                         leader,
                         controllerVehicle))
@@ -436,77 +440,96 @@ namespace BetterBoarding
             }
 
             bool changed = false;
+            int waitingPets = 0;
+            int petsPromptedToEnter = 0;
 
             for (int i = 0; i < group.Length; i++)
             {
                 Entity member = group[i].m_Creature;
-                CurrentVehicle currentVehicle =
-                    EntityManager.GetComponentData<CurrentVehicle>(member);
+                bool hasCurrentVehicle =
+                    EntityManager.HasComponent<CurrentVehicle>(member);
 
-                if ((currentVehicle.m_Flags & CreatureVehicleFlags.Ready) != 0)
+                if (hasCurrentVehicle &&
+                    (EntityManager.GetComponentData<CurrentVehicle>(member).m_Flags &
+                        CreatureVehicleFlags.Ready) != 0)
                 {
                     continue;
                 }
 
                 if (EntityManager.HasComponent<HumanCurrentLane>(member))
                 {
-                    HumanCurrentLane lane =
-                        EntityManager.GetComponentData<HumanCurrentLane>(member);
-                    CreatureLaneFlags flags =
-                        CreatureLaneFlags.EndOfPath | CreatureLaneFlags.EndReached;
-
-                    if ((lane.m_Flags & flags) != flags)
+                    if (hasCurrentVehicle)
                     {
-                        lane.m_Flags |= flags;
-                        EntityManager.SetComponentData(member, lane);
-                        promptedMembers++;
-                        changed = true;
+                        Game.Creatures.Resident resident =
+                            EntityManager.GetComponentData<Game.Creatures.Resident>(member);
+
+                        if (resident.m_Timer < kVanillaBoardingTimeout)
+                        {
+                            resident.m_Timer = kVanillaBoardingTimeout;
+                            EntityManager.SetComponentData(member, resident);
+                            promptedMembers++;
+                            changed = true;
+                        }
+                    }
+                    else
+                    {
+                        HumanCurrentLane lane =
+                            EntityManager.GetComponentData<HumanCurrentLane>(member);
+                        CreatureLaneFlags finishFlags =
+                            CreatureLaneFlags.EndOfPath | CreatureLaneFlags.EndReached;
+
+                        if ((lane.m_Flags & finishFlags) != finishFlags)
+                        {
+                            lane.m_Flags |= finishFlags;
+                            EntityManager.SetComponentData(member, lane);
+                            promptedMembers++;
+                            changed = true;
+                        }
                     }
                 }
                 else if (EntityManager.HasComponent<AnimalCurrentLane>(member))
                 {
-                    AnimalCurrentLane lane =
-                        EntityManager.GetComponentData<AnimalCurrentLane>(member);
-                    CreatureLaneFlags flags =
-                        CreatureLaneFlags.EndOfPath | CreatureLaneFlags.EndReached;
+                    waitingPets++;
 
-                    if ((lane.m_Flags & flags) != flags)
+                    if (!hasCurrentVehicle)
                     {
-                        lane.m_Flags |= flags;
-                        EntityManager.SetComponentData(member, lane);
-                        promptedMembers++;
-                        changed = true;
+                        AnimalCurrentLane lane =
+                            EntityManager.GetComponentData<AnimalCurrentLane>(member);
+                        CreatureLaneFlags finishFlags =
+                            CreatureLaneFlags.EndOfPath | CreatureLaneFlags.EndReached;
+
+                        if ((lane.m_Flags & finishFlags) != finishFlags)
+                        {
+                            lane.m_Flags |= finishFlags;
+                            EntityManager.SetComponentData(member, lane);
+                            petsPromptedToEnter++;
+                            promptedMembers++;
+                            changed = true;
+                        }
                     }
-                }
-                else
-                {
-                    // No current lane means vanilla already completed the physical transition.
-                    // Repair only the missing readiness flag; do not recreate boarding side effects.
-                    currentVehicle.m_Flags &= ~CreatureVehicleFlags.Entering;
-                    currentVehicle.m_Flags |= CreatureVehicleFlags.Ready;
-                    EntityManager.SetComponentData(member, currentVehicle);
-                    promptedMembers++;
-                    changed = true;
                 }
             }
 
-            // Mark the leader ready only when every member is already logically aboard. Members
-            // that were merely prompted above remain not-ready until vanilla finishes them.
-            if (HasEveryoneBoarded(group))
+            if (waitingPets > 0)
             {
-                CurrentVehicle leaderVehicle =
-                    EntityManager.GetComponentData<CurrentVehicle>(leader);
+                // PetAISystem intentionally reads the group leader's Resident timer. Setting it
+                // now also covers a walking pet as soon as vanilla assigns that pet to the vehicle.
+                Game.Creatures.Resident leaderResident =
+                    EntityManager.GetComponentData<Game.Creatures.Resident>(leader);
 
-                leaderVehicle.m_Flags &= ~CreatureVehicleFlags.Entering;
-                leaderVehicle.m_Flags |= CreatureVehicleFlags.Ready;
-                EntityManager.SetComponentData(leader, leaderVehicle);
-                changed = true;
+                if (leaderResident.m_Timer < kVanillaBoardingTimeout)
+                {
+                    leaderResident.m_Timer = kVanillaBoardingTimeout;
+                    EntityManager.SetComponentData(leader, leaderResident);
+                    promptedMembers += waitingPets - petsPromptedToEnter;
+                    changed = true;
+                }
             }
 
             return changed;
         }
 
-        private bool CanAdvanceGroupMember(
+        private bool CanAssistGroupMember(
             Entity member,
             Entity expectedLeader,
             Entity controllerVehicle)
@@ -516,21 +539,15 @@ namespace BetterBoarding
                 EntityManager.HasComponent<Destroyed>(member) ||
                 EntityManager.HasComponent<Temp>(member) ||
                 EntityManager.HasComponent<Overridden>(member) ||
-                !EntityManager.HasComponent<GroupMember>(member) ||
-                !EntityManager.HasComponent<CurrentVehicle>(member))
+                !EntityManager.HasComponent<GroupMember>(member))
             {
                 return false;
             }
 
             GroupMember groupMember =
                 EntityManager.GetComponentData<GroupMember>(member);
-            CurrentVehicle currentVehicle =
-                EntityManager.GetComponentData<CurrentVehicle>(member);
 
-            if (groupMember.m_Leader != expectedLeader ||
-                currentVehicle.m_Vehicle == Entity.Null ||
-                GetControllerVehicle(currentVehicle.m_Vehicle) != controllerVehicle ||
-                !VehicleContainsPassenger(currentVehicle.m_Vehicle, member))
+            if (groupMember.m_Leader != expectedLeader)
             {
                 return false;
             }
@@ -539,6 +556,26 @@ namespace BetterBoarding
             bool hasAnimalLane = EntityManager.HasComponent<AnimalCurrentLane>(member);
 
             if (hasHumanLane && hasAnimalLane)
+            {
+                return false;
+            }
+
+            bool hasCurrentVehicle = EntityManager.HasComponent<CurrentVehicle>(member);
+
+            if (!hasCurrentVehicle)
+            {
+                // Vanilla group walking code assigns the follower only after EndReached. These
+                // members are safe to prompt because the boarded leader selects the exact vehicle.
+                return (hasHumanLane && IsValidHumanGroupMember(member)) ||
+                    (hasAnimalLane && IsValidPetGroupMember(member));
+            }
+
+            CurrentVehicle currentVehicle =
+                EntityManager.GetComponentData<CurrentVehicle>(member);
+
+            if (currentVehicle.m_Vehicle == Entity.Null ||
+                GetControllerVehicle(currentVehicle.m_Vehicle) != controllerVehicle ||
+                !VehicleContainsPassenger(currentVehicle.m_Vehicle, member))
             {
                 return false;
             }
@@ -552,18 +589,12 @@ namespace BetterBoarding
 
             if (hasHumanLane)
             {
-                return EntityManager.HasComponent<Human>(member) &&
-                    EntityManager.HasComponent<Game.Creatures.Resident>(member) &&
-                    EntityManager.HasComponent<HumanNavigation>(member) &&
-                    EntityManager.HasComponent<PathOwner>(member) &&
-                    EntityManager.HasBuffer<PathElement>(member);
+                return IsValidHumanGroupMember(member);
             }
 
             if (hasAnimalLane)
             {
-                return EntityManager.HasComponent<Game.Creatures.Pet>(member) &&
-                    EntityManager.HasComponent<Creature>(member) &&
-                    EntityManager.HasComponent<AnimalNavigation>(member);
+                return IsValidPetGroupMember(member);
             }
 
             bool isKnownHuman =
@@ -579,21 +610,20 @@ namespace BetterBoarding
             return (isKnownHuman || isKnownPet) && isPhysicallyAboard;
         }
 
-        private bool HasEveryoneBoarded(DynamicBuffer<GroupCreature> group)
+        private bool IsValidHumanGroupMember(Entity member)
         {
-            for (int i = 0; i < group.Length; i++)
-            {
-                Entity member = group[i].m_Creature;
+            return EntityManager.HasComponent<Human>(member) &&
+                EntityManager.HasComponent<Game.Creatures.Resident>(member) &&
+                EntityManager.HasComponent<HumanNavigation>(member) &&
+                EntityManager.HasComponent<PathOwner>(member) &&
+                EntityManager.HasBuffer<PathElement>(member);
+        }
 
-                if (!EntityManager.HasComponent<CurrentVehicle>(member) ||
-                    (EntityManager.GetComponentData<CurrentVehicle>(member).m_Flags &
-                        CreatureVehicleFlags.Ready) == 0)
-                {
-                    return false;
-                }
-            }
-
-            return true;
+        private bool IsValidPetGroupMember(Entity member)
+        {
+            return EntityManager.HasComponent<Game.Creatures.Pet>(member) &&
+                EntityManager.HasComponent<Creature>(member) &&
+                EntityManager.HasComponent<AnimalNavigation>(member);
         }
 
         private bool IsBoardedHuman(Entity leader)
