@@ -124,6 +124,9 @@ namespace BetterBoarding
                 return;
             }
 
+            EntityCommandBuffer ecb = default;
+            bool hasCommandBuffer = false;
+
             try
             {
                 CompleteDependencies();
@@ -137,6 +140,10 @@ namespace BetterBoarding
                     m_VehicleQuery.ToEntityArray(Allocator.Temp);
                 using NativeList<GroupCandidate> candidates =
                     new NativeList<GroupCandidate>(kMaxGroupsPerUpdate, Allocator.Temp);
+                using NativeList<Entity> releasedLeaders =
+                    new NativeList<Entity>(kMaxGroupsPerUpdate, Allocator.Temp);
+                using NativeList<Entity> releasedVehicles =
+                    new NativeList<Entity>(kMaxGroupsPerUpdate, Allocator.Temp);
 
                 for (int i = 0;
                     i < controllers.Length && candidates.Length < kMaxGroupsPerUpdate;
@@ -150,18 +157,17 @@ namespace BetterBoarding
                         continue;
                     }
 
-                    CollectLateGroupCandidates(controllerVehicle, ref candidates);
+                    CollectLateGroupCandidates(controllerVehicle, candidates);
                 }
 
                 for (int i = 0; i < candidates.Length; i++)
                 {
                     GroupCandidate candidate = candidates[i];
 
-                    if (!TryGetGroup(
+                    if (!IsValidGroup(
                             candidate.Leader,
                             candidate.AssignedVehicle,
-                            candidate.ControllerVehicle,
-                            out DynamicBuffer<GroupCreature> group))
+                            candidate.ControllerVehicle))
                     {
                         continue;
                     }
@@ -171,10 +177,24 @@ namespace BetterBoarding
                     // existing missing-leader path.
                     if (EntityManager.HasComponent<HumanCurrentLane>(candidate.Leader))
                     {
-                        if (TryCancelOutsideGroupLeader(
+                        if (ContainsEntity(releasedLeaders, candidate.Leader))
+                        {
+                            continue;
+                        }
+
+                        if (!hasCommandBuffer)
+                        {
+                            ecb = new EntityCommandBuffer(Allocator.Temp);
+                            hasCommandBuffer = true;
+                        }
+
+                        if (TryQueueOutsideGroupLeaderCancellation(
+                                ref ecb,
                                 candidate.Leader,
                                 candidate.AssignedVehicle))
                         {
+                            releasedLeaders.Add(candidate.Leader);
+                            AddUniqueEntity(releasedVehicles, candidate.AssignedVehicle);
                             groupsReleased++;
                         }
 
@@ -184,16 +204,33 @@ namespace BetterBoarding
                     // A boarded leader has no current lane. Prompt walking members to join, and
                     // raise vanilla's own timeout for members already assigned to the vehicle.
                     // Vanilla retains every enter/finish transition and its bookkeeping.
-                    if (IsBoardedHuman(candidate.Leader) &&
-                        TryAssistLateGroup(
-                            candidate.Leader,
-                            candidate.ControllerVehicle,
-                            group,
-                            out int promptedMembers))
+                    if (IsBoardedHuman(candidate.Leader))
                     {
-                        groupsAssisted++;
-                        membersPrompted += promptedMembers;
+                        DynamicBuffer<GroupCreature> group =
+                            EntityManager.GetBuffer<GroupCreature>(candidate.Leader);
+
+                        if (TryAssistLateGroup(
+                                candidate.Leader,
+                                candidate.ControllerVehicle,
+                                group,
+                                out int promptedMembers))
+                        {
+                            groupsAssisted++;
+                            membersPrompted += promptedMembers;
+                        }
                     }
+                }
+
+                if (hasCommandBuffer)
+                {
+                    QueueReleasedLeaderPassengerBuffers(
+                        ref ecb,
+                        releasedVehicles,
+                        releasedLeaders);
+
+                    // Apply structural and buffer changes only after every live source buffer
+                    // used by this pass has finished being read.
+                    ecb.Playback(EntityManager);
                 }
 
                 if (BoardingRuntimeSettings.EnableVerboseLogging &&
@@ -218,6 +255,13 @@ namespace BetterBoarding
                         $"{Mod.ModTag} Late group assist disabled after " +
                         $"{ex.GetType().Name}: {ex.Message}",
                     ex);
+            }
+            finally
+            {
+                if (hasCommandBuffer)
+                {
+                    ecb.Dispose();
+                }
             }
         }
 
@@ -260,7 +304,7 @@ namespace BetterBoarding
 
         private void CollectLateGroupCandidates(
             Entity controllerVehicle,
-            ref NativeList<GroupCandidate> candidates)
+            NativeList<GroupCandidate> candidates)
         {
             if (EntityManager.HasBuffer<LayoutElement>(controllerVehicle))
             {
@@ -274,7 +318,7 @@ namespace BetterBoarding
                     CollectLateGroupCandidatesFromVehicle(
                         layout[i].m_Vehicle,
                         controllerVehicle,
-                        ref candidates);
+                        candidates);
                 }
 
                 return;
@@ -283,13 +327,13 @@ namespace BetterBoarding
             CollectLateGroupCandidatesFromVehicle(
                 controllerVehicle,
                 controllerVehicle,
-                ref candidates);
+                candidates);
         }
 
         private void CollectLateGroupCandidatesFromVehicle(
             Entity assignedVehicle,
             Entity controllerVehicle,
-            ref NativeList<GroupCandidate> candidates)
+            NativeList<GroupCandidate> candidates)
         {
             if (!EntityManager.Exists(assignedVehicle) ||
                 !EntityManager.HasBuffer<Passenger>(assignedVehicle))
@@ -332,14 +376,11 @@ namespace BetterBoarding
             }
         }
 
-        private bool TryGetGroup(
+        private bool IsValidGroup(
             Entity leader,
             Entity assignedVehicle,
-            Entity controllerVehicle,
-            out DynamicBuffer<GroupCreature> group)
+            Entity controllerVehicle)
         {
-            group = default;
-
             if (!EntityManager.Exists(leader) ||
                 !EntityManager.HasComponent<CurrentVehicle>(leader) ||
                 !EntityManager.HasBuffer<GroupCreature>(leader))
@@ -358,11 +399,13 @@ namespace BetterBoarding
                 return false;
             }
 
-            group = EntityManager.GetBuffer<GroupCreature>(leader);
+            DynamicBuffer<GroupCreature> group =
+                EntityManager.GetBuffer<GroupCreature>(leader);
             return group.Length > 0;
         }
 
-        private bool TryCancelOutsideGroupLeader(
+        private bool TryQueueOutsideGroupLeaderCancellation(
+            ref EntityCommandBuffer ecb,
             Entity leader,
             Entity assignedVehicle)
         {
@@ -391,8 +434,7 @@ namespace BetterBoarding
                 }
             }
 
-            if (vehiclePathIndex < 0 ||
-                !RemovePassengerFromVehicle(assignedVehicle, leader))
+            if (vehiclePathIndex < 0)
             {
                 return false;
             }
@@ -401,20 +443,25 @@ namespace BetterBoarding
                 EntityManager.GetComponentData<Game.Creatures.Resident>(leader);
             resident.m_Flags &= ~ResidentFlags.InVehicle;
             resident.m_Timer = 0;
-            EntityManager.SetComponentData(leader, resident);
+            ecb.SetComponent(leader, resident);
 
             Human human = EntityManager.GetComponentData<Human>(leader);
             human.m_Flags &= ~(HumanFlags.Run | HumanFlags.Emergency);
-            EntityManager.SetComponentData(leader, human);
+            ecb.SetComponent(leader, human);
 
-            // Match vanilla CancelEnterVehicle: drop the missed vehicle leg and continue onward.
-            pathElements.RemoveRange(0, vehiclePathIndex + 1);
+            // Match vanilla CancelEnterVehicle without mutating the live source buffer. The ECB
+            // owns this replacement buffer until playback after all source reads have completed.
+            DynamicBuffer<PathElement> newPath = ecb.SetBuffer<PathElement>(leader);
+            for (int i = vehiclePathIndex + 1; i < pathElements.Length; i++)
+            {
+                newPath.Add(pathElements[i]);
+            }
+
             pathOwner.m_ElementIndex = 0;
-            EntityManager.SetComponentData(leader, pathOwner);
+            ecb.SetComponent(leader, pathOwner);
 
-            // Remove this structural component last so the path buffer above cannot be invalidated
-            // by moving the leader to a different archetype before it is edited.
-            EntityManager.RemoveComponent<CurrentVehicle>(leader);
+            // Queue the archetype change; never invalidate a live buffer during this scan.
+            ecb.RemoveComponent<CurrentVehicle>(leader);
             return true;
         }
 
@@ -659,23 +706,58 @@ namespace BetterBoarding
             return false;
         }
 
-        private bool RemovePassengerFromVehicle(Entity vehicle, Entity passenger)
+        private void QueueReleasedLeaderPassengerBuffers(
+            ref EntityCommandBuffer ecb,
+            NativeList<Entity> releasedVehicles,
+            NativeList<Entity> releasedLeaders)
         {
-            if (vehicle == Entity.Null ||
-                !EntityManager.Exists(vehicle) ||
-                !EntityManager.HasBuffer<Passenger>(vehicle))
+            for (int vehicleIndex = 0;
+                vehicleIndex < releasedVehicles.Length;
+                vehicleIndex++)
             {
-                return false;
-            }
-
-            DynamicBuffer<Passenger> passengers =
-                EntityManager.GetBuffer<Passenger>(vehicle);
-
-            for (int i = passengers.Length - 1; i >= 0; i--)
-            {
-                if (passengers[i].m_Passenger == passenger)
+                Entity vehicle = releasedVehicles[vehicleIndex];
+                if (vehicle == Entity.Null ||
+                    !EntityManager.Exists(vehicle) ||
+                    !EntityManager.HasBuffer<Passenger>(vehicle))
                 {
-                    passengers.RemoveAt(i);
+                    continue;
+                }
+
+                DynamicBuffer<Passenger> passengers =
+                    EntityManager.GetBuffer<Passenger>(vehicle);
+                DynamicBuffer<Passenger> newPassengers =
+                    ecb.SetBuffer<Passenger>(vehicle);
+
+                for (int i = 0; i < passengers.Length; i++)
+                {
+                    if (!ContainsEntity(
+                            releasedLeaders,
+                            passengers[i].m_Passenger))
+                    {
+                        newPassengers.Add(passengers[i]);
+                    }
+                }
+            }
+        }
+
+        private static void AddUniqueEntity(
+            NativeList<Entity> entities,
+            Entity entity)
+        {
+            if (!ContainsEntity(entities, entity))
+            {
+                entities.Add(entity);
+            }
+        }
+
+        private static bool ContainsEntity(
+            NativeList<Entity> entities,
+            Entity entity)
+        {
+            for (int i = 0; i < entities.Length; i++)
+            {
+                if (entities[i] == entity)
+                {
                     return true;
                 }
             }
