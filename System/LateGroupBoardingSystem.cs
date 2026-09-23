@@ -42,7 +42,7 @@ namespace BetterBoarding
     ///
     /// It never disables or replaces a vanilla transport AI system.
     /// </summary>
-    public sealed class LateGroupBoardingSystem : GameSystemBase
+public sealed partial class LateGroupBoardingSystem : GameSystemBase
     {
         public const int UpdatesPerDay = 2048;
 

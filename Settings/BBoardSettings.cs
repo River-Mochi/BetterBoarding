@@ -309,9 +309,13 @@ namespace BetterBoarding
             {
                 LogUtils.Info(
                     Mod.s_Log,
-                    () => DescribeBehaviorForLog(value, BoardingRuntimeSettings.CimsRunSoonerToCatchBuses));
+                    () => DescribeBehaviorForLog(
+                        value,
+                        BoardingRuntimeSettings.CimsRunSoonerToCatchBuses));
 
-                TrySetLateBoarderSystemEnabled(BoardingRuntimeSettings.BoardingAssistEnabled);
+                TrySetLateBoarderSystemEnabled(
+                    BoardingRuntimeSettings.BoardingAssistEnabled);
+
                 TrySetLateGroupBoardingSystemEnabled(value);
             }
         }
@@ -418,7 +422,8 @@ namespace BetterBoarding
             }
         }
 
-        private static void TrySetLateGroupBoardingSystemEnabled(bool enabled)
+
+       private static void TrySetLateGroupBoardingSystemEnabled(bool enabled)
         {
             if (!TryGetLoadedWorld(out World? world))
             {
@@ -435,7 +440,12 @@ namespace BetterBoarding
             }
             catch (Exception ex)
             {
-                LogUtils.Warn(Mod.s_Log, () => $"Failed updating LateGroupBoardingSystem state: {ex.GetType().Name}: {ex.Message}", ex);
+                LogUtils.Warn(
+                    Mod.s_Log,
+                    () =>
+                        $"Failed updating LateGroupBoardingSystem state: " +
+                        $"{ex.GetType().Name}: {ex.Message}",
+                    ex);
             }
         }
 
