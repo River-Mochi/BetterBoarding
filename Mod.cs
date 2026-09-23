@@ -140,12 +140,24 @@ namespace BetterBoarding
                 updateSystem.UpdateBefore<LateBoarderCancelSystem, HumanMoveSystem>(
                     SystemUpdatePhase.GameSimulation);
 
+                // Group cleanup runs after the normal solo pass. It never replaces vanilla
+                // transport AI; it only resolves group members that are still not ready.
+                updateSystem.UpdateAfter<LateGroupBoardingSystem, LateBoarderCancelSystem>(
+                    SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateAfter<LateGroupBoardingSystem, ResidentAISystem.Actions>(
+                    SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateBefore<LateGroupBoardingSystem, HumanMoveSystem>(
+                    SystemUpdatePhase.GameSimulation);
+
                 // Retune once on load even if Options was never opened.
                 updateSystem.World.GetOrCreateSystemManaged<TransportStopTuningSystem>().Enabled = true;
 
-                // Start boarding assist in the saved ON/OFF state.
+                // Start boarding assists in their saved ON/OFF state.
                 updateSystem.World.GetOrCreateSystemManaged<LateBoarderCancelSystem>().Enabled =
                     BoardingRuntimeSettings.BoardingAssistEnabled;
+
+                updateSystem.World.GetOrCreateSystemManaged<LateGroupBoardingSystem>().Enabled =
+                    BoardingRuntimeSettings.CancelLateBoarders;
             }
             catch (Exception ex)
             {

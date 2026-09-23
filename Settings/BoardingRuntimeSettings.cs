@@ -32,7 +32,6 @@ namespace BetterBoarding
 
         public static void LoadFromSettings(BBoardSettings settings)
         {
-            // Clamp loaded .coc values before systems see them.
             int bus = ClampSpeedFactor(settings.BusBoardingSpeedFactor);
             int rail = ClampSpeedFactor(settings.RailBoardingSpeedFactor);
             int water = ClampSpeedFactor(settings.WaterBoardingSpeedFactor);
@@ -100,7 +99,6 @@ namespace BetterBoarding
             }
 
             BusBoardingSpeedFactor = value;
-            // Any speed-factor change wakes the one-shot prefab tuning pass.
             StopTuningRevision++;
             return true;
         }
@@ -181,11 +179,10 @@ namespace BetterBoarding
 
         public static string DescribeForLog()
         {
-            // Keep this compact because it is reused in support logs and report headers.
             return
                 $"bus={BusBoardingSpeedFactor}x, rail={RailBoardingSpeedFactor}x, " +
                 $"ship+ferry={WaterBoardingSpeedFactor}x, air={AirBoardingSpeedFactor}x, " +
-                $"skipLateSoloCim={CancelLateBoarders}, " +
+                $"skipLatePassengers={CancelLateBoarders}, " +
                 $"runSooner={CimsRunSoonerToCatchBuses}";
         }
 
