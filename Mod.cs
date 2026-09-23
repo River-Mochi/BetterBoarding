@@ -140,13 +140,10 @@ namespace BetterBoarding
                 updateSystem.UpdateBefore<LateBoarderCancelSystem, HumanMoveSystem>(
                     SystemUpdatePhase.GameSimulation);
 
-                // Group cleanup runs after the normal solo pass. It never replaces vanilla
-                // transport AI; it only resolves group members that are still not ready.
-                updateSystem.UpdateAfter<LateGroupBoardingSystem, LateBoarderCancelSystem>(
-                    SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateAfter<LateGroupBoardingSystem, ResidentAISystem.Actions>(
-                    SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateBefore<LateGroupBoardingSystem, HumanMoveSystem>(
+                // Group assistance runs after navigation but before pet/resident AI. This lets
+                // vanilla consume the adjusted lane state in its normal boarding path and avoids
+                // conflicting with boarding commands those systems defer to EndFrameBarrier.
+                updateSystem.UpdateBefore<LateGroupBoardingSystem, PetAISystem>(
                     SystemUpdatePhase.GameSimulation);
 
                 // Retune once on load even if Options was never opened.

@@ -422,8 +422,7 @@ namespace BetterBoarding
             }
         }
 
-
-       private static void TrySetLateGroupBoardingSystemEnabled(bool enabled)
+        private static void TrySetLateGroupBoardingSystemEnabled(bool enabled)
         {
             if (!TryGetLoadedWorld(out World? world))
             {
