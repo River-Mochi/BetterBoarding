@@ -46,9 +46,7 @@ namespace BetterBoarding
         public const int DefaultSpeedFactor = 3;
         public const int MinSpeedFactor = VanillaSpeedFactor;
         public const int MaxSpeedFactor = 5;
-        public const int MaxPassengerRunSpeedFactor = 4;
         public const int SpeedStepFactor = 1;
-        public const int DefaultPassengerRunSpeedFactor = VanillaSpeedFactor;
 
         public BBoardSettings(IMod mod)
             : base(mod)
@@ -96,14 +94,6 @@ namespace BetterBoarding
         [SettingsUISection(ActionsTab, BehaviorGroup)]
         [SettingsUISetter(typeof(BBoardSettings), nameof(SetCimsRunSoonerToCatchBusesLive))]
         public bool CimsRunSoonerToCatchBuses { get; set; }
-
-        [SettingsUISlider(
-            min = MinSpeedFactor,
-            max = MaxPassengerRunSpeedFactor,
-            step = SpeedStepFactor)]
-        [SettingsUISection(ActionsTab, BehaviorGroup)]
-        [SettingsUISetter(typeof(BBoardSettings), nameof(SetPassengerRunSpeedFactorLive))]
-        public int PassengerRunSpeedFactor { get; set; }
 
         [SettingsUISection(ActionsTab, StatusGroup)]
         public string StatusOverview
@@ -340,20 +330,6 @@ namespace BetterBoarding
                     Mod.s_Log,
                     () => DescribeBehaviorForLog(BoardingRuntimeSettings.CancelLateBoarders, value));
                 TrySetLateBoarderSystemEnabled(BoardingRuntimeSettings.BoardingAssistEnabled);
-                TrySetRunSoonerSpeedSystemEnabled(
-                    BoardingRuntimeSettings.RunSoonerSpeedBoostEnabled);
-            }
-        }
-
-        private void SetPassengerRunSpeedFactorLive(int value)
-        {
-            if (BoardingRuntimeSettings.SetPassengerRunSpeedFactor(
-                    ClampPassengerRunSpeedFactor(value)))
-            {
-                LogSpeedChange();
-
-                TrySetRunSoonerSpeedSystemEnabled(
-                    BoardingRuntimeSettings.RunSoonerSpeedBoostEnabled);
             }
         }
 
@@ -389,7 +365,6 @@ namespace BetterBoarding
             RailBoardingSpeedFactor = ClampSpeedFactor(RailBoardingSpeedFactor);
             WaterBoardingSpeedFactor = ClampSpeedFactor(WaterBoardingSpeedFactor);
             AirBoardingSpeedFactor = ClampSpeedFactor(AirBoardingSpeedFactor);
-            PassengerRunSpeedFactor = ClampPassengerRunSpeedFactor(PassengerRunSpeedFactor);
         }
 
         private static int ClampSpeedFactor(int value)
@@ -402,21 +377,6 @@ namespace BetterBoarding
             if (value > MaxSpeedFactor)
             {
                 return MaxSpeedFactor;
-            }
-
-            return value;
-        }
-
-        private static int ClampPassengerRunSpeedFactor(int value)
-        {
-            if (value < MinSpeedFactor)
-            {
-                return MinSpeedFactor;
-            }
-
-            if (value > MaxPassengerRunSpeedFactor)
-            {
-                return MaxPassengerRunSpeedFactor;
             }
 
             return value;
@@ -467,32 +427,6 @@ namespace BetterBoarding
             }
         }
 
-        private static void TrySetRunSoonerSpeedSystemEnabled(bool enabled)
-        {
-            if (!TryGetLoadedWorld(out World? world))
-            {
-                return;
-            }
-
-            try
-            {
-                RunSoonerSpeedSystem system =
-                    world.GetExistingSystemManaged<RunSoonerSpeedSystem>() ??
-                    world.GetOrCreateSystemManaged<RunSoonerSpeedSystem>();
-
-                system.Enabled = enabled;
-            }
-            catch (Exception ex)
-            {
-                LogUtils.Warn(
-                    Mod.s_Log,
-                    () =>
-                        $"Failed updating RunSoonerSpeedSystem state: " +
-                        $"{ex.GetType().Name}: {ex.Message}",
-                    ex);
-            }
-        }
-
         private static bool TryGetLoadedWorld(out World world)
         {
             world = World.DefaultGameObjectInjectionWorld;
@@ -517,7 +451,6 @@ namespace BetterBoarding
             CancelLateBoarders = true;
             CimsRunSoonerToCatchBuses = true;
             EnableVerboseLogging = false;
-            PassengerRunSpeedFactor = DefaultPassengerRunSpeedFactor;
         }
     }
 }
