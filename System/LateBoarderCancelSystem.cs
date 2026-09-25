@@ -120,8 +120,8 @@ namespace BetterBoarding
 
                 LogActiveOnce();
 
-                // Tool application and its command-buffer playback finish earlier in the frame.
-                // A selected tool is therefore not a reason to pause this GameSimulation pass.
+                // Active game tools do not require pausing this GameSimulation pass.
+                // ECS dependencies are completed before the boarding-assist data is read or edited.
                 // One pass handles both behavior toggles, then older samples are checked separately.
                 PassStats stats = RunCancellationPass();
                 uint currentFrame = m_SimulationSystem?.frameIndex ?? 0;

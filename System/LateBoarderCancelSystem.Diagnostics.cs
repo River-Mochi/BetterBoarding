@@ -264,7 +264,7 @@ namespace BetterBoarding
                 return;
             }
 
-            // The tool-paused path can reach diagnostics without running the main assist pass first.
+            // Follow-up checks read the same live ECS data and wait for earlier jobs too.
             CompleteBoardingAssistDependencies();
 
             TransitWaitStatusSystem followUpStatusSystem = World.GetOrCreateSystemManaged<TransitWaitStatusSystem>();
