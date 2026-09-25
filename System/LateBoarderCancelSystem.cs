@@ -52,8 +52,6 @@ namespace BetterBoarding
         private EntityQuery m_GroupCreatureQuery;
         private EntityQuery m_TransformQuery;
         private SimulationSystem? m_SimulationSystem;
-        private ToolSystem? m_ToolSystem;
-        private DefaultToolSystem? m_DefaultToolSystem;
 
         public override int GetUpdateInterval(SystemUpdatePhase phase)
         {
@@ -65,8 +63,6 @@ namespace BetterBoarding
         {
             base.OnCreate();
             m_SimulationSystem = World.GetOrCreateSystemManaged<SimulationSystem>();
-            m_ToolSystem = World.GetOrCreateSystemManaged<ToolSystem>();
-            m_DefaultToolSystem = World.GetOrCreateSystemManaged<DefaultToolSystem>();
 
             // Passenger is not required because some multi-car layouts store passengers on child vehicles.
             m_VehicleQuery = SystemAPI.QueryBuilder()
@@ -124,20 +120,12 @@ namespace BetterBoarding
 
                 LogActiveOnce();
 
-                if (IsPlayerUsingTool())
-                {
-                    // Avoid passenger-buffer edits while tools may delete or rebuild entities.
-                    m_SkippedForTool++;
-                    uint frame = m_SimulationSystem?.frameIndex ?? 0;
-                    LogPassSummary(frame, new PassStats(0, 0, 0, 0, 0), "paused-tool");
-                    LogFollowUps(frame);
-                    return;
-                }
-
+                // Tool application and its command-buffer playback finish earlier in the frame.
+                // A selected tool is therefore not a reason to pause this GameSimulation pass.
                 // One pass handles both behavior toggles, then older samples are checked separately.
                 PassStats stats = RunCancellationPass();
                 uint currentFrame = m_SimulationSystem?.frameIndex ?? 0;
-                LogPassSummary(currentFrame, stats, "pass");
+                LogPassSummary(currentFrame, stats);
                 LogFollowUps(currentFrame);
             }
             catch (Exception ex)

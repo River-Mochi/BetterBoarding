@@ -42,7 +42,6 @@ namespace BetterBoarding
         private long m_TotalRunSoonerAssists;
         private static bool s_FollowUpLegendLogged;
         private static bool s_RunSoonerFollowUpLegendLogged;
-        private int m_SkippedForTool;
         private bool m_LoggedActive;
 
         // Fixed-size storage for delayed follow-up checks. Reuse slots instead of allocating every update.
@@ -74,7 +73,7 @@ namespace BetterBoarding
                 () => $"Boarding assist active: every {GetUpdateInterval(SystemUpdatePhase.GameSimulation)} frames, cap={kMaxCancellationsPerUpdate} solo cancellations/update, skipLatePassengers={BoardingRuntimeSettings.CancelLateBoarders}, runSooner={BoardingRuntimeSettings.CimsRunSoonerToCatchBuses}");
         }
 
-        private void LogPassSummary(uint frame, PassStats stats, string reason)
+        private void LogPassSummary(uint frame, PassStats stats)
         {
             m_TotalCanceled += stats.Canceled;
             m_TotalRunSoonerAssists += stats.RunSoonerAssists;
@@ -100,15 +99,6 @@ namespace BetterBoarding
             }
 
             m_LastDiagnosticFrame = frame;
-            string activeTool = m_ToolSystem?.activeTool?.GetType().Name ?? "none";
-            if (reason == "paused-tool")
-            {
-                LogUtils.Info(
-                    Mod.s_Log,
-                    () => $"Boarding assist paused: activeTool={activeTool}, pauses={m_SkippedForTool}, totalSkipped={m_TotalCanceled}, totalRunSooner={m_TotalRunSoonerAssists}");
-                return;
-            }
-
             LogUtils.Info(
                 Mod.s_Log,
                 () => $"Boarding assist: vehicles={stats.Vehicles}, passengersScanned={stats.Passengers}, lateSolo={stats.Candidates}, skipped={stats.Canceled}, runFlagsSetByBB={stats.RunSoonerAssists}, totalSkipped={m_TotalCanceled}, totalRunSooner={m_TotalRunSoonerAssists}");
@@ -794,7 +784,6 @@ namespace BetterBoarding
             m_LastDiagnosticFrame = 0;
             m_TotalCanceled = 0;
             m_TotalRunSoonerAssists = 0;
-            m_SkippedForTool = 0;
             m_LoggedActive = false;
             m_FollowUpCount = 0;
             m_NextFollowUpSample = 0;
