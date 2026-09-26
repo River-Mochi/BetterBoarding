@@ -37,7 +37,7 @@ namespace BetterBoarding
         public const int UpdatesPerDay = 8192;
 
         private const float kFramesPerSecond = 60f;
-        private const int kMaxReportedLines = 8;
+        private const int kMaxReportedLinesPerTransportType = 3;
         private const int kReportHeaderWidth = 60;
         private const int kReportFieldWidth = 24;
 
@@ -51,6 +51,7 @@ namespace BetterBoarding
         private readonly List<Entity> m_StaleVehicles = new List<Entity>();
         private readonly List<Entity> m_StaleLines = new List<Entity>();
         private readonly List<LineStatistics> m_ReportLines = new List<LineStatistics>();
+        private readonly List<LineStatistics> m_ModeReportLines = new List<LineStatistics>();
 
         private EntityQuery m_VehicleQuery;
         private SimulationSystem? m_SimulationSystem;
@@ -161,6 +162,8 @@ namespace BetterBoarding
 
             public Entity MinimumRatioCurrentVehicle;
 
+            public int MinimumRatioScheduledHoldFrames;
+
             public int ScheduledHoldSamples;
 
             public long ScheduledHoldSumFrames;
@@ -171,13 +174,13 @@ namespace BetterBoarding
 
             public int BoardingEndSamples;
 
-            public long BoardingEndOvershootSumFrames;
+            public int PositiveBoardingEndOvershootSamples;
 
-            public int MinimumBoardingEndOvershootFrames = int.MaxValue;
+            public long PositiveBoardingEndOvershootSumFrames;
 
-            public int MaximumBoardingEndOvershootFrames = int.MinValue;
+            public int MaximumPositiveBoardingEndOvershootFrames;
 
-            public int BoardingEndsBeforeSchedule;
+            public int BoardingEndsOnOrBeforeSchedule;
 
             public int BoardingEndsOver128FramesLate;
 
@@ -346,7 +349,7 @@ namespace BetterBoarding
                         frame);
 
                     previous.WasBoarding = true;
-                    previous.TrackBoardingEnd = true;
+                    previous.TrackBoardingEnd = usedVanillaDepartureCalculation;
                     previous.Route = route;
                     previous.ScheduledDepartureFrame = publicTransport.m_DepartureFrame;
                     m_VehicleObservations[vehicle] = previous;
@@ -450,7 +453,13 @@ namespace BetterBoarding
             }
 
             statistics.CalculatedBoardingStarts++;
-            RecordScheduledHold(statistics, scheduledDepartureFrame, frame);
+            int scheduledHoldFrames = Math.Max(
+                0,
+                SignedFrameDelta(scheduledDepartureFrame, frame));
+            RecordScheduledHold(
+                statistics,
+                scheduledDepartureFrame,
+                scheduledHoldFrames);
 
             if (m_LastBoardingStarts.TryGetValue(key, out BoardingStartObservation lastStart) &&
                 lastStart.UsedVanillaDepartureCalculation)
@@ -463,7 +472,8 @@ namespace BetterBoarding
                         gapFrames,
                         transportLine.m_VehicleInterval,
                         lastStart.Vehicle,
-                        vehicle);
+                        vehicle,
+                        scheduledHoldFrames);
                 }
             }
 
@@ -479,7 +489,8 @@ namespace BetterBoarding
             uint gapFrames,
             float targetIntervalSeconds,
             Entity previousVehicle,
-            Entity currentVehicle)
+            Entity currentVehicle,
+            int scheduledHoldFrames)
         {
             statistics.HeadwaySamples++;
             statistics.HeadwaySumFrames += gapFrames;
@@ -508,6 +519,7 @@ namespace BetterBoarding
                 statistics.MinimumRatioPreviousVehicle = previousVehicle;
                 statistics.MinimumRatioCurrentVehicle = currentVehicle;
                 statistics.MinimumHeadwayRatioTargetSeconds = targetIntervalSeconds;
+                statistics.MinimumRatioScheduledHoldFrames = scheduledHoldFrames;
             }
 
             if (gapSeconds < targetIntervalSeconds * 0.5f)
@@ -524,20 +536,19 @@ namespace BetterBoarding
         private static void RecordScheduledHold(
             LineStatistics statistics,
             uint scheduledDepartureFrame,
-            uint observedBoardingStartFrame)
+            int scheduledHoldFrames)
         {
             if (scheduledDepartureFrame == 0)
             {
                 return;
             }
 
-            int holdFrames = SignedFrameDelta(scheduledDepartureFrame, observedBoardingStartFrame);
             statistics.ScheduledHoldSamples++;
-            statistics.ScheduledHoldSumFrames += holdFrames;
+            statistics.ScheduledHoldSumFrames += scheduledHoldFrames;
             statistics.MinimumScheduledHoldFrames =
-                Math.Min(statistics.MinimumScheduledHoldFrames, holdFrames);
+                Math.Min(statistics.MinimumScheduledHoldFrames, scheduledHoldFrames);
             statistics.MaximumScheduledHoldFrames =
-                Math.Max(statistics.MaximumScheduledHoldFrames, holdFrames);
+                Math.Max(statistics.MaximumScheduledHoldFrames, scheduledHoldFrames);
         }
 
         private void RecordBoardingEnd(
@@ -551,30 +562,35 @@ namespace BetterBoarding
                 return;
             }
 
-            int overshootFrames = SignedFrameDelta(observedBoardingEndFrame, scheduledDepartureFrame);
+            int signedDeltaFrames =
+                SignedFrameDelta(observedBoardingEndFrame, scheduledDepartureFrame);
             statistics.BoardingEndSamples++;
-            statistics.BoardingEndOvershootSumFrames += overshootFrames;
-            statistics.MinimumBoardingEndOvershootFrames =
-                Math.Min(statistics.MinimumBoardingEndOvershootFrames, overshootFrames);
-            statistics.MaximumBoardingEndOvershootFrames =
-                Math.Max(statistics.MaximumBoardingEndOvershootFrames, overshootFrames);
 
-            if (overshootFrames < 0)
+            if (signedDeltaFrames <= 0)
             {
-                statistics.BoardingEndsBeforeSchedule++;
+                statistics.BoardingEndsOnOrBeforeSchedule++;
+                return;
             }
 
-            if (overshootFrames > 128)
+            int positiveOvershootFrames = Math.Max(0, signedDeltaFrames);
+            statistics.PositiveBoardingEndOvershootSamples++;
+            statistics.PositiveBoardingEndOvershootSumFrames += positiveOvershootFrames;
+            statistics.MaximumPositiveBoardingEndOvershootFrames =
+                Math.Max(
+                    statistics.MaximumPositiveBoardingEndOvershootFrames,
+                    positiveOvershootFrames);
+
+            if (positiveOvershootFrames > 128)
             {
                 statistics.BoardingEndsOver128FramesLate++;
             }
 
-            if (overshootFrames > 512)
+            if (positiveOvershootFrames > 512)
             {
                 statistics.BoardingEndsOver512FramesLate++;
             }
 
-            if (overshootFrames > 1024)
+            if (positiveOvershootFrames > 1024)
             {
                 statistics.BoardingEndsOver1024FramesLate++;
             }
@@ -624,6 +640,8 @@ namespace BetterBoarding
             AppendField(sb, "Sampling", "every 32 simulation frames; transition times may read 0-31f late");
             AppendField(sb, "Scope", "read-only; Bus, Tram, Train, Subway passenger lines");
             AppendField(sb, "Interpretation", "short-headway thresholds are diagnostic, not proof of a game bug");
+            AppendField(sb, "Overshoot scope", "EnRoute starts using vanilla's calculated departure only");
+            AppendField(sb, "Ranking", "per mode: <25% rate/count, <50% rate/count, minimum ratio, late-end tie-breakers");
 
             BuildReportLineList();
             AppendField(sb, "Lines with observations", LocaleUtils.FormatN0(m_ReportLines.Count));
@@ -634,13 +652,15 @@ namespace BetterBoarding
                 return;
             }
 
-            int reportCount = Math.Min(kMaxReportedLines, m_ReportLines.Count);
-            AppendField(sb, "Lines shown", $"worst {LocaleUtils.FormatN0(reportCount)} of {LocaleUtils.FormatN0(m_ReportLines.Count)}");
+            AppendField(
+                sb,
+                "Lines shown",
+                $"up to {kMaxReportedLinesPerTransportType} diagnostic-ranked lines per transport type");
 
-            for (int i = 0; i < reportCount; i++)
-            {
-                AppendLineReport(sb, m_ReportLines[i]);
-            }
+            AppendTransportTypeReports(sb, TransportType.Bus);
+            AppendTransportTypeReports(sb, TransportType.Tram);
+            AppendTransportTypeReports(sb, TransportType.Train);
+            AppendTransportTypeReports(sb, TransportType.Subway);
         }
 
         private void BuildReportLineList()
@@ -665,8 +685,41 @@ namespace BetterBoarding
             {
                 m_LineStatistics.Remove(m_StaleLines[i]);
             }
+        }
 
-            m_ReportLines.Sort(CompareWorstLines);
+        private void AppendTransportTypeReports(
+            StringBuilder sb,
+            TransportType transportType)
+        {
+            m_ModeReportLines.Clear();
+            for (int i = 0; i < m_ReportLines.Count; i++)
+            {
+                LineStatistics statistics = m_ReportLines[i];
+                if (statistics.TransportType == transportType)
+                {
+                    m_ModeReportLines.Add(statistics);
+                }
+            }
+
+            if (m_ModeReportLines.Count == 0)
+            {
+                AppendField(sb, $"{transportType} lines", "none observed");
+                return;
+            }
+
+            m_ModeReportLines.Sort(CompareDiagnosticPriority);
+            int reportCount = Math.Min(
+                kMaxReportedLinesPerTransportType,
+                m_ModeReportLines.Count);
+            AppendField(
+                sb,
+                $"{transportType} lines",
+                $"showing {LocaleUtils.FormatN0(reportCount)} of {LocaleUtils.FormatN0(m_ModeReportLines.Count)}");
+
+            for (int i = 0; i < reportCount; i++)
+            {
+                AppendLineReport(sb, m_ModeReportLines[i]);
+            }
         }
 
         private void AppendLineReport(StringBuilder sb, LineStatistics statistics)
@@ -719,7 +772,19 @@ namespace BetterBoarding
                     AppendField(
                         sb,
                         "Worst ratio pair",
-                        $"{statistics.MinimumRatioPreviousVehicle} -> {statistics.MinimumRatioCurrentVehicle} | {statistics.MinimumHeadwayRatio:F2}x target ({statistics.MinimumHeadwayRatioTargetSeconds:F1}s)");
+                        $"{statistics.MinimumRatioPreviousVehicle} -> {statistics.MinimumRatioCurrentVehicle}");
+                    AppendField(
+                        sb,
+                        "Headway at worst ratio",
+                        $"{statistics.MinimumHeadwayRatio:F2}x target");
+                    AppendField(
+                        sb,
+                        "Target at worst ratio",
+                        $"{statistics.MinimumHeadwayRatioTargetSeconds:F1}s");
+                    AppendField(
+                        sb,
+                        "Following vehicle hold",
+                        $"{statistics.MinimumRatioScheduledHoldFrames / kFramesPerSecond:F1}s ({statistics.MinimumRatioScheduledHoldFrames}f) for {statistics.MinimumRatioCurrentVehicle}");
                 }
                 else
                 {
@@ -747,28 +812,46 @@ namespace BetterBoarding
 
             if (statistics.BoardingEndSamples > 0)
             {
-                double averageOvershootFrames =
-                    (double)statistics.BoardingEndOvershootSumFrames / statistics.BoardingEndSamples;
                 AppendField(
                     sb,
-                    "Boarding-end overshoot",
-                    $"avg {averageOvershootFrames:F1}f | min {statistics.MinimumBoardingEndOvershootFrames}f | max {statistics.MaximumBoardingEndOvershootFrames}f");
+                    "Boarding ends observed",
+                    LocaleUtils.FormatN0(statistics.BoardingEndSamples));
                 AppendField(
                     sb,
-                    "Late boarding ends",
-                    $">128f {LocaleUtils.FormatN0(statistics.BoardingEndsOver128FramesLate)} | >512f {LocaleUtils.FormatN0(statistics.BoardingEndsOver512FramesLate)} | >1024f {LocaleUtils.FormatN0(statistics.BoardingEndsOver1024FramesLate)}");
+                    "On/before schedule",
+                    LocaleUtils.FormatN0(statistics.BoardingEndsOnOrBeforeSchedule));
 
-                if (statistics.BoardingEndsBeforeSchedule > 0)
+                if (statistics.PositiveBoardingEndOvershootSamples > 0)
                 {
+                    double averagePositiveOvershootFrames =
+                        (double)statistics.PositiveBoardingEndOvershootSumFrames /
+                        statistics.PositiveBoardingEndOvershootSamples;
                     AppendField(
                         sb,
-                        "Before scheduled frame",
-                        LocaleUtils.FormatN0(statistics.BoardingEndsBeforeSchedule));
+                        "Positive overshoot",
+                        $"avg {averagePositiveOvershootFrames:F1}f | max {statistics.MaximumPositiveBoardingEndOvershootFrames}f");
                 }
+                else
+                {
+                    AppendField(sb, "Positive overshoot", "none observed");
+                }
+
+                AppendField(
+                    sb,
+                    ">128f",
+                    LocaleUtils.FormatN0(statistics.BoardingEndsOver128FramesLate));
+                AppendField(
+                    sb,
+                    ">512f",
+                    LocaleUtils.FormatN0(statistics.BoardingEndsOver512FramesLate));
+                AppendField(
+                    sb,
+                    ">1024f",
+                    LocaleUtils.FormatN0(statistics.BoardingEndsOver1024FramesLate));
             }
             else
             {
-                AppendField(sb, "Boarding-end overshoot", "no completed observed boardings yet");
+                AppendField(sb, "Boarding ends observed", "none yet");
             }
         }
 
@@ -783,23 +866,15 @@ namespace BetterBoarding
             return string.IsNullOrWhiteSpace(name) ? "(unnamed line)" : name.Trim();
         }
 
-        private static int CompareWorstLines(LineStatistics left, LineStatistics right)
+        private static int CompareDiagnosticPriority(
+            LineStatistics left,
+            LineStatistics right)
         {
-            double leftRatio = left.MinimumHeadwayRatio;
-            double rightRatio = right.MinimumHeadwayRatio;
-            int comparison = leftRatio.CompareTo(rightRatio);
-            if (comparison != 0)
-            {
-                return comparison;
-            }
-
-            comparison = right.BoardingEndsOver1024FramesLate.CompareTo(left.BoardingEndsOver1024FramesLate);
-            if (comparison != 0)
-            {
-                return comparison;
-            }
-
-            comparison = right.BoardingEndsOver512FramesLate.CompareTo(left.BoardingEndsOver512FramesLate);
+            int comparison = CompareRateDescending(
+                left.UnderQuarterTarget,
+                left.TargetComparisonSamples,
+                right.UnderQuarterTarget,
+                right.TargetComparisonSamples);
             if (comparison != 0)
             {
                 return comparison;
@@ -811,7 +886,66 @@ namespace BetterBoarding
                 return comparison;
             }
 
+            comparison = CompareRateDescending(
+                left.UnderHalfTarget,
+                left.TargetComparisonSamples,
+                right.UnderHalfTarget,
+                right.TargetComparisonSamples);
+            if (comparison != 0)
+            {
+                return comparison;
+            }
+
+            comparison = right.UnderHalfTarget.CompareTo(left.UnderHalfTarget);
+            if (comparison != 0)
+            {
+                return comparison;
+            }
+
+            comparison = left.MinimumHeadwayRatio.CompareTo(right.MinimumHeadwayRatio);
+            if (comparison != 0)
+            {
+                return comparison;
+            }
+
+            comparison = right.BoardingEndsOver1024FramesLate.CompareTo(
+                left.BoardingEndsOver1024FramesLate);
+            if (comparison != 0)
+            {
+                return comparison;
+            }
+
+            comparison = right.BoardingEndsOver512FramesLate.CompareTo(
+                left.BoardingEndsOver512FramesLate);
+            if (comparison != 0)
+            {
+                return comparison;
+            }
+
+            comparison = right.BoardingEndsOver128FramesLate.CompareTo(
+                left.BoardingEndsOver128FramesLate);
+            if (comparison != 0)
+            {
+                return comparison;
+            }
+
             return right.HeadwaySamples.CompareTo(left.HeadwaySamples);
+        }
+
+        private static int CompareRateDescending(
+            int leftCount,
+            int leftSampleCount,
+            int rightCount,
+            int rightSampleCount)
+        {
+            double leftRate = leftSampleCount > 0
+                ? (double)leftCount / leftSampleCount
+                : -1d;
+            double rightRate = rightSampleCount > 0
+                ? (double)rightCount / rightSampleCount
+                : -1d;
+
+            return rightRate.CompareTo(leftRate);
         }
 
         private void ResetForCityLoad()
