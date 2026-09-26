@@ -486,6 +486,10 @@ namespace BetterBoarding
                 AppendFamilyReport(sb, "Ship", snapshot.Ship, s_ShipLateBoardersToday, s_ShipSkippedSamples, s_ShipFollowUpOutcomes, s_ShipFollowUpSamples);
                 AppendFamilyReport(sb, "Airplane", snapshot.Air, s_AirLateBoardersToday, s_AirSkippedSamples, s_AirFollowUpOutcomes, s_AirFollowUpSamples);
 
+                TransitHeadwayDiagnosticSystem headwayDiagnostics =
+                    world.GetOrCreateSystemManaged<TransitHeadwayDiagnosticSystem>();
+                headwayDiagnostics.AppendReport(sb);
+
                 AppendDivider(sb);
 
                 LogUtils.Info(Mod.s_Log, () => sb.ToString());

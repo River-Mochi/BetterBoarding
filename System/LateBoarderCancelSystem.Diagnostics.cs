@@ -46,9 +46,38 @@ namespace BetterBoarding
 
         // Fixed-size storage for delayed follow-up checks. Reuse slots instead of allocating every update.
         private readonly FollowUpSample[] m_FollowUpSamples = new FollowUpSample[kMaxFollowUpSamples];
-        private readonly HashSet<Entity> m_LoggedRunSoonerSpeedPrefabs = new HashSet<Entity>();
+        private readonly HashSet<RunSoonerSpeedSampleKey> m_LoggedRunSoonerSpeedSamples =
+            new HashSet<RunSoonerSpeedSampleKey>();
         private int m_FollowUpCount;
         private int m_NextFollowUpSample;
+
+        private readonly struct RunSoonerSpeedSampleKey : IEquatable<RunSoonerSpeedSampleKey>
+        {
+            public RunSoonerSpeedSampleKey(TransportType transportType, Entity humanPrefab)
+            {
+                TransportType = transportType;
+                HumanPrefab = humanPrefab;
+            }
+
+            public TransportType TransportType { get; }
+
+            public Entity HumanPrefab { get; }
+
+            public bool Equals(RunSoonerSpeedSampleKey other)
+            {
+                return TransportType == other.TransportType && HumanPrefab == other.HumanPrefab;
+            }
+
+            public override bool Equals(object? obj)
+            {
+                return obj is RunSoonerSpeedSampleKey other && Equals(other);
+            }
+
+            public override int GetHashCode()
+            {
+                return ((int)TransportType * 397) ^ HumanPrefab.GetHashCode();
+            }
+        }
    
         private static double FramesToGameMinutes(uint frames)
         {
@@ -192,8 +221,11 @@ namespace BetterBoarding
                 return;
             }
 
-            // Log each loaded human prefab only once per city.
-            if (!m_LoggedRunSoonerSpeedPrefabs.Add(humanPrefab))
+            // A prefab may use several transit modes. Keep one sample per mode/prefab
+            // so an earlier bus or tram sample cannot hide train or subway evidence.
+            RunSoonerSpeedSampleKey sampleKey =
+                new RunSoonerSpeedSampleKey(transportType, humanPrefab);
+            if (!m_LoggedRunSoonerSpeedSamples.Add(sampleKey))
             {
                 return;
             }
@@ -787,7 +819,7 @@ namespace BetterBoarding
             m_LoggedActive = false;
             m_FollowUpCount = 0;
             m_NextFollowUpSample = 0;
-            m_LoggedRunSoonerSpeedPrefabs.Clear();
+            m_LoggedRunSoonerSpeedSamples.Clear();
         }
     }
 }

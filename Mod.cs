@@ -146,6 +146,11 @@ namespace BetterBoarding
                 updateSystem.UpdateBefore<LateGroupBoardingSystem, PetAISystem>(
                     SystemUpdatePhase.GameSimulation);
 
+                // Read-only verbose diagnostics run after vanilla and Better Boarding have
+                // updated boarding state. They never change vehicle or route components.
+                updateSystem.UpdateAfter<TransitHeadwayDiagnosticSystem>(
+                    SystemUpdatePhase.GameSimulation);
+
                 // Retune once on load even if Options was never opened.
                 updateSystem.World.GetOrCreateSystemManaged<TransportStopTuningSystem>().Enabled = true;
 
