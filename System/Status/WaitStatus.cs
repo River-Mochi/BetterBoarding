@@ -72,8 +72,6 @@ namespace BetterBoarding
         private const int kReportFieldWidth = 24;
         private const int kSkippedSampleCapacityPerMode = 3;
 
-        public static int RefreshIntervalSeconds { get; set; } = 15;
-
         public static string OverviewSummary { get; private set; } = string.Empty;
         public static string CimsRunSoonerSummary { get; private set; } = string.Empty;
         public static string BusSummary { get; private set; } = string.Empty;
@@ -86,7 +84,7 @@ namespace BetterBoarding
 
         private static bool s_WasInGame;
         private static bool s_HasSnapshotThisCity;
-        private static long s_LastRefreshTicksUtc;
+        private static uint s_LastSnapshotSimulationFrame = uint.MaxValue;
         private static int s_LastUiFrame = -1;
         private static int s_CurrentDayKey = int.MinValue;
         private static uint s_LastSimulationFrame = uint.MaxValue;
@@ -317,7 +315,7 @@ namespace BetterBoarding
         public static void InvalidateCache()
         {
             s_HasSnapshotThisCity = false;
-            s_LastRefreshTicksUtc = 0;
+            s_LastSnapshotSimulationFrame = uint.MaxValue;
             s_LastUiFrame = -1;
 
             BusSummary = Localize(KeyStatusNotLoaded, "Status not loaded.");
@@ -329,6 +327,14 @@ namespace BetterBoarding
             ShipSummary = string.Empty;
             FerrySummary = string.Empty;
             AirSummary = string.Empty;
+        }
+
+        public static void MarkDirty()
+        {
+            // Preserve the visible rows until the next getter replaces them.
+            s_HasSnapshotThisCity = false;
+            s_LastSnapshotSimulationFrame = uint.MaxValue;
+            s_LastUiFrame = -1;
         }
 
         public static void ResetForCityLoad()
@@ -394,24 +400,24 @@ namespace BetterBoarding
 
             EnsureCounterDay(world);
 
-            long nowUtc = DateTime.UtcNow.Ticks;
-            if (!s_HasSnapshotThisCity)
+            SimulationSystem? simulationSystem = world.GetExistingSystemManaged<SimulationSystem>();
+            if (simulationSystem == null)
             {
-                BuildSnapshotSafe(world);
-                s_HasSnapshotThisCity = true;
-                s_LastRefreshTicksUtc = nowUtc;
                 return;
             }
 
-            int intervalSeconds = Math.Max(1, RefreshIntervalSeconds);
-            long nextAllowed = s_LastRefreshTicksUtc + TimeSpan.FromSeconds(intervalSeconds).Ticks;
-            if (nowUtc < nextAllowed)
+            uint simulationFrame = simulationSystem.frameIndex;
+
+            // Options pauses the city. If the simulation has not advanced, the cached
+            // snapshot is still current and its displayed update time should not change.
+            if (s_HasSnapshotThisCity && s_LastSnapshotSimulationFrame == simulationFrame)
             {
                 return;
             }
 
             BuildSnapshotSafe(world);
-            s_LastRefreshTicksUtc = nowUtc;
+            s_HasSnapshotThisCity = true;
+            s_LastSnapshotSimulationFrame = simulationFrame;
         }
 
         private static void BuildSnapshotSafe(World world)
@@ -457,6 +463,9 @@ namespace BetterBoarding
                 TransitWaitStatusSystem system = world.GetOrCreateSystemManaged<TransitWaitStatusSystem>();
                 TransitWaitStatusSystem.Snapshot snapshot = system.BuildSnapshot();
                 ApplySnapshot(snapshot);
+                s_HasSnapshotThisCity = true;
+                s_LastSnapshotSimulationFrame =
+                    world.GetExistingSystemManaged<SimulationSystem>()?.frameIndex ?? uint.MaxValue;
 
                 // Keep this verbose output in the log, not the cramped Options UI row.
                 StringBuilder sb = new StringBuilder();
@@ -663,7 +672,8 @@ namespace BetterBoarding
             string summary =
                 $"{LocaleUtils.FormatN0(s_BusRunSoonerToday)} bus | " +
                 $"{LocaleUtils.FormatN0(s_TramRunSoonerToday)} tram | " +
-                $"{LocaleUtils.FormatN0(s_TrainRunSoonerToday)} train";
+                $"{LocaleUtils.FormatN0(s_TrainRunSoonerToday)} train | " +
+                $"{LocaleUtils.FormatN0(s_SubwayRunSoonerToday)} subway";
 
             return LocaleUtils.SafeFormat(KeyStatusRunSoonerLine, "{0}", summary);
         }

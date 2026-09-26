@@ -317,6 +317,7 @@ namespace BetterBoarding
                     BoardingRuntimeSettings.BoardingAssistEnabled);
 
                 TrySetLateGroupBoardingSystemEnabled(value);
+                WaitStatus.MarkDirty();
             }
         }
 
@@ -329,6 +330,7 @@ namespace BetterBoarding
                     () => DescribeBehaviorForLog(BoardingRuntimeSettings.CancelLateBoarders, value));
 
                 TrySetLateBoarderSystemEnabled(BoardingRuntimeSettings.BoardingAssistEnabled);
+                WaitStatus.MarkDirty();
             }
         }
 
