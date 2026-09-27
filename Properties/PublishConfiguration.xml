@@ -10,59 +10,40 @@
 <LongDescription>
 #### Late Passengers stop holding up transit
 
-- Like Japanese oshiya👨‍✈️pushers but in a mod 😊
+- Like Japanese oshiya 👨‍✈️ pushers, but in a mod 😊
 
-┌──────────────────────────────────────────────────────────────┐
+┌────────────────────────────────────────────────────────────┐
 
-The game can keep a vehicle stuck wait for passengers long past departure time — even if the cim is far away!
+The game can keep transit stuck waiting long past departure time — even when the cim is far away!
 
-Vanilla only releases a stuck vehicle after ~10 minutes.
-└──────────────────────────────────────────────────────────────┘
+Vanilla only releases a stuck vehicle after ~10 in-game minutes.
 
-**Better Boarding helps before that by reducing Late Passengers to keep transit moving which in turn helps vanilla un-bunch vehicles.**
+└────────────────────────────────────────────────────────────┘
 
-This mod mostly targets citizen behavior as the bus schedule doesn't matter if a cim 4 blocks away can stop the bus from leaving.
+**Better Boarding steps in sooner so late passengers don't keep everyone waiting and transit keeps moving.**
 
-### Skip Late Passengers
+### 🏃‍➡️🏃‍♀️‍➡️🏃‍♂️‍➡️ 🚍 More Boarding
 
-- ✅ When **Skip Late** is enabled, late citizens who are still **not ready** even after **departure time** can miss that vehicle instead of making everyone wait.
-- The cim is not deleted and the game can naturally reassign them.
-- Groups/families traveling together; helps the vehicle leave instead of waiting up to 10 minutes for one member separated or not at the station.
+- ✅ **Skip Late Passengers** — cims who still aren't ready after departure can miss that vehicle instead of holding it up. Groups/families are handled too.
+- ✅ **Cims Run Sooner** — assigned passengers start running before vanilla normally tells them to.
+- ✅ **Helps long train platforms** — cims hanging around far from the doors get a head start instead of waiting until departure time to run. Vanilla doesn't start cims running until departure time.
+- ✅ **Adjust Boarding/Loading** — shorten planned dwell/loading times from 1x vanilla up to 5x.
+- Late cims aren't deleted; the game can naturally continue or reroute them.
 
-### Cims Run Sooner 🏃‍➡️🏃‍♀️‍➡️🏃‍♂️‍➡️ 🚍
-
-- ✅ When **Cims Run Sooner** is ON, the assigned but late passengers can start running a little sooner.
-- Vanilla starts cims running at departure time, which can be too late if they are not already at the stop/station.
-- In real life, people start running from a block away, not just at the stop.
-- Helps with long train stations where cims are in a hang around area far from the train doors.
-- Helps reduce how many cims miss their ride and need to be reassigned; does not change schedules, or departure time - allows vanilla to safely finish transactions.
-
-### Boarding/Loading
-- ✅ Adjust boarding/loading times, helps with dwell time.
-- ✅ Lets late cims miss a vehicle (if it's after departure time) so others are not held up.
-- ✅ Late cims can also start running sooner so they have a chance to catch their ride (bus + tram + train + subway).
-- Helps reduce transit delays, traffic backups, and vehicle bunching. Even more useful in big cities with lots of public transit.
+Helps reduce long boarding delays, traffic backups, and vehicles bunching up — especially in busy transit cities.
 
 ### Notes
-- **Compatibility:** should not use Better Boarding and All-Aboard at the same time - pick one.
-- Some players report no issues with Smart Transportation with Better Boarding.
-- Mod is intended to be a lighter, safer alternative than replacing the game's whole transport system files approach.
-- This mod works nicely with [All Transit + Trucks](https://mods.paradoxplaza.com/mods/138390/Windows) to solve many transit issues.
-- Safe to remove anytime. No Harmony patches; lightweight design for low overhead.
-- Note: vanilla has un-bunching formulas and may hold back a vehicle a little longer to space them out - this is normal if it's not excessive 10 minutes.
+
+- **Compatibility:** don't use Better Boarding and All Aboard together — pick one.
+- Some players report no issues using Smart Transportation with Better Boarding.
+- Works nicely with [All Transit + Trucks](https://mods.paradoxplaza.com/mods/138390/Windows).
+- Safe to remove anytime. No Harmony patches and no replacement of the game's transport systems.
+- Vanilla still controls schedules and un-bunching, so it may intentionally hold a vehicle briefly for spacing.
 
 ### Support and feedback
-- Support by clicking Like 👍 (top right); helps people know about the mod. No donations requested.
-- Feedback on GitHub and Discord links (icons on the right). PRs welcome.
 
-### Credits and Thanks
-
-- River-Mochi - mod author
-- Inspiration and thanks to bcallender's All Aboard mod and Wayze's InstantBoarding.
-- yenyang (Anarchy) - code review/feedback and testing.
-- 🎀 foxxy ✿, MayorCheeks, Empiiey, Neco1996, Gagaxm - testing.
-- elGendo87 - Spanish editor, thumbnail straightener, testing.
-- Thumbnail is an edited version of the [Philidelphia train flap board.](https://www.inquirer.com/philly/news/20160828_Sign_of_the_times__At_30th_Street_Station__display_board_will_soon_be_no_more.html)
+- Support by clicking Like 👍 (top right). No donations requested.
+- Feedback and PRs welcome through the GitHub and Discord links (icons on the right).
 
 ### 15+ Languages
 
@@ -70,36 +51,45 @@ Hello, Bonjour, Hallo, Hola, Ciao, こんにちは, 안녕하세요, Cześć, Oi
 
 ### How does it work?
 
-Better Boarding leaves vanilla transport, departure scheduling, and un-bunching in control as they can work well with a little help. It mainly steps in when late passengers would keep boarding open too long and cause unnecessary delays. This is more a Citizen Behavior change.
+Better Boarding leaves vanilla routes, schedules, and un-bunching in control. It mainly fixes citizen behavior that can keep boarding open too long.
 
-**Solo late passengers**
+**Late passengers / families**
 
-- If they are still too late, they can miss that vehicle; then we let vanilla naturally reroute them, often on the next bus.
-
-**Late groups/families**
-
-- If the leader is still outside, the whole group can miss the vehicle together (vanilla methods).
-- If the leader is already aboard, Better Boarding nudges the game's normal system to finish boarding a child/pet so the family stays together and the vehicle can leave.
+- Late cims get a short grace after departure, then can miss that vehicle instead of holding everyone.
+- Families/groups are kept together where possible. If the leader is already aboard, a separated child or pet can be instantly placed on the same vehicle so it can leave.
 
 **Run Sooner**
 
-- Vanilla already has cims start running at stops but not until departure time, which is often too late, especially on long platforms.
-- We allow assigned passengers to begin running 512 frames earlier (a few seconds).
-- Does not change vehicle schedule or departure times.
+- Vanilla normally waits until departure time before telling an assigned cim to run.
+- Better Boarding can start them running **512 frames earlier**, especially useful on long platforms.
+- Run Sooner itself does not change schedules or departure times.
+
+**Boarding / Loading speed**
+
+- Changes stop/loading time.
+- `1x` = vanilla, `3x` = recommended, `5x` = shortest dwell.
+- This is separate from Skip Late and Run Sooner.
 
 ### Bonus Status report
 
-After the city runs a bit, check Options for current waits, worst stops, late skipped passengers, and Run Sooner counts.
+Check Options after your city runs for a while to see waiting passengers, worst stops, late passengers skipped, and Run Sooner counts.
 
-- If a stop has a huge wait, check it for traffic, bad placement, needs more vehicles, or just swap out a bugged bus stop.
-- [Stats to Log] makes a detailed one-time log entry with current stop names, Entity IDs, hints, and more.
-- It only runs when clicked; it is not a continuous per-frame system, so there is no ongoing performance cost.
+**Stats to Log** creates a detailed one-time report with stop names, Entity IDs, line hints, and more. It only runs when clicked.
+
+### Credits and Thanks
+
+- River-Mochi — mod author
+- bcallender's All Aboard and Wayze's InstantBoarding — inspiration
+- yenyang (Anarchy) — code review, feedback, and testing
+- 🎀 foxxy ✿, MayorCheeks, Empiiey, Neco1996, Gagaxm — testing
+- elGendo87 — Spanish editor, thumbnail straightener, testing
+- Thumbnail based on the [Philadelphia train flap board](https://www.inquirer.com/philly/news/20160828_Sign_of_the_times__At_30th_Street_Station__display_board_will_soon_be_no_more.html)
 
 **What does lightweight mean?**
 
-Better Boarding does not use Harmony patches or replace entire game transport systems. It works alongside and improves the game's normal systems. It is designed to have a low performance impact, even in large cities.
+Better Boarding works alongside the game's normal transport systems instead of replacing them. It is designed for low performance impact, even in large cities.
 
-- If you got this far, congrats, say hi, there is a senryu poem I wrote just for you in images. Click Like 👍 button, it's hard, I know, and so tiny.
+If you got this far, congrats 😄 There is a senryu poem I wrote just for you in the images. Click Like 👍 — it's hard to find, I know, and so tiny.
 
 tags: boarding time, bus stop issues, slow stuck transit, debunching, unbunching
 
