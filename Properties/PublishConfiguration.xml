@@ -12,15 +12,15 @@
 
 - Like Japanese oshiya👨‍✈️pushers but in a mod 😊
 
-┌──────────────────────────────────────────────────────────────────┐
+┌────────────────────────────────────────────────────────────────┐
 
 The game can keep a vehicle stuck boarding past departure time while it waits for passengers — even if the cim is still far away!
-Vanilla's solution is to release any stuck vehicle only after ~10 minutes.
-└──────────────────────────────────────────────────────────────────┘
+Vanilla releases any stuck vehicle only after ~10 minutes.
+└────────────────────────────────────────────────────────────────┘
 
 **Better Boarding helps before that by reducing Late Passenger delays to keep transit moving which in turn helps vanilla un-bunch vehicles.**
 
-This mod mostly targets the citizen behavior as the bus schedule doesn't matter if a cim 4 blocks away can stop a bus from leaving.
+This mod mostly targets citizen behavior because the bus schedule doesn't matter if a cim 4 blocks away can stop the bus from leaving.
 
 ### Skip Late Passengers
 
@@ -87,19 +87,19 @@ Better Boarding leaves vanilla transport, departure scheduling, and un-bunching 
 
 ### Bonus Status report
 
-After the city runs a bit, check Options for current waits, worst stops, skipped passengers, and Run Sooner counts.
+After the city runs a bit, check Options for current waits, worst stops, late skipped passengers, and Run Sooner counts.
 
-- If a stop has a huge wait, check it for traffic, bad placement, or too few vehicles.
-- \[Stats to Log\] writes a detailed one-time snapshot with stop names, Entity IDs, line hints, and more.
-- only runs when clicked; it does not run constantly per-frame or in the city (no harm to performance).
+- If a stop has a huge wait, check it for traffic, bad placement, needs more vehicles, or just swap out a bugged bus stop.
+- [Stats to Log] makes a detailed one-time log entry with current stop names, Entity IDs, hints, and more.
+- It only runs when clicked; it is not a continuous per-frame system, so there is no ongoing performance cost.
 
-**What does lightweight mean?
+**What does lightweight mean?**
 
-** Better Boarding does not use Harmony patches or replace entire game transport systems. It works alongside and improves the game's normal systems. It is designed to have a low performance impact, even in large cities.
+Better Boarding does not use Harmony patches or replace entire game transport systems. It works alongside and improves the game's normal systems. It is designed to have a low performance impact, even in large cities.
 
-- If you got this far, congrats, say hi, there is a senryu poem I wrote just for you in images. Click Like button, it's hard, I know, and so tiny.
+- If you got this far, congrats, say hi, there is a senryu poem I wrote just for you in images. Click Like 👍 button, it's hard, I know, and so tiny.
 
-tags: boarding time, bus stop, slow stuck transit, debunching, unbunching
+tags: boarding time, bus stop issues, slow stuck transit, debunching, unbunching
 
 </LongDescription>
 <!--Thumbnail-->
