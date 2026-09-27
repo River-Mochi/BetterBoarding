@@ -6,7 +6,7 @@ Better Boarding reduces public transport boarding delays without replacing the g
 
 - Faster boarding/loading sliders for bus, rail, ship + ferry, and airplane.
 - `Skip Late Passengers`: late solo cims can miss a vehicle after a short grace instead of holding everyone.
-- Groups/families get extra grace and are handled together so one straggler does not cause a long delay.
+- Groups/families are handled together so one straggler does not cause a long delay.
 - `Cims Run Sooner`: assigned late passengers start running earlier for bus, tram, train, and subway.
 - Compact Options status plus `Stats to Log` for waits, worst stops, skipped passengers, and troubleshooting.
 
