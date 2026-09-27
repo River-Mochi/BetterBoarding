@@ -15,18 +15,18 @@
 ┌────────────────────────────────────────────────────────────────┐
 
 The game can keep a vehicle stuck boarding past departure time while it waits for passengers — even if the cim is still far away!
-Vanilla releases any stuck vehicle only after ~10 minutes.
+Vanilla only releases a stuck vehicle after ~10 minutes.
 └────────────────────────────────────────────────────────────────┘
 
 **Better Boarding helps before that by reducing Late Passenger delays to keep transit moving which in turn helps vanilla un-bunch vehicles.**
 
-This mod mostly targets citizen behavior because the bus schedule doesn't matter if a cim 4 blocks away can stop the bus from leaving.
+This mod mostly targets citizen behavior as the bus schedule doesn't matter if a cim 4 blocks away can stop the bus from leaving.
 
 ### Skip Late Passengers
 
 - ✅ When **Skip Late** is enabled, late citizens who are still **not ready** even after **departure time** can miss that vehicle instead of making everyone wait.
 - The cim is not deleted and the game can naturally reassign them.
-- Groups/families are helped so one cim does not cause a long delay; helps the vehicle leave instead of waiting up to 10 minutes for someone far away.
+- Groups/families traveling together; helps the vehicle leave instead of waiting up to 10 minutes for one member separated or not at the station.
 
 ### Cims Run Sooner 🏃‍➡️🏃‍♀️‍➡️🏃‍♂️‍➡️ 🚍
 
