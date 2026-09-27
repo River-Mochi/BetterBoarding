@@ -7,7 +7,7 @@
 // ================= </copyright> ======================
 
 // File: System/LateBoarderCancelSystem.Helpers.cs
-// Purpose: Helper methods for tool safety, passenger checks, run assists, and cancellation edits.
+// Purpose: Helper methods for passenger checks, run assists, and cancellation edits.
 
 namespace BetterBoarding
 {
@@ -17,7 +17,7 @@ namespace BetterBoarding
     using Game.Common; // Deleted, Destroyed, Overridden
     using Game.Creatures; // Human, CurrentVehicle, group checks
     using Game.Pathfind; // PathOwner, PathElement
-    using Game.Tools; // ToolBaseSystem
+    using Game.Tools; // Temp
     using Game.Vehicles; // CargoTransport, LayoutElement, Passenger
     using Unity.Entities; // DynamicBuffer, Entity, EntityCommandBuffer
     using Unity.Mathematics; // math
@@ -36,17 +36,6 @@ namespace BetterBoarding
             // Groups/families have leader/member rules, so the safe beta behavior stays solo-only.
             return EntityManager.HasComponent<GroupMember>(passenger) ||
                    EntityManager.HasBuffer<GroupCreature>(passenger);
-        }
-
-        private bool IsPlayerUsingTool()
-        {
-            if (m_ToolSystem == null || m_DefaultToolSystem == null)
-            {
-                return false;
-            }
-
-            ToolBaseSystem? activeTool = m_ToolSystem.activeTool;
-            return activeTool != null && activeTool != m_DefaultToolSystem;
         }
 
         private bool CanSafelyCancelPassenger(Entity vehicleEntity, Entity passenger)

@@ -14,8 +14,8 @@ namespace BetterBoarding
     /// <summary>
     /// Runtime snapshot of the current mod settings for ECS systems.
     /// Mirrors applied options into simple static values
-    /// and exposes separate revised counters so each system
-    /// Only Wakes when its own inputs changed.
+    /// and exposes separate revision counters so each system
+    /// only wakes when its own inputs change.
     /// </summary>
     public static class BoardingRuntimeSettings
     {
@@ -29,14 +29,13 @@ namespace BetterBoarding
         public static bool CimsRunSoonerToCatchBuses { get; private set; } = false;
         public static bool BoardingAssistEnabled => CancelLateBoarders || CimsRunSoonerToCatchBuses;
         public static bool EnableVerboseLogging { get; private set; } = false;
+
         public static void LoadFromSettings(BBoardSettings settings)
         {
-            // Clamp loaded .coc values before systems see them.
             int bus = ClampSpeedFactor(settings.BusBoardingSpeedFactor);
             int rail = ClampSpeedFactor(settings.RailBoardingSpeedFactor);
             int water = ClampSpeedFactor(settings.WaterBoardingSpeedFactor);
             int air = ClampSpeedFactor(settings.AirBoardingSpeedFactor);
-            int passengerRun = ClampPassengerRunSpeedFactor(settings.PassengerRunSpeedFactor);
 
             bool stopChanged = false;
 
@@ -87,9 +86,10 @@ namespace BetterBoarding
             {
                 LateBoarderRevision++;
             }
-            PassengerRunSpeedFactor = passengerRun;
+
             EnableVerboseLogging = settings.EnableVerboseLogging;
         }
+
         public static bool SetBusBoardingSpeedFactor(int value)
         {
             value = ClampSpeedFactor(value);
@@ -99,7 +99,6 @@ namespace BetterBoarding
             }
 
             BusBoardingSpeedFactor = value;
-            // Any speed-factor change wakes the one-shot prefab tuning pass.
             StopTuningRevision++;
             return true;
         }
@@ -143,13 +142,6 @@ namespace BetterBoarding
             return true;
         }
 
-        public static int PassengerRunSpeedFactor { get; private set; } =
-            BBoardSettings.DefaultPassengerRunSpeedFactor;
-
-        public static bool RunSoonerSpeedBoostEnabled =>
-            CimsRunSoonerToCatchBuses &&
-            PassengerRunSpeedFactor > BBoardSettings.VanillaSpeedFactor;
-
         public static bool SetCancelLateBoarders(bool value)
         {
             if (CancelLateBoarders == value)
@@ -185,29 +177,13 @@ namespace BetterBoarding
             return true;
         }
 
-        public static bool SetPassengerRunSpeedFactor(int value)
-        {
-            value = ClampPassengerRunSpeedFactor(value);
-
-            if (PassengerRunSpeedFactor == value)
-            {
-                return false;
-            }
-
-            PassengerRunSpeedFactor = value;
-            return true;
-        }
-
         public static string DescribeForLog()
         {
-            // Keep this compact because it is reused in support logs and report headers.
             return
                 $"bus={BusBoardingSpeedFactor}x, rail={RailBoardingSpeedFactor}x, " +
                 $"ship+ferry={WaterBoardingSpeedFactor}x, air={AirBoardingSpeedFactor}x, " +
-
-                $"skipLateSoloCim={CancelLateBoarders}, " +
-                $"runSooner={CimsRunSoonerToCatchBuses}, " +
-                $"passengerRun={PassengerRunSpeedFactor}x";
+                $"skipLatePassengers={CancelLateBoarders}, " +
+                $"runSooner={CimsRunSoonerToCatchBuses}";
         }
 
         public static string DescribeVerboseForLog(bool enabled)
@@ -229,19 +205,5 @@ namespace BetterBoarding
 
             return value;
         }
-        private static int ClampPassengerRunSpeedFactor(int value)
-        {
-            if (value < BBoardSettings.MinSpeedFactor)
-            {
-                return BBoardSettings.MinSpeedFactor;
-            }
-
-            if (value > BBoardSettings.MaxPassengerRunSpeedFactor)
-            {
-                return BBoardSettings.MaxPassengerRunSpeedFactor;
-            }
-
-            return value;
-}
     }
 }

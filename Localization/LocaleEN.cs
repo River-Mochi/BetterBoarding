@@ -129,10 +129,10 @@ namespace BetterBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CancelLateBoarders)), ToggleName },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CancelLateBoarders)),
                     "<Late passengers> who are still <not ready> after <departure time> are allowed to miss the vehicle.\n" +
-                    "- Note: we only skip solo late citizens.\n" +
-                    "- Groups/families travelling together that are late are <not skipped> and may still cause delays to transit like in vanilla.\n" +
-                    "- Group travelers are a small number; most benefits are from skipping solo cims who are running late.\n" +
-                    "- Skipped late citizens are not deleted; they are naturally reassigned by the game."
+                    "- Solo late passengers are released after a short grace so transit can depart.\n" +
+                    "- Groups/families get a little extra grace. If the leader is still outside, the group is released through vanilla group cancellation.\n" +
+                    "- If the leader is already aboard, lagging child/pet members are finished aboard so one straggler cannot hold the vehicle for vanilla's long timeout.\n" +
+                    "- Skipped late citizens are not deleted; vanilla can naturally continue or reroute them."
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cims Run Sooner: Bus + All Rail" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
@@ -142,15 +142,6 @@ namespace BetterBoarding
                     "- Vanilla only starts cims running at departure time, which can be too late to help.\n" +
                     $"- Pairs well with <{ToggleName}> because it may reduce how many cims miss the vehicle and need to be reassigned.\n" +
                     "- Does not change the vehicle's departure time, force boarding, or teleport citizens."
-                },
-
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.PassengerRunSpeedFactor)), "Passenger run speed"
-                },
-                { m_Setting.GetOptionDescLocaleID( nameof(BBoardSettings.PassengerRunSpeedFactor)),
-                    "<1x = vanilla running speed>\n" +
-                    "Makes BetterBoarding passengers run faster while hurrying to their assigned bus, tram, train, or subway.\n" +
-                    "Only affects passengers currently trying to board those vehicles. Other citizens are unchanged.\n" +
-                    "Higher values can look unrealistic; 4x is intentionally extreme."
                 },
 
                 // Status overview
@@ -204,14 +195,14 @@ namespace BetterBoarding
                 // Debug
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.EnableVerboseLogging)), "Enable verbose logging" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.EnableVerboseLogging)),
-                    "**Debug / testing only**\n" +
+                    "**Debug / Testing ONLY**\n" +
                     "Adds <live> details to <Logs/BetterBoarding.log> while the city runs.\n" +
-                    "**Do not enable for normal gameplay.**\n" +
+                    "**Do Not enable for normal gameplay.**\n" +
                     "Leaving this on can decrease performance and create huge log files.\n" +
                     "You can delete old log files later.\n" +
-                    "Note: <Stats to Log> is a point-in-time report plus today's late-skip counters; it is different than what is seen with verbose logs.\n" +
-                    "Run verbose logging for 15-20 min if you want a timeline of what happened over time.\n" +
-                    "Just don't forget to turn **OFF** verbose again before normal gameplay."
+                    "Note: <Stats to Log> is a point-in-time report plus today's late-skip counters so it's not have any performance concerns like Verbose logging does.\n" +
+                    "Run verbose logging for 10-20 min if you want a timeline of what happened over time.\n" +
+                    "Important: Don't forget to turn **OFF** verbose again before normal gameplay."
                 },
 
                 // Runtime status strings
@@ -235,7 +226,7 @@ namespace BetterBoarding
                 { WaitStatus.KeyReportTesterHintsHeader, "Tester hints" },
                 { WaitStatus.KeyReportHintWorstStops, "Worst stops: inspect these first in-game or with Scene Explorer mod (find locations with entity ID). Look for traffic, bad transit stop location, or a bugged stop." },
                 { WaitStatus.KeyReportHintSkippedCims, "Skipped solo cims: late passengers we skip to allow transit to leave. Later state should usually become 'has path' or 'assigned'. If it stays 'no path yet', inspect that cim entity after more time." },
-                { WaitStatus.KeyReportHintLateGroups, "Late groups (families): purposely left alone so they stay together and follow vanilla behavior; they are few compared to many single travelers." },
+                { WaitStatus.KeyReportHintLateGroups, "Late groups (families): shows groups that are still unresolved at the instant this report is taken. BetterBoarding gives groups a short extra grace, then releases an outside group or nudges vanilla to finish lagging members when the leader is already aboard." },
                 { WaitStatus.KeyReportFamilyHeader, "{0}" },
                 { WaitStatus.KeyReportServedStops, "Served stops: {0}" },
                 { WaitStatus.KeyReportStopsWithWaiting, "Stops with waiting passengers: {0}" },
@@ -252,7 +243,7 @@ namespace BetterBoarding
                 { WaitStatus.KeyReportWorstLineWaypointAverage, "Worst line waypoint avg: {0} with {1} waiting" },
                 { WaitStatus.KeyReportTopWorstStopsHeader, "Top {0} worst stops by average wait:" },
                 { WaitStatus.KeyReportTopWorstStopLine, "{0}. {1} | avg {2} | waiting {3} | stop entity {4} | waypoint entity {5} | line entity {6} | line hint {7}" },
-                { WaitStatus.KeyReportLateGroups, "Late cims traveling as a group left alone: {0} passengers in {1} groups on {2} vehicles" },
+                { WaitStatus.KeyReportLateGroups, "Late group cims still unresolved right now: {0} passengers in {1} groups on {2} vehicles" },
                 { WaitStatus.KeyReportLastSkippedSamplesHeader, "Skipped solo late cim examples" },
                 { WaitStatus.KeyReportLastSkippedSampleLine, "{0}. {1} | passenger {2} | missed vehicle {3} | time {4} | now {5}" },
                 { WaitStatus.KeyReportNone, "none" },

@@ -47,8 +47,7 @@ namespace BetterBoarding
                     "<1x = vanilla>\n" +
                     extraLine +
                     $"ค่าที่สูงขึ้นช่วยลดเวลาในการขึ้นและโหลดที่ {transitName}\n" +
-        
-                    "ช่วยให้คิวปกติเดินเร็วขึ้น แต่ผู้โดยสารที่มาสายยังอาจทำให้รถออกช้าได้ตามระบบของเกม\n" +
+                    "ช่วยให้คิวปกติเดินเร็วขึ้น แต่ผู้โดยสารที่มาสายยังอาจทำให้รถออกช้าได้ตามระบบ vanilla\n" +
                     $"ใช้ [✓] <{ToggleName}> ถ้าต้องการให้ cim ที่มาสายพลาดรถได้หลังเวลาออก\n" +
                     "พลเมืองที่มาสายและถูกข้ามจะไม่ถูกลบ เกมจะจัดเส้นทางใหม่ให้ตามปกติ\n" +
                     "<==========================>\n" +
@@ -70,7 +69,7 @@ namespace BetterBoarding
                     "**แย่สุด** = ป้ายที่มีเวลารอเฉลี่ยสูงสุด\n" +
                     "ป้ายที่แย่ที่สุดเหมาะสำหรับตรวจอุบัติเหตุ การจราจรติด ป้ายมีปัญหา หรือจำนวนรถไม่พอ\n" +
                     $"**มาสายวันนี้** = ผู้โดยสารเดี่ยวที่มาสายและถูกข้ามวันนี้โดย <{ToggleName}>\n" +
-                    "ใช้ <Stats to Log> เพื่อดูรายงานละเอียด: ชื่อป้าย Entity ID และข้อมูลอื่น ๆ";
+                    "ใช้ <บันทึกสถิติลง Log> เพื่อดูรายงานละเอียด: ชื่อป้าย Entity ID และข้อมูลอื่น ๆ";
             }
 
             return new Dictionary<string, string>
@@ -124,15 +123,15 @@ namespace BetterBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CancelLateBoarders)), ToggleName },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CancelLateBoarders)),
                     "<ผู้โดยสารที่มาสาย> ซึ่งยัง <ไม่พร้อม> หลัง <เวลาออก> สามารถพลาดรถคันนั้นได้\n" +
-                    "- หมายเหตุ: ข้ามเฉพาะพลเมืองเดี่ยวที่มาสาย\n" +
-                    "- กลุ่ม/ครอบครัวที่เดินทางด้วยกันและมาสายจะ <ไม่ถูกข้าม> และยังอาจทำให้การขนส่งล่าช้าเหมือน vanilla\n" +
-                    "- ผู้เดินทางแบบกลุ่มมีจำนวนน้อย ประโยชน์หลักมาจากการข้าม cim เดี่ยวที่มาสาย\n" +
-                    "- พลเมืองที่ถูกข้ามจะไม่ถูกลบ เกมจะจัดให้ใหม่ตามธรรมชาติ"
+                    "- ผู้โดยสารเดี่ยวที่มาสายจะถูกปล่อยหลังช่วงผ่อนผันสั้น ๆ เพื่อให้รถออกได้\n" +
+                    "- กลุ่ม/ครอบครัวจะได้เวลาผ่อนผันเพิ่มเล็กน้อย ถ้าหัวหน้ากลุ่มยังอยู่นอกรถ ระบบยกเลิกกลุ่มของ vanilla จะปล่อยทั้งกลุ่มพร้อมกัน\n" +
+                    "- ถ้าหัวหน้ากลุ่มขึ้นรถแล้ว Better Boarding จะให้ vanilla จัดสมาชิกเด็ก/สัตว์เลี้ยงที่ตามหลังให้ขึ้นจนเสร็จ เพื่อไม่ให้คนเดียวค้างรถจนถึง timeout ยาวของ vanilla\n" +
+                    "- พลเมืองที่ถูกข้ามจะไม่ถูกลบ vanilla จะให้เดินทางต่อหรือจัดเส้นทางใหม่ตามปกติ"
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cim วิ่งเร็วขึ้น: รถบัส + รถราง + รถไฟ" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cim วิ่งเร็วขึ้น: รถบัส + ระบบรางทั้งหมด" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
                     "พลเมืองที่ <มาสาย> จะเริ่ม <วิ่งเร็วขึ้น> เพื่อพยายามไปถึง **ก่อน** เวลาออก\n" +
-                    "- ใช้กับรถบัส รถราง และรถไฟ โดยเฉพาะชานชาลารถไฟยาว ๆ\n" +
+                    "- ใช้กับรถบัส รถราง รถไฟ และรถไฟใต้ดิน โดยเฉพาะชานชาลายาว ๆ\n" +
                     "- มีผลเฉพาะ cim ที่ถูกกำหนดให้ขึ้นรถที่กำลังรับผู้โดยสารอยู่แล้ว\n" +
                     "- vanilla เริ่มให้ cim วิ่งเมื่อถึงเวลาออก ซึ่งอาจสายเกินไป\n" +
                     $"- ใช้คู่กับ <{ToggleName}> ได้ดี เพราะช่วยลดจำนวน cim ที่พลาดรถและต้องถูกจัดใหม่\n" +
@@ -147,7 +146,7 @@ namespace BetterBoarding
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)), "Cim วิ่งเร็วขึ้น" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)),
-                    "ถ้าเปิด [x] จะนับ cim ทั้งหมด (วันนี้) ที่เริ่ม **วิ่งเร็วขึ้น** เพื่อพยายามขึ้นรถบัส รถราง หรือรถไฟก่อนเวลาออก\n" +
+                    "ถ้าเปิด [x] จะนับ cim ทั้งหมด (วันนี้) ที่เริ่ม **วิ่งเร็วขึ้น** เพื่อพยายามขึ้นรถบัส รถราง รถไฟ หรือรถไฟใต้ดินก่อนเวลาออก\n" +
                     "cim จะวิ่งเร็วกว่า vanilla 512 เฟรม (~2-8 วินาทีจริง หรือ ~2 นาทีในเกม)"
                 },
 
@@ -195,7 +194,7 @@ namespace BetterBoarding
                     "**อย่าเปิดไว้ตอนเล่นปกติ**\n" +
                     "การเปิดทิ้งไว้อาจลดประสิทธิภาพและทำให้ไฟล์ log ใหญ่มาก\n" +
                     "ลบไฟล์ log เก่าได้ภายหลัง\n" +
-                    "หมายเหตุ: <Stats to Log> เป็นรายงาน ณ เวลานั้นพร้อมตัวนับการข้ามผู้โดยสารวันนี้ ซึ่งต่างจาก verbose log\n" +
+                    "หมายเหตุ: <บันทึกสถิติลง Log> เป็นรายงาน ณ เวลานั้นพร้อมตัวนับผู้โดยสารมาสายที่ถูกข้ามวันนี้ ซึ่งต่างจาก verbose log\n" +
                     "เปิด verbose log 15-20 นาทีถ้าต้องการดูไทม์ไลน์ว่าเกิดอะไรขึ้น\n" +
                     "อย่าลืมปิด verbose log ก่อนกลับไปเล่นปกติ"
                 },
@@ -220,8 +219,8 @@ namespace BetterBoarding
                 { WaitStatus.KeyReportNote, "คำใบ้สายมาจาก waypoint ที่มีเวลารอสูงสุดของป้ายนั้น" },
                 { WaitStatus.KeyReportTesterHintsHeader, "คำแนะนำสำหรับผู้ทดสอบ" },
                 { WaitStatus.KeyReportHintWorstStops, "ป้ายแย่สุด: ตรวจในเกมหรือใช้ม็อด Scene Explorer ก่อน (ค้นหาตำแหน่งด้วย Entity ID) ดูการจราจร ตำแหน่งป้ายไม่ดี หรือป้ายมีปัญหา" },
-                { WaitStatus.KeyReportHintSkippedCims, "cim เดี่ยวที่ถูกข้าม: ผู้โดยสารมาสายที่เราข้ามเพื่อให้รถออกได้ หลังจากนั้นสถานะควรเป็น 'มีเส้นทาง' หรือ 'ถูกกำหนดแล้ว' ถ้ายัง 'ไม่มีเส้นทาง' ให้ตรวจ entity นั้นอีกครั้งภายหลัง" },
-                { WaitStatus.KeyReportHintLateGroups, "กลุ่มที่มาสาย (ครอบครัว): ปล่อยให้ vanilla จัดการเพื่อให้อยู่ด้วยกัน มีจำนวนน้อยเมื่อเทียบกับผู้เดินทางเดี่ยว" },
+                { WaitStatus.KeyReportHintSkippedCims, "cim เดี่ยวที่ถูกข้าม: ผู้โดยสารมาสายที่ปล่อยเพื่อให้รถออกได้ หลังจากนั้นสถานะควรเป็น 'has path' หรือ 'assigned' ถ้ายังเป็น 'no path yet' ให้ตรวจ entity นั้นอีกครั้งภายหลัง" },
+                { WaitStatus.KeyReportHintLateGroups, "กลุ่มที่มาสาย (ครอบครัว): แสดงกลุ่มที่ยังแก้ไม่เสร็จ ณ เวลาที่ออกรายงาน Better Boarding ให้เวลาผ่อนผันเพิ่มเล็กน้อย ถ้าหัวหน้ากลุ่มยังอยู่นอกรถจะปล่อยทั้งกลุ่ม แต่ถ้าขึ้นรถแล้วจะช่วย vanilla จัดสมาชิกที่ตามหลังให้ขึ้นจนเสร็จ" },
                 { WaitStatus.KeyReportFamilyHeader, "{0}" },
                 { WaitStatus.KeyReportServedStops, "ป้ายที่ให้บริการ: {0}" },
                 { WaitStatus.KeyReportStopsWithWaiting, "ป้ายที่มีผู้โดยสารรอ: {0}" },
@@ -237,8 +236,8 @@ namespace BetterBoarding
                 { WaitStatus.KeyReportWorstLineEntity, "Entity สายแย่สุด: {0}" },
                 { WaitStatus.KeyReportWorstLineWaypointAverage, "ค่าเฉลี่ย waypoint ของสายแย่สุด: {0} มี {1} คนรอ" },
                 { WaitStatus.KeyReportTopWorstStopsHeader, "ป้ายแย่สุด {0} อันดับตามเวลารอเฉลี่ย:" },
-                { WaitStatus.KeyReportTopWorstStopLine, "{0}. {1} | เฉลี่ย {2} | รอ {3} | stop entity {4} | waypoint entity {5} | line entity {6} | คำใบ้สาย {7}" },
-                { WaitStatus.KeyReportLateGroups, "cim ที่มาสายเป็นกลุ่มและปล่อยไว้: {0} คนใน {1} กลุ่ม บน {2} คัน" },
+                { WaitStatus.KeyReportTopWorstStopLine, "{0}. {1} | เฉลี่ย {2} | รอ {3} | ป้าย {4} | waypoint {5} | สาย {6} | คำใบ้ {7}" },
+                { WaitStatus.KeyReportLateGroups, "cim ในกลุ่มที่มาสายและยังแก้ไม่เสร็จ: {0} คนใน {1} กลุ่ม บน {2} คัน" },
                 { WaitStatus.KeyReportLastSkippedSamplesHeader, "ตัวอย่าง cim เดี่ยวที่มาสายและถูกข้าม" },
                 { WaitStatus.KeyReportLastSkippedSampleLine, "{0}. {1} | ผู้โดยสาร {2} | รถที่พลาด {3} | เวลา {4} | ตอนนี้ {5}" },
                 { WaitStatus.KeyReportNone, "ไม่มี" },

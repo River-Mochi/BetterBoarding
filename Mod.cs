@@ -28,6 +28,17 @@ namespace BetterBoarding
         public const string ModId = "BetterBoarding";
         public const string ModTag = "[BBoard]";
 
+#if DEBUG
+        private const string kBuildType = "DEBUG";
+#else
+        private const string kBuildType = "RELEASE";
+#endif
+
+        // Release builds read as "Release" in the Options About tab; a DEBUG
+        // build stays shouty so a tester can tell at a glance which one they have.
+        public static string BuildDisplayName =>
+            kBuildType == "RELEASE" ? "Release" : kBuildType;
+
         public static readonly string ModVersion =
             Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.0.0";
 
@@ -47,7 +58,8 @@ namespace BetterBoarding
             if (!s_BannerLogged)
             {
                 s_BannerLogged = true;
-                LogUtils.Info($"{ModName} v{ModVersion} OnLoad");
+                LogUtils.Info(
+                    $"{ModName} {ModTag} v{ModVersion} [{kBuildType}] OnLoad");
             }
 
             BBoardSettings setting = new(this);
@@ -128,27 +140,26 @@ namespace BetterBoarding
                 updateSystem.UpdateBefore<LateBoarderCancelSystem, HumanMoveSystem>(
                     SystemUpdatePhase.GameSimulation);
 
-                // Apply the passenger-only run boost after vanilla navigation and
-                // BetterBoarding's Run flag, but before vanilla moves the cim.
-                updateSystem.UpdateAfter<RunSoonerSpeedSystem, HumanNavigationSystem>(
+                // Group assistance runs after navigation but before pet/resident AI. This lets
+                // vanilla consume adjusted approach/timeout state in the normal boarding path
+                // and avoids conflicting with commands those systems defer to EndFrameBarrier.
+                updateSystem.UpdateBefore<LateGroupBoardingSystem, PetAISystem>(
                     SystemUpdatePhase.GameSimulation);
 
-                updateSystem.UpdateAfter<RunSoonerSpeedSystem, LateBoarderCancelSystem>(
-                    SystemUpdatePhase.GameSimulation);
-
-                updateSystem.UpdateBefore<RunSoonerSpeedSystem, HumanMoveSystem>(
+                // Read-only verbose diagnostics run after vanilla and Better Boarding have
+                // updated boarding state. They never change vehicle or route components.
+                updateSystem.UpdateAfter<TransitHeadwayDiagnosticSystem>(
                     SystemUpdatePhase.GameSimulation);
 
                 // Retune once on load even if Options was never opened.
                 updateSystem.World.GetOrCreateSystemManaged<TransportStopTuningSystem>().Enabled = true;
 
-                // Start boarding assist in the saved ON/OFF state.
+                // Start boarding assists in their saved ON/OFF state.
                 updateSystem.World.GetOrCreateSystemManaged<LateBoarderCancelSystem>().Enabled =
                     BoardingRuntimeSettings.BoardingAssistEnabled;
 
-                updateSystem.World.GetOrCreateSystemManaged<RunSoonerSpeedSystem>().Enabled =
-                    BoardingRuntimeSettings.RunSoonerSpeedBoostEnabled;
-
+                updateSystem.World.GetOrCreateSystemManaged<LateGroupBoardingSystem>().Enabled =
+                    BoardingRuntimeSettings.CancelLateBoarders;
             }
             catch (Exception ex)
             {
@@ -165,4 +176,3 @@ namespace BetterBoarding
         }
     }
 }
-

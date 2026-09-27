@@ -36,6 +36,7 @@ namespace BetterBoarding
         public const string StatusButtonsRow = "StatusButtonsRow";
         public const string AboutInfoGroup = "ModInfo";
         public const string AboutLinksGroup = "Links";
+        public const string AboutLogButtonsRow = "AboutLogButtonsRow";
         public const string DebugGroup = "Debug";
 
         private const string kUrlParadox =
@@ -46,9 +47,7 @@ namespace BetterBoarding
         public const int DefaultSpeedFactor = 3;
         public const int MinSpeedFactor = VanillaSpeedFactor;
         public const int MaxSpeedFactor = 5;
-        public const int MaxPassengerRunSpeedFactor = 4;
         public const int SpeedStepFactor = 1;
-        public const int DefaultPassengerRunSpeedFactor = VanillaSpeedFactor;
 
         public BBoardSettings(IMod mod)
             : base(mod)
@@ -97,14 +96,6 @@ namespace BetterBoarding
         [SettingsUISetter(typeof(BBoardSettings), nameof(SetCimsRunSoonerToCatchBusesLive))]
         public bool CimsRunSoonerToCatchBuses { get; set; }
 
-        [SettingsUISlider(
-            min = MinSpeedFactor,
-            max = MaxPassengerRunSpeedFactor,
-            step = SpeedStepFactor)]
-        [SettingsUISection(ActionsTab, BehaviorGroup)]
-        [SettingsUISetter(typeof(BBoardSettings), nameof(SetPassengerRunSpeedFactorLive))]
-        public int PassengerRunSpeedFactor { get; set; }
-
         [SettingsUISection(ActionsTab, StatusGroup)]
         public string StatusOverview
         {
@@ -130,7 +121,6 @@ namespace BetterBoarding
         {
             get
             {
-                // Options UI polls status rows separately; the cache prevents duplicate work.
                 try { WaitStatus.RefreshIfNeeded(); } catch { }
                 return WaitStatus.BusSummary ?? string.Empty;
             }
@@ -208,7 +198,6 @@ namespace BetterBoarding
                     return;
                 }
 
-                // Detailed report belongs in the log so the UI rows can stay compact.
                 WaitStatus.LogDetailedReport();
             }
         }
@@ -225,7 +214,6 @@ namespace BetterBoarding
                     return;
                 }
 
-                // Open the exact mod log when possible; otherwise open the Logs folder.
                 ShellOpen.OpenModLogOrLogsFolder();
             }
         }
@@ -234,7 +222,7 @@ namespace BetterBoarding
         public string AboutName => Mod.ModName;
 
         [SettingsUISection(AboutTab, AboutInfoGroup)]
-        public string AboutVersion => Mod.ModVersion;
+        public string AboutVersion => $"{Mod.ModVersion} {Mod.BuildDisplayName}";
 
         [SettingsUISection(AboutTab, AboutLinksGroup)]
         [SettingsUIButtonGroup(AboutLinksGroup)]
@@ -250,7 +238,6 @@ namespace BetterBoarding
 
                 try
                 {
-                    // External links use Unity's URL opener; no filesystem fallback needed here.
                     Application.OpenURL(kUrlParadox);
                 }
                 catch (Exception ex)
@@ -268,16 +255,33 @@ namespace BetterBoarding
         {
             if (BoardingRuntimeSettings.SetBusBoardingSpeedFactor(ClampSpeedFactor(value)))
             {
-                // Live setters let the relevant system react immediately instead of waking every system.
                 LogSpeedChange();
                 TryEnableStopTuningSystem();
             }
         }
 
-        // Use the same locale info for both Open Log buttons.
+        [SettingsUISection(AboutTab, DebugGroup)]
+        [SettingsUIDisplayName("BetterBoarding.BetterBoarding.Mod.BBoardSettings.StatsToLog")]
+        [SettingsUIDescription("BetterBoarding.BetterBoarding.Mod.BBoardSettings.StatsToLog")]
+        [SettingsUIButtonGroup(AboutLogButtonsRow)]
+        [SettingsUIButton]
+        public bool StatsToLogAbout
+        {
+            set
+            {
+                if (!value)
+                {
+                    return;
+                }
+
+                WaitStatus.LogDetailedReport();
+            }
+        }
+
         [SettingsUISection(AboutTab, DebugGroup)]
         [SettingsUIDisplayName("BetterBoarding.BetterBoarding.Mod.BBoardSettings.OpenLog")]
         [SettingsUIDescription("BetterBoarding.BetterBoarding.Mod.BBoardSettings.OpenLog")]
+        [SettingsUIButtonGroup(AboutLogButtonsRow)]
         [SettingsUIButton]
         public bool OpenLogAbout
         {
@@ -323,11 +327,17 @@ namespace BetterBoarding
         {
             if (BoardingRuntimeSettings.SetCancelLateBoarders(value))
             {
-                // Apply this toggle immediately without waking unrelated systems.
                 LogUtils.Info(
                     Mod.s_Log,
-                    () => DescribeBehaviorForLog(value, BoardingRuntimeSettings.CimsRunSoonerToCatchBuses));
-                TrySetLateBoarderSystemEnabled(BoardingRuntimeSettings.BoardingAssistEnabled);
+                    () => DescribeBehaviorForLog(
+                        value,
+                        BoardingRuntimeSettings.CimsRunSoonerToCatchBuses));
+
+                TrySetLateBoarderSystemEnabled(
+                    BoardingRuntimeSettings.BoardingAssistEnabled);
+
+                TrySetLateGroupBoardingSystemEnabled(value);
+                WaitStatus.MarkDirty();
             }
         }
 
@@ -335,25 +345,12 @@ namespace BetterBoarding
         {
             if (BoardingRuntimeSettings.SetCimsRunSoonerToCatchBuses(value))
             {
-                // This only sets vanilla's Run flag a little before bus/tram/train/subway departure.
                 LogUtils.Info(
                     Mod.s_Log,
                     () => DescribeBehaviorForLog(BoardingRuntimeSettings.CancelLateBoarders, value));
+
                 TrySetLateBoarderSystemEnabled(BoardingRuntimeSettings.BoardingAssistEnabled);
-                TrySetRunSoonerSpeedSystemEnabled(
-                    BoardingRuntimeSettings.RunSoonerSpeedBoostEnabled);
-            }
-        }
-
-        private void SetPassengerRunSpeedFactorLive(int value)
-        {
-            if (BoardingRuntimeSettings.SetPassengerRunSpeedFactor(
-                    ClampPassengerRunSpeedFactor(value)))
-            {
-                LogSpeedChange();
-
-                TrySetRunSoonerSpeedSystemEnabled(
-                    BoardingRuntimeSettings.RunSoonerSpeedBoostEnabled);
+                WaitStatus.MarkDirty();
             }
         }
 
@@ -367,15 +364,14 @@ namespace BetterBoarding
 
         private static void LogSpeedChange()
         {
-            // Keep slider logs short because players may drag several sliders in one session.
             LogUtils.Info(Mod.s_Log, () => $"Speed changed: {BoardingRuntimeSettings.DescribeForLog()}");
         }
 
         private static string DescribeBehaviorForLog(
-            bool skipLateSoloCim,
+            bool skipLatePassengers,
             bool runSooner)
         {
-            return $"Options Settings: skipLateSoloCim={skipLateSoloCim}, runSooner={runSooner}";
+            return $"Options Settings: skipLatePassengers={skipLatePassengers}, runSooner={runSooner}";
         }
 
         public void RepairLoadedValues()
@@ -389,7 +385,6 @@ namespace BetterBoarding
             RailBoardingSpeedFactor = ClampSpeedFactor(RailBoardingSpeedFactor);
             WaterBoardingSpeedFactor = ClampSpeedFactor(WaterBoardingSpeedFactor);
             AirBoardingSpeedFactor = ClampSpeedFactor(AirBoardingSpeedFactor);
-            PassengerRunSpeedFactor = ClampPassengerRunSpeedFactor(PassengerRunSpeedFactor);
         }
 
         private static int ClampSpeedFactor(int value)
@@ -407,21 +402,6 @@ namespace BetterBoarding
             return value;
         }
 
-        private static int ClampPassengerRunSpeedFactor(int value)
-        {
-            if (value < MinSpeedFactor)
-            {
-                return MinSpeedFactor;
-            }
-
-            if (value > MaxPassengerRunSpeedFactor)
-            {
-                return MaxPassengerRunSpeedFactor;
-            }
-
-            return value;
-        }
-
         private static void TryEnableStopTuningSystem()
         {
             if (!TryGetLoadedWorld(out World? world))
@@ -431,12 +411,10 @@ namespace BetterBoarding
 
             try
             {
-                // SettingsUISetter can fire while in-game, so wake only the relevant one-shot system.
                 TransportStopTuningSystem system =
                     world.GetExistingSystemManaged<TransportStopTuningSystem>() ??
                     world.GetOrCreateSystemManaged<TransportStopTuningSystem>();
 
-                // The stop tuning system does one pass, then disables itself again.
                 system.Enabled = true;
             }
             catch (Exception ex)
@@ -454,7 +432,6 @@ namespace BetterBoarding
 
             try
             {
-                // The live system stays disabled unless at least one boarding behavior is on.
                 LateBoarderCancelSystem system =
                     world.GetExistingSystemManaged<LateBoarderCancelSystem>() ??
                     world.GetOrCreateSystemManaged<LateBoarderCancelSystem>();
@@ -467,7 +444,7 @@ namespace BetterBoarding
             }
         }
 
-        private static void TrySetRunSoonerSpeedSystemEnabled(bool enabled)
+        private static void TrySetLateGroupBoardingSystemEnabled(bool enabled)
         {
             if (!TryGetLoadedWorld(out World? world))
             {
@@ -476,9 +453,9 @@ namespace BetterBoarding
 
             try
             {
-                RunSoonerSpeedSystem system =
-                    world.GetExistingSystemManaged<RunSoonerSpeedSystem>() ??
-                    world.GetOrCreateSystemManaged<RunSoonerSpeedSystem>();
+                LateGroupBoardingSystem system =
+                    world.GetExistingSystemManaged<LateGroupBoardingSystem>() ??
+                    world.GetOrCreateSystemManaged<LateGroupBoardingSystem>();
 
                 system.Enabled = enabled;
             }
@@ -487,7 +464,7 @@ namespace BetterBoarding
                 LogUtils.Warn(
                     Mod.s_Log,
                     () =>
-                        $"Failed updating RunSoonerSpeedSystem state: " +
+                        $"Failed updating LateGroupBoardingSystem state: " +
                         $"{ex.GetType().Name}: {ex.Message}",
                     ex);
             }
@@ -498,7 +475,6 @@ namespace BetterBoarding
             world = World.DefaultGameObjectInjectionWorld;
 
             GameManager gameManager = GameManager.instance;
-            // UI setters can fire from the main menu too, so guard against a missing game world.
             if (!gameManager.gameMode.IsGame() || world == null)
             {
                 return false;
@@ -509,7 +485,6 @@ namespace BetterBoarding
 
         public override void SetDefaults()
         {
-            // New installs start at a noticeable but not extreme middle value.
             BusBoardingSpeedFactor = DefaultSpeedFactor;
             RailBoardingSpeedFactor = DefaultSpeedFactor;
             WaterBoardingSpeedFactor = DefaultSpeedFactor;
@@ -517,7 +492,6 @@ namespace BetterBoarding
             CancelLateBoarders = true;
             CimsRunSoonerToCatchBuses = true;
             EnableVerboseLogging = false;
-            PassengerRunSpeedFactor = DefaultPassengerRunSpeedFactor;
         }
     }
 }

@@ -47,7 +47,6 @@ namespace BetterBoarding
                     "<1x = vanilla>\n" +
                     extraLine +
                     $"Daha yüksek değerler {transitName} için biniş ve yükleme süresini azaltır.\n" +
-        
                     "Bu, normal kuyrukların daha hızlı boşalmasına yardımcı olur; ancak vanilla tasarımı nedeniyle geç kalan bir yolcu yine kalkışı geciktirebilir.\n" +
                     $"Geç kalan cimlerin kalkıştan sonra aracı kaçırabilmesi için [✓] <{ToggleName}> seçeneğini kullanın.\n" +
                     "Atlanan geç yolcular silinmez; vanilla onları doğal olarak yeniden yönlendirir.\n" +
@@ -70,7 +69,7 @@ namespace BetterBoarding
                     "**En kötü** durak = tek bir duraktaki en yüksek ortalama bekleme.\n" +
                     "En kötü duraklar; trafik kazaları, tıkanmış/hatalı duraklar veya yetersiz araç sayısını kontrol etmek için iyi yerlerdir.\n" +
                     $"**Bugün geç kalan** = bugün <{ToggleName}> tarafından atlanan geç kalan solo yolcular.\n" +
-                    "Ayrıntılı rapor için <Stats to Log> kullanın: durak adları, entity ID'leri ve daha fazlası.";
+                    "Ayrıntılı rapor için <İstatistikleri günlüğe yaz> kullanın: durak adları, entity ID’leri ve daha fazlası.";
             }
 
             return new Dictionary<string, string>
@@ -94,28 +93,28 @@ namespace BetterBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.BusBoardingSpeedFactor)), "Otobüs biniş hızı" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.BusBoardingSpeedFactor)),
                     SpeedDescription(
-                        "otobüs durağı",
+                        "otobüs durakları",
                         "otobüsü",
                         string.Empty)
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.RailBoardingSpeedFactor)), "Raylı sistem biniş hızı" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.RailBoardingSpeedFactor)),
                     SpeedDescription(
-                        "tren, tramvay ve metro durağı",
+                        "tren, tramvay ve metro durakları",
                         "aracı",
                         "Tren, tramvay ve metro duraklarına uygulanır.\n")
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.WaterBoardingSpeedFactor)), "Gemi + feribot hızı" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.WaterBoardingSpeedFactor)),
                     SpeedDescription(
-                        "gemi ve feribot durağı",
+                        "gemi ve feribot durakları",
                         "aracı",
                         "Gemi ve feribot duraklarına uygulanır.\n")
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)), "Uçak hızı" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)),
                     SpeedDescription(
-                        "uçak terminali",
+                        "uçak terminalleri",
                         "uçağı",
                         "Yolcu uçağı terminallerine uygulanır.\n")
                 },
@@ -124,15 +123,15 @@ namespace BetterBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CancelLateBoarders)), ToggleName },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CancelLateBoarders)),
                     "<Geç kalan yolcular> <kalkış saatinden> sonra hâlâ <hazır değilse> aracı kaçırabilir.\n" +
-                    "- Not: yalnızca geç kalan solo yolcuları atlıyoruz.\n" +
-                    "- Birlikte seyahat eden geç kalmış gruplar/aileler <atlanmaz> ve vanilla gibi ulaşımı geciktirebilir.\n" +
-                    "- Grup yolcuları kalabalığın küçük bir kısmıdır; asıl fayda geç kalan solo cimleri atlamaktan gelir.\n" +
-                    "- Atlanan geç yolcular silinmez; oyun onları doğal olarak yeniden atar."
+                    "- Geç kalan solo yolcular kısa bir ek sürenin ardından serbest bırakılır, böylece araç kalkabilir.\n" +
+                    "- Gruplara/ailelere biraz daha fazla ek süre verilir. Lider hâlâ dışarıdaysa tüm grup vanilla grup iptaliyle birlikte serbest bırakılır.\n" +
+                    "- Lider zaten araçtaysa Better Boarding, geride kalan çocuk/evcil hayvan üyelerinin binişini vanilla üzerinden tamamlatır; böylece tek bir kişi aracı vanilla’nın uzun timeout süresine kadar bekletmez.\n" +
+                    "- Atlanan geç yolcular silinmez; vanilla yolculuklarını doğal şekilde sürdürebilir veya yeniden yönlendirebilir."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cimler daha erken koşsun: Otobüs + tramvay + tren" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cimler daha erken koşsun: otobüs + tüm raylı sistem" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
                     "<Geç kalan> vatandaşlar kalkış saatinden **önce** yetişmeye çalışmak için <daha erken koşmaya> başlar.\n" +
-                    "- Otobüs, tramvay ve trenlerde çalışır; özellikle uzun tren peronlarında faydalıdır.\n" +
+                    "- Otobüs, tramvay, tren ve metroda çalışır; özellikle uzun peronlarda faydalıdır.\n" +
                     "- Yalnızca şu anda yolcu alan bir araca zaten atanmış cimleri etkiler.\n" +
                     "- Vanilla cimleri ancak kalkış saatinde koşturmaya başlatır; bu bazen çok geç olabilir.\n" +
                     $"- <{ToggleName}> ile iyi çalışır; aracı kaçırıp yeniden atanması gereken cim sayısını azaltabilir.\n" +
@@ -147,8 +146,8 @@ namespace BetterBoarding
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)), "Cimler daha erken koşuyor" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)),
-                    "Etkinse [x], bugün otobüs, tramvay veya trene kalkıştan önce yetişmek için **daha erken koşmaya başlayan** tüm cimleri sayar.\n" +
-                    "Cimler vanilla'dan 512 kare daha erken koşar (gerçek zamanda ~2-8 saniye, oyun içinde ~2 dakika)."
+                    "Etkinse [x], bugün otobüs, tramvay, tren veya metroya kalkıştan önce yetişmek için **daha erken koşmaya başlayan** tüm cimleri sayar.\n" +
+                    "Cimler vanilla’dan 512 kare daha erken koşar (gerçek zamanda ~2-8 saniye, oyun içinde ~2 dakika)."
                 },
 
                 // Status rows
@@ -171,7 +170,7 @@ namespace BetterBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatsToLog)), "İstatistikleri günlüğe yaz" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatsToLog)),
                     "**BetterBoarding.log** dosyasına tek seferlik ayrıntılı rapor yazar.\n" +
-                    "Bekleyen toplamları, mod başına en kötü 3 durağı, atlanan cim örneklerini, entity ID'lerini ve hat ipuçlarını içerir."
+                    "Bekleyen toplamlarını, tür başına en kötü 3 durağı, atlanan cim örneklerini, entity ID’lerini ve hat ipuçlarını içerir."
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.OpenLog)), "Günlüğü aç" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.OpenLog)),
@@ -195,7 +194,7 @@ namespace BetterBoarding
                     "**Normal oyunda açık bırakmayın.**\n" +
                     "Açık bırakmak performansı düşürebilir ve çok büyük günlük dosyaları oluşturabilir.\n" +
                     "Eski günlük dosyalarını daha sonra silebilirsiniz.\n" +
-                    "Not: <Stats to Log>, o anlık bir rapor ve bugünkü geç-atlama sayaçlarıdır; ayrıntılı günlükten farklıdır.\n" +
+                    "Not: <İstatistikleri günlüğe yaz>, o anlık bir rapor ve bugünkü atlanan geç yolcu sayaçlarıdır; ayrıntılı günlükten farklıdır.\n" +
                     "Zaman içinde ne olduğunu görmek istiyorsanız ayrıntılı günlüğü 15-20 dakika çalıştırın.\n" +
                     "Normal oyuna dönmeden önce ayrıntılı günlüğü tekrar **KAPATMAYI** unutmayın."
                 },
@@ -209,19 +208,19 @@ namespace BetterBoarding
                 { WaitStatus.KeyStatusLateSkipped, "bugün {0} geç" },
                 { WaitStatus.KeyStatusSkipOff, "atlama KAPALI" },
 
-                { WaitStatus.KeyStatusOverviewLine, "{0} turist/ay | {1} vatandaş/ay | güncelleme {2}" },
+                { WaitStatus.KeyStatusOverviewLine, "{0} turist/ay | {1} vatandaş/ay | günc. {2}" },
                 { WaitStatus.KeyStatusRunSoonerLine, "{0}" },
                 { WaitStatus.KeyStatusRunSoonerOff, "erken koşma KAPALI" },
 
                 // Stats-to-log report strings
                 { WaitStatus.KeyReportNoCityLoaded, "[BBoard] İstatistik raporu istendi ama şehir yüklü değil." },
-                { WaitStatus.KeyReportTitle, "Stats to Log anlık görüntüsü - Better Boarding" },
+                { WaitStatus.KeyReportTitle, "İstatistik günlüğü anlık görüntüsü - Better Boarding" },
                 { WaitStatus.KeyReportSettings, "Ayarlar: {0}" },
-                { WaitStatus.KeyReportNote, "Hat ipucu, o duraktaki en yüksek beklemeye sahip waypoint'ten gelir." },
+                { WaitStatus.KeyReportNote, "Hat ipucu, o duraktaki en yüksek beklemeye sahip waypoint’ten gelir." },
                 { WaitStatus.KeyReportTesterHintsHeader, "Test ipuçları" },
                 { WaitStatus.KeyReportHintWorstStops, "En kötü duraklar: önce oyunda veya Scene Explorer moduyla inceleyin (entity ID ile bulun). Trafik, kötü durak konumu veya hatalı durak arayın." },
-                { WaitStatus.KeyReportHintSkippedCims, "Atlanan solo cimler: toplu taşımanın ayrılabilmesi için atladığımız geç yolcular. Sonraki durum genelde 'yolu var' veya 'atandı' olmalıdır. 'Henüz yol yok' kalırsa cimi biraz sonra tekrar inceleyin." },
-                { WaitStatus.KeyReportHintLateGroups, "Geç kalan gruplar (aileler): birlikte kalmaları için kasıtlı olarak vanilla'ya bırakılır; solo yolculara göre azdır." },
+                { WaitStatus.KeyReportHintSkippedCims, "Atlanan solo cimler: toplu taşımanın ayrılabilmesi için serbest bıraktığımız geç yolcular. Sonraki durum genelde 'has path' veya 'assigned' olmalıdır. 'no path yet' kalırsa cimi biraz sonra tekrar inceleyin." },
+                { WaitStatus.KeyReportHintLateGroups, "Geç kalan gruplar (aileler): rapor alındığı anda hâlâ çözülmemiş grupları gösterir. Better Boarding biraz ek süre verir; lider hâlâ dışarıdaysa grubu serbest bırakır, lider araçtaysa geride kalan üyelerin binişini vanilla üzerinden tamamlamaya yardım eder." },
                 { WaitStatus.KeyReportFamilyHeader, "{0}" },
                 { WaitStatus.KeyReportServedStops, "Hizmet verilen duraklar: {0}" },
                 { WaitStatus.KeyReportStopsWithWaiting, "Bekleyen yolcusu olan duraklar: {0}" },
@@ -237,8 +236,8 @@ namespace BetterBoarding
                 { WaitStatus.KeyReportWorstLineEntity, "En kötü hat entity: {0}" },
                 { WaitStatus.KeyReportWorstLineWaypointAverage, "En kötü hat waypoint ort.: {0}, bekleyen {1}" },
                 { WaitStatus.KeyReportTopWorstStopsHeader, "Ortalama beklemeye göre en kötü {0} durak:" },
-                { WaitStatus.KeyReportTopWorstStopLine, "{0}. {1} | ort. {2} | bekleyen {3} | durak entity {4} | waypoint entity {5} | hat entity {6} | hat ipucu {7}" },
-                { WaitStatus.KeyReportLateGroups, "Grup halinde seyahat eden geç cimlere dokunulmadı: {0} yolcu, {1} grup, {2} araç" },
+                { WaitStatus.KeyReportTopWorstStopLine, "{0}. {1} | ort. {2} | bekleyen {3} | durak {4} | waypoint {5} | hat {6} | ipucu {7}" },
+                { WaitStatus.KeyReportLateGroups, "Hâlâ çözülmemiş geç grup cimleri: {0} yolcu, {1} grup, {2} araç" },
                 { WaitStatus.KeyReportLastSkippedSamplesHeader, "Atlanan geç solo cim örnekleri" },
                 { WaitStatus.KeyReportLastSkippedSampleLine, "{0}. {1} | yolcu {2} | kaçırdığı araç {3} | saat {4} | şimdi {5}" },
                 { WaitStatus.KeyReportNone, "yok" },

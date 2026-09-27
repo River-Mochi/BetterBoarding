@@ -42,14 +42,42 @@ namespace BetterBoarding
         private long m_TotalRunSoonerAssists;
         private static bool s_FollowUpLegendLogged;
         private static bool s_RunSoonerFollowUpLegendLogged;
-        private int m_SkippedForTool;
         private bool m_LoggedActive;
 
         // Fixed-size storage for delayed follow-up checks. Reuse slots instead of allocating every update.
         private readonly FollowUpSample[] m_FollowUpSamples = new FollowUpSample[kMaxFollowUpSamples];
-        private readonly HashSet<Entity> m_LoggedRunSoonerSpeedPrefabs = new HashSet<Entity>();
+        private readonly HashSet<RunSoonerSpeedSampleKey> m_LoggedRunSoonerSpeedSamples =
+            new HashSet<RunSoonerSpeedSampleKey>();
         private int m_FollowUpCount;
         private int m_NextFollowUpSample;
+
+        private readonly struct RunSoonerSpeedSampleKey : IEquatable<RunSoonerSpeedSampleKey>
+        {
+            public RunSoonerSpeedSampleKey(TransportType transportType, Entity humanPrefab)
+            {
+                TransportType = transportType;
+                HumanPrefab = humanPrefab;
+            }
+
+            public TransportType TransportType { get; }
+
+            public Entity HumanPrefab { get; }
+
+            public bool Equals(RunSoonerSpeedSampleKey other)
+            {
+                return TransportType == other.TransportType && HumanPrefab == other.HumanPrefab;
+            }
+
+            public override bool Equals(object? obj)
+            {
+                return obj is RunSoonerSpeedSampleKey other && Equals(other);
+            }
+
+            public override int GetHashCode()
+            {
+                return ((int)TransportType * 397) ^ HumanPrefab.GetHashCode();
+            }
+        }
    
         private static double FramesToGameMinutes(uint frames)
         {
@@ -71,10 +99,10 @@ namespace BetterBoarding
             m_LoggedActive = true;
             LogUtils.Info(
                 Mod.s_Log,
-                () => $"Boarding assist active: every {GetUpdateInterval(SystemUpdatePhase.GameSimulation)} frames, cap={kMaxCancellationsPerUpdate} late solo cims/update, skipLateSoloCim={BoardingRuntimeSettings.CancelLateBoarders}, runSooner={BoardingRuntimeSettings.CimsRunSoonerToCatchBuses}");
+                () => $"Boarding assist active: every {GetUpdateInterval(SystemUpdatePhase.GameSimulation)} frames, cap={kMaxCancellationsPerUpdate} solo cancellations/update, skipLatePassengers={BoardingRuntimeSettings.CancelLateBoarders}, runSooner={BoardingRuntimeSettings.CimsRunSoonerToCatchBuses}");
         }
 
-        private void LogPassSummary(uint frame, PassStats stats, string reason)
+        private void LogPassSummary(uint frame, PassStats stats)
         {
             m_TotalCanceled += stats.Canceled;
             m_TotalRunSoonerAssists += stats.RunSoonerAssists;
@@ -100,15 +128,6 @@ namespace BetterBoarding
             }
 
             m_LastDiagnosticFrame = frame;
-            string activeTool = m_ToolSystem?.activeTool?.GetType().Name ?? "none";
-            if (reason == "paused-tool")
-            {
-                LogUtils.Info(
-                    Mod.s_Log,
-                    () => $"Boarding assist paused: activeTool={activeTool}, pauses={m_SkippedForTool}, totalSkipped={m_TotalCanceled}, totalRunSooner={m_TotalRunSoonerAssists}");
-                return;
-            }
-
             LogUtils.Info(
                 Mod.s_Log,
                 () => $"Boarding assist: vehicles={stats.Vehicles}, passengersScanned={stats.Passengers}, lateSolo={stats.Candidates}, skipped={stats.Canceled}, runFlagsSetByBB={stats.RunSoonerAssists}, totalSkipped={m_TotalCanceled}, totalRunSooner={m_TotalRunSoonerAssists}");
@@ -202,8 +221,11 @@ namespace BetterBoarding
                 return;
             }
 
-            // Log each loaded human prefab only once per city.
-            if (!m_LoggedRunSoonerSpeedPrefabs.Add(humanPrefab))
+            // A prefab may use several transit modes. Keep one sample per mode/prefab
+            // so an earlier bus or tram sample cannot hide train or subway evidence.
+            RunSoonerSpeedSampleKey sampleKey =
+                new RunSoonerSpeedSampleKey(transportType, humanPrefab);
+            if (!m_LoggedRunSoonerSpeedSamples.Add(sampleKey))
             {
                 return;
             }
@@ -274,7 +296,7 @@ namespace BetterBoarding
                 return;
             }
 
-            // The tool-paused path can reach diagnostics without running the main assist pass first.
+            // Follow-up checks read the same live ECS data and wait for earlier jobs too.
             CompleteBoardingAssistDependencies();
 
             TransitWaitStatusSystem followUpStatusSystem = World.GetOrCreateSystemManaged<TransitWaitStatusSystem>();
@@ -794,11 +816,10 @@ namespace BetterBoarding
             m_LastDiagnosticFrame = 0;
             m_TotalCanceled = 0;
             m_TotalRunSoonerAssists = 0;
-            m_SkippedForTool = 0;
             m_LoggedActive = false;
             m_FollowUpCount = 0;
             m_NextFollowUpSample = 0;
-            m_LoggedRunSoonerSpeedPrefabs.Clear();
+            m_LoggedRunSoonerSpeedSamples.Clear();
         }
     }
 }
