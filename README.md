@@ -34,4 +34,4 @@ Use only one boarding-behavior mod at a time. Do not use Better Boarding and All
 - bcallender's All Aboard and Wayze's InstantBoarding: inspiration
 - yenyang: testing and code feedback
 - 🎀 foxxy ✿, MayorCheeks, Gagaxm, Neco1996, Empiiey: testing
-- elGendo87: thumbnail straightener
+- elGendo87: thumbnail straightener, Spanish editor, testing.
