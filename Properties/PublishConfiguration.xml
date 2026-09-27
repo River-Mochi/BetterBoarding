@@ -95,7 +95,7 @@ tags: boarding time, bus stop, slow stuck transit, debunching, unbunching
 - Cims Run Sooner now supports Trains and Subways too (already did bus, trams).
 - Added handling for Late group/family members traveling together.
 - Improved boarding status and un-bunching diagnostics.
--  Updated for game patch 1.6.2.Renamed Fast Boarding to Better Boarding.
+- Updated for game patch 1.6.2.Renamed Fast Boarding to Better Boarding.
 </ChangeLog>
 <!--External link. supported types are discord, github, youtube, twitch, x, paypal, patreon, buymeacoffee, kofi, crowdin, gitlab-->
 <ExternalLink Type="github" Url="https://github.com/River-Mochi/BetterBoarding"/>
