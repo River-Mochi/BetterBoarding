@@ -128,7 +128,7 @@ namespace BetterBoarding
                     "- ถ้าหัวหน้ากลุ่มขึ้นรถแล้ว Better Boarding จะให้ vanilla จัดสมาชิกเด็ก/สัตว์เลี้ยงที่ตามหลังให้ขึ้นจนเสร็จ เพื่อไม่ให้คนเดียวค้างรถจนถึง timeout ยาวของ vanilla\n" +
                     "- พลเมืองที่ถูกข้ามจะไม่ถูกลบ vanilla จะให้เดินทางต่อหรือจัดเส้นทางใหม่ตามปกติ"
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cim วิ่งเร็วขึ้น: รถบัส + ระบบรางทั้งหมด" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cim วิ่งเร็วขึ้น (ดูคำอธิบาย แผงที่ 3)" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
                     "พลเมืองที่ <มาสาย> จะเริ่ม <วิ่งเร็วขึ้น> เพื่อพยายามไปถึง **ก่อน** เวลาออก\n" +
                     "- ใช้กับรถบัส รถราง รถไฟ และรถไฟใต้ดิน โดยเฉพาะชานชาลายาว ๆ\n" +
@@ -190,12 +190,13 @@ namespace BetterBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.EnableVerboseLogging)), "เปิด Log แบบละเอียด" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.EnableVerboseLogging)),
                     "**สำหรับดีบัก / ทดสอบเท่านั้น**\n" +
+                    "แนะนำให้ปล่อยไว้เป็น **OFF** ตลอด เว้นแต่คุณจะรู้ว่ามันใช้ทำอะไร\n" +
                     "เพิ่มรายละเอียด <สด> ลง <Logs/BetterBoarding.log> ขณะเมืองทำงาน\n" +
                     "**อย่าเปิดไว้ตอนเล่นปกติ**\n" +
                     "การเปิดทิ้งไว้อาจลดประสิทธิภาพและทำให้ไฟล์ log ใหญ่มาก\n" +
                     "ลบไฟล์ log เก่าได้ภายหลัง\n" +
-                    "หมายเหตุ: <บันทึกสถิติลง Log> เป็นรายงาน ณ เวลานั้นพร้อมตัวนับผู้โดยสารมาสายที่ถูกข้ามวันนี้ ซึ่งต่างจาก verbose log\n" +
-                    "เปิด verbose log 15-20 นาทีถ้าต้องการดูไทม์ไลน์ว่าเกิดอะไรขึ้น\n" +
+                    "หมายเหตุ: <บันทึกสถิติลง Log> เป็นรายงานสถานะตอนนี้พร้อมตัวนับผู้โดยสารมาสายที่ถูกข้ามวันนี้ จึงไม่มีผลต่อประสิทธิภาพแบบ verbose log\n" +
+                    "เปิด verbose log 10-15 นาทีถ้าต้องการดูไทม์ไลน์ แต่จะบันทึกข้อมูลจำนวนมาก\n" +
                     "อย่าลืมปิด verbose log ก่อนกลับไปเล่นปกติ"
                 },
 

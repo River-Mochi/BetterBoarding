@@ -128,7 +128,7 @@ namespace BetterBoarding
                     "- Nếu người dẫn nhóm đã lên xe, Better Boarding để vanilla hoàn tất việc lên xe cho trẻ em/thú cưng còn chậm để một người không giữ phương tiện đến timeout dài của vanilla.\n" +
                     "- Công dân đến trễ bị bỏ qua không bị xóa; vanilla có thể tiếp tục hành trình hoặc tự chuyển tuyến cho họ."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cim chạy sớm hơn: xe buýt + toàn bộ đường sắt" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cim chạy sớm hơn (xem chú thích, bảng thứ 3)" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
                     "Công dân <đến trễ> bắt đầu <chạy sớm hơn> để cố đến **trước** giờ khởi hành.\n" +
                     "- Hoạt động với xe buýt, tàu điện, tàu hỏa và metro, đặc biệt hữu ích ở sân ga dài.\n" +
@@ -190,12 +190,13 @@ namespace BetterBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.EnableVerboseLogging)), "Bật ghi log chi tiết" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.EnableVerboseLogging)),
                     "**Chỉ dành cho gỡ lỗi / thử nghiệm**\n" +
+                    "Nên luôn để **TẮT**, trừ khi bạn biết rõ tính năng này dùng để làm gì.\n" +
                     "Thêm chi tiết <trực tiếp> vào <Logs/BetterBoarding.log> khi thành phố đang chạy.\n" +
                     "**Không bật khi chơi bình thường.**\n" +
                     "Để bật có thể giảm hiệu năng và tạo tệp log rất lớn.\n" +
                     "Bạn có thể xóa các tệp log cũ sau.\n" +
-                    "Lưu ý: <Ghi thống kê vào Log> là báo cáo tại một thời điểm cộng bộ đếm hành khách trễ bị bỏ qua hôm nay; khác với verbose log.\n" +
-                    "Chạy verbose log 15-20 phút nếu muốn xem dòng thời gian những gì đã xảy ra.\n" +
+                    "Lưu ý: <Ghi thống kê vào Log> là báo cáo trạng thái hiện tại kèm bộ đếm hành khách trễ bị bỏ qua hôm nay; không ảnh hưởng hiệu năng như verbose log.\n" +
+                    "Chạy verbose log 10-15 phút nếu muốn xem dòng thời gian sự kiện, nhưng nó tạo ra rất nhiều dữ liệu.\n" +
                     "Đừng quên **TẮT** verbose log trước khi chơi bình thường."
                 },
 

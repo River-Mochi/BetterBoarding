@@ -128,7 +128,7 @@ namespace BetterBoarding
                     "- Se o líder já estiver a bordo, Better Boarding deixa o vanilla terminar o embarque de crianças/animais atrasados para que um único retardatário não prenda o veículo até ao longo timeout do vanilla.\n" +
                     "- Os cidadãos atrasados ignorados não são apagados; o vanilla pode continuar a viagem ou reencaminhá-los naturalmente."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cims correm mais cedo: autocarro + toda a rede ferroviária" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cims correm mais cedo (ver dica, 3.º painel)" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
                     "Cidadãos <atrasados> começam a <correr mais cedo> para tentar chegar **antes** da hora de partida.\n" +
                     "- Funciona com autocarros, elétricos, comboios e metro, sobretudo em plataformas longas.\n" +
@@ -190,12 +190,13 @@ namespace BetterBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.EnableVerboseLogging)), "Ativar registo detalhado" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.EnableVerboseLogging)),
                     "**Apenas debug / testes**\n" +
+                    "Recomendado manter sempre **OFF**, a menos que saiba para que serve.\n" +
                     "Adiciona detalhes <ao vivo> a <Logs/BetterBoarding.log> enquanto a cidade corre.\n" +
                     "**Não ative durante jogo normal.**\n" +
                     "Deixar isto ligado pode reduzir o desempenho e criar ficheiros de log enormes.\n" +
                     "Pode apagar ficheiros de log antigos mais tarde.\n" +
-                    "Nota: <Stats para o log> é um relatório pontual mais os contadores de passageiros atrasados ignorados hoje; é diferente do registo detalhado.\n" +
-                    "Use o registo detalhado durante 15-20 min se quiser uma linha temporal do que aconteceu.\n" +
+                    "Nota: <Stats para o log> é um relatório do momento com os contadores de passageiros atrasados ignorados hoje; não tem o impacto no desempenho do registo detalhado.\n" +
+                    "Use o registo detalhado durante 10-15 min se quiser uma linha temporal do que aconteceu, mas gera muitos dados.\n" +
                     "Não se esqueça de o desligar antes de jogar normalmente."
                 },
 

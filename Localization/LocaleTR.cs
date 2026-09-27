@@ -128,7 +128,7 @@ namespace BetterBoarding
                     "- Lider zaten araçtaysa Better Boarding, geride kalan çocuk/evcil hayvan üyelerinin binişini vanilla üzerinden tamamlatır; böylece tek bir kişi aracı vanilla’nın uzun timeout süresine kadar bekletmez.\n" +
                     "- Atlanan geç yolcular silinmez; vanilla yolculuklarını doğal şekilde sürdürebilir veya yeniden yönlendirebilir."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cimler daha erken koşsun: otobüs + tüm raylı sistem" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cimler daha erken koşsun (ipucuna bak, 3. panel)" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
                     "<Geç kalan> vatandaşlar kalkış saatinden **önce** yetişmeye çalışmak için <daha erken koşmaya> başlar.\n" +
                     "- Otobüs, tramvay, tren ve metroda çalışır; özellikle uzun peronlarda faydalıdır.\n" +
@@ -190,12 +190,13 @@ namespace BetterBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.EnableVerboseLogging)), "Ayrıntılı günlüğü etkinleştir" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.EnableVerboseLogging)),
                     "**Yalnızca hata ayıklama / test için**\n" +
+                    "Ne işe yaradığını bilmiyorsanız her zaman **KAPALI** tutmanız önerilir.\n" +
                     "Şehir çalışırken <Logs/BetterBoarding.log> dosyasına <canlı> ayrıntılar ekler.\n" +
                     "**Normal oyunda açık bırakmayın.**\n" +
                     "Açık bırakmak performansı düşürebilir ve çok büyük günlük dosyaları oluşturabilir.\n" +
                     "Eski günlük dosyalarını daha sonra silebilirsiniz.\n" +
-                    "Not: <İstatistikleri günlüğe yaz>, o anlık bir rapor ve bugünkü atlanan geç yolcu sayaçlarıdır; ayrıntılı günlükten farklıdır.\n" +
-                    "Zaman içinde ne olduğunu görmek istiyorsanız ayrıntılı günlüğü 15-20 dakika çalıştırın.\n" +
+                    "Not: <İstatistikleri günlüğe yaz>, şu anki durumu ve bugünkü atlanan geç yolcu sayaçlarını içeren bir rapordur; ayrıntılı günlük gibi performans etkisi oluşturmaz.\n" +
+                    "Zaman içinde ne olduğunu görmek istiyorsanız ayrıntılı günlüğü 10-15 dakika çalıştırın, ancak çok fazla veri oluşturur.\n" +
                     "Normal oyuna dönmeden önce ayrıntılı günlüğü tekrar **KAPATMAYI** unutmayın."
                 },
 

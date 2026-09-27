@@ -128,7 +128,7 @@ namespace BetterBoarding
                     "- 如果组长已经上车，Better Boarding 会让 vanilla 完成落后的儿童/宠物成员上车，避免一个人把车辆拖到 vanilla 的长时间 timeout。\n" +
                     "- 被跳过的迟到市民不会被删除；vanilla 可以让他们自然继续行程或重新规划路线。"
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "提前奔跑：公交 + 全部轨道交通" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "提前奔跑（见提示，第 3 面板）" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
                     "<迟到>市民会<提前奔跑>，尝试在发车时间**之前**赶到。\n" +
                     "- 适用于公交、有轨电车、火车和地铁，尤其适合较长站台。\n" +
@@ -190,12 +190,13 @@ namespace BetterBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.EnableVerboseLogging)), "启用详细日志" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.EnableVerboseLogging)),
                     "**仅用于调试 / 测试**\n" +
+                    "除非你清楚它的用途，否则建议始终保持 **OFF**。\n" +
                     "城市运行时向 <Logs/BetterBoarding.log> 添加 <live> 详细信息。\n" +
                     "**不要在正常游玩时启用。**\n" +
                     "保持开启可能降低性能并生成巨大的日志文件。\n" +
                     "以后可以删除旧日志文件。\n" +
-                    "注意：<统计写入日志> 是某一时刻的报告，加上今天的迟到跳过计数；它与详细日志不同。\n" +
-                    "如需查看事件时间线，请运行详细日志 15-20 分钟。\n" +
+                    "注意：<统计写入日志> 是当前状态报告，并包含今天的迟到跳过计数；它不会像详细日志那样持续影响性能。\n" +
+                    "如需查看事件时间线，可运行详细日志 10-15 分钟，但会产生大量数据。\n" +
                     "正常游玩前别忘了再次切回 **OFF**。"
                 },
 

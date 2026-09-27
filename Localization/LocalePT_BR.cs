@@ -128,7 +128,7 @@ namespace BetterBoarding
                     "- Se o líder já estiver a bordo, Better Boarding deixa o vanilla concluir o embarque de crianças/animais atrasados para que um único retardatário não segure o veículo até o longo timeout do vanilla.\n" +
                     "- Cidadãos atrasados pulados não são excluídos; vanilla pode continuar a viagem ou redirecioná-los naturalmente."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cims correm antes: ônibus + todos os trilhos" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cims correm antes (veja a dica, 3º painel)" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
                     "Cidadãos <atrasados> começam a <correr antes> para tentar chegar **antes** do horário de partida.\n" +
                     "- Funciona com ônibus, bondes, trens e metrôs, especialmente em plataformas longas.\n" +
@@ -190,12 +190,13 @@ namespace BetterBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.EnableVerboseLogging)), "Ativar log detalhado" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.EnableVerboseLogging)),
                     "**Somente debug / teste**\n" +
+                    "Recomendado deixar sempre **OFF**, a menos que você saiba para que serve.\n" +
                     "Adiciona detalhes <live> a <Logs/BetterBoarding.log> enquanto a cidade roda.\n" +
                     "**Não ative para jogo normal.**\n" +
                     "Deixar isso ligado pode reduzir o desempenho e criar arquivos de log enormes.\n" +
                     "Você pode excluir logs antigos depois.\n" +
-                    "Nota: <Stats para log> é um relatório pontual mais os contadores de passageiros atrasados pulados hoje; é diferente do log detalhado.\n" +
-                    "Execute o log detalhado por 15-20 min se quiser uma linha do tempo do que aconteceu.\n" +
+                    "Nota: <Stats para log> é um relatório do momento com os contadores de passageiros atrasados pulados hoje; não tem o impacto no desempenho do log detalhado.\n" +
+                    "Execute o log detalhado por 10-15 min se quiser uma linha do tempo do que aconteceu, mas ele gera muitos dados.\n" +
                     "Só não esqueça de voltar para **OFF** antes do jogo normal."
                 },
 
