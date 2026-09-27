@@ -134,7 +134,7 @@ namespace BetterBoarding
                     "- If the leader is already aboard, lagging child/pet members are finished aboard so one straggler cannot hold the vehicle for vanilla's long timeout.\n" +
                     "- Skipped late citizens are not deleted; vanilla can naturally continue or reroute them."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cims Run Sooner: Bus + All Rail" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cims Run Sooner (see tooltip, 3rd panel)" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
                     "Citizens who are <late> start <running sooner> to try to make it **before** departure time.\n" +
                     "- Works for buses, trams, trains, and subways, especially on long platforms.\n" +
@@ -196,12 +196,13 @@ namespace BetterBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.EnableVerboseLogging)), "Enable verbose logging" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.EnableVerboseLogging)),
                     "**Debug / Testing ONLY**\n" +
+                    "Recommended to KEEP OFF at all times unless you know what this is for.\n" +
                     "Adds <live> details to <Logs/BetterBoarding.log> while the city runs.\n" +
                     "**Do Not enable for normal gameplay.**\n" +
                     "Leaving this on can decrease performance and create huge log files.\n" +
                     "You can delete old log files later.\n" +
-                    "Note: <Stats to Log> is a point-in-time report plus today's late-skip counters so it's not have any performance concerns like Verbose logging does.\n" +
-                    "Run verbose logging for 10-20 min if you want a timeline of what happened over time.\n" +
+                    "Note: <Stats to Log> is right-now report with today's late-skip counters; it does not have the performance impact of Verbose logging.\n" +
+                    "Run verbose logging for 10-15 min if you want a timeline of what happened over time, but it's a lot of data.\n" +
                     "Important: Don't forget to turn **OFF** verbose again before normal gameplay."
                 },
 
