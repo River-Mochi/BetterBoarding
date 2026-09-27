@@ -62,6 +62,7 @@ This mod mostly targets citizen behavior as the bus schedule doesn't matter if a
 - yenyang (Anarchy) - code review/feedback and testing.
 - 🎀 foxxy ✿, MayorCheeks, Empiiey, Neco1996, Gagaxm - testing.
 - elGendo87 - Spanish editor, thumbnail straightener, testing.
+- Thumbnail is an edited version of the [Philidelphia train flap board.](https://www.inquirer.com/philly/news/20160828_Sign_of_the_times__At_30th_Street_Station__display_board_will_soon_be_no_more.html)
 
 ### 15+ Languages
 
@@ -107,8 +108,8 @@ tags: boarding time, bus stop issues, slow stuck transit, debunching, unbunching
 <Thumbnail Value="Properties/Thumbnail-Boarding.jpg"/>
 <!--Screenshot, can be set multiple times-->
 <Screenshot Value="Properties/image10-BoardingSpeed.jpg"/>
-<Screenshot Value="Properties/image30-Status.jpg"/>
 <Screenshot Value="Properties/image40-Languages.jpg"/>
+<Screenshot Value="Properties/image50-oshiya.jpg"/>
 <Screenshot Value="Properties/image60-senryu-BoardingFix.jpg"/>
 <!--Tag, can be set multiple times-->
 <Tag Value=""/>
