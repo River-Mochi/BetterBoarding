@@ -8,14 +8,15 @@
 <!--Long description of the mod. Single line or multi line. Supports minimal markdown subset-->
 <!--LongDescription Value="This is a long description" /-->
 <LongDescription>
-### Better public transit boarding
+#### Fix stuck transit, like Japanese oshiya👨‍✈️ pushers but in a mod 😊
 
-Vanilla can keep a vehicle stuck boarding past departure time while it waits for passengers — even if they are still far away. Vanilla's fallback can still take ~10 minutes past scheduled departure time.
+The game can keep a vehicle stuck boarding past departure time while it waits for passengers — even if they are still far away.
+Vanilla's fallback can still take ~10 minutes past scheduled departure time before it releases a stuck vehicle.
 
 #### Better Boarding helps way before that by reducing late-passenger delays to keep transit moving and help vanilla un-bunch vehicles.
 
 - Helps reduce transit delays, traffic backups, and vehicle bunching.
-- Especially useful in busy cities with lots of public transit.
+- Especially useful in busy cities.
 - ✅ Speeds up public transit boarding/loading with simple sliders.
 - ✅ Lets late cims miss a vehicle (if it's after departure time) so others are not held up.
 - ✅ Late cims can also start running sooner so they have a chance to catch their ride (bus + tram + train + subway).
@@ -27,11 +28,11 @@ Vanilla can keep a vehicle stuck boarding past departure time while it waits for
 - Groups/families are helped so one cim does not cause a long delay. This helps the vehicle leave instead of waiting up to 10 minutes for someone far away.
 
 ### Cims Run Sooner 🏃‍➡️🏃‍♀️‍➡️🏃‍♂️‍➡️ 🚍
-Bus + Tram + Train + Subway
 
 - ✅ When **Cims Run Sooner** is ON, the assigned but late passengers can start running a little sooner.
 - Vanilla starts cims running at departure time, which can be too late to help if they are not already at the stop/station.
 - Like real life, people start running from a block away, not just at the stop.
+- Bus, Tram, Train, or Subway
 - Helps reduce how many cims miss their ride and need to be reassigned. It does not change departure time, force boarding, or teleport citizens.
 
 ### Notes
@@ -43,7 +44,7 @@ Bus + Tram + Train + Subway
 
 ### Support and feedback
 - Support by clicking Like 👍 (top right); helps people know about the mod. No donations requested.
-- Feedback on GitHub and Discord links (buttons on the right). PRs welcome.
+- Feedback on GitHub and Discord links (icons on the right). PRs welcome.
 
 ### Credits and Thanks
 - River-Mochi - mod author
