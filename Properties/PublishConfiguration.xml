@@ -34,11 +34,11 @@ This mod mostly targets citizen behavior as the bus schedule doesn't matter if a
 - ✅ When **Cims Run Sooner** is ON, the assigned but late passengers can start running a little sooner.
 - Vanilla starts cims running at departure time, which can be too late if they are not already at the stop/station.
 - In real life, people start running from a block away, not just at the stop.
-- Bus, Tram, Train, or Subway
+- Helps with long train stations where cims are in a hang around area far from the train doors.
 - Helps reduce how many cims miss their ride and need to be reassigned; does not change schedules, or departure time - allows vanilla to safely finish transactions.
 
 ### Boarding/Loading
-- ✅ Adjust boarding/loading times.
+- ✅ Adjust boarding/loading times, helps with dwell time.
 - ✅ Lets late cims miss a vehicle (if it's after departure time) so others are not held up.
 - ✅ Late cims can also start running sooner so they have a chance to catch their ride (bus + tram + train + subway).
 - Helps reduce transit delays, traffic backups, and vehicle bunching. Even more useful in big cities with lots of public transit.
