@@ -195,14 +195,14 @@ namespace BetterBoarding
                 // Debug
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.EnableVerboseLogging)), "Enable verbose logging" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.EnableVerboseLogging)),
-                    "**Debug / testing only**\n" +
+                    "**Debug / Testing ONLY**\n" +
                     "Adds <live> details to <Logs/BetterBoarding.log> while the city runs.\n" +
-                    "**Do not enable for normal gameplay.**\n" +
+                    "**Do Not enable for normal gameplay.**\n" +
                     "Leaving this on can decrease performance and create huge log files.\n" +
                     "You can delete old log files later.\n" +
-                    "Note: <Stats to Log> is a point-in-time report plus today's late-skip counters; it is different than what is seen with verbose logs.\n" +
-                    "Run verbose logging for 15-20 min if you want a timeline of what happened over time.\n" +
-                    "Just don't forget to turn **OFF** verbose again before normal gameplay."
+                    "Note: <Stats to Log> is a point-in-time report plus today's late-skip counters so it's not have any performance concerns like Verbose logging does.\n" +
+                    "Run verbose logging for 10-20 min if you want a timeline of what happened over time.\n" +
+                    "Important: Don't forget to turn **OFF** verbose again before normal gameplay."
                 },
 
                 // Runtime status strings

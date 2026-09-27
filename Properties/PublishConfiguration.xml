@@ -4,7 +4,7 @@
 <!--Name of the mod to display to players-->
 <DisplayName Value="Better Boarding"/>
 <!--Short description of the mod-->
-<ShortDescription Value="Better Transit Boarding. Late solo passengers stop holding up vehicles, and cims may start running earlier to catch their bus, tram, or train. "/>
+<ShortDescription Value="Better Transit Boarding. Late passengers stop holding up vehicles. Cims may Run earlier to catch their Bus, Tram, Train, or Subway. "/>
 <!--Long description of the mod. Single line or multi line. Supports minimal markdown subset-->
 <!--LongDescription Value="This is a long description" /-->
 <LongDescription>
@@ -17,25 +17,26 @@ The game does not end boarding based on departure time, but rather waits for cim
 - Improve traffic, increase transit usage, reduce bunching of vehicles.
 - The larger your city, the more this mod will help.
 - ✅ Speeds up public transit boarding/loading with simple sliders.
-- ✅ Lets late solo cims miss a vehicle (if it's after departure time) so others are not held up.
-- ✅ Late cims can also start running sooner so they have a chance to catch their ride (bus + tram + train).
-- ✅ Adds compact Status info in Options menu and a detailed [Stats to Log] report.
+- ✅ Lets late cims miss a vehicle (if it's after departure time) so others are not held up.
+- ✅ Late cims can also start running sooner so they have a chance to catch their ride (bus + tram + train + subway).
+- ✅ Adds compact Status info in Options menu and a detailed [Stats to Log] report. Stats to log is on-demand button and does not affect performance.
 
 ### Skip Late Passengers
-- ✅ When **Skip Late Passengers** is enabled, late solo cims who are still **not ready** even after **departure time** can miss that vehicle instead of making everyone wait.
+- ✅ When **Skip Late Passengers** is enabled, late citizens who are still **not ready** even after **Departure time** can miss that vehicle instead of making everyone wait.
 - The cim is not deleted and the game can naturally reassign them.
+- Late Groups/families get help: if the leader is still outside, the group can be released together; if the leader is aboard, lagging family members can finish boarding.
 
 ### Cims Run sooner 🏃‍➡️🏃‍♀️‍➡️🏃‍♂️‍➡️ 🚍
-Bus + Tram + Train
+Bus + Tram + Train + Subway
 
 - ✅ When **Cims Run Sooner** is ON, the assigned but late passengers can start running a little sooner.
 - Vanilla starts cims running at departure time, which can be too late to help if they are not already at the stop/station.
 - Like real life, people start running from a block away, not just at the stop.
-- It reduces how many cims need to be reassigned later. Works for bus, tram, and train; does not change departure time, force boarding, or teleport citizens.
+- It reduces how many cims need to be reassigned later. Works for bus, tram, train, and subway; does not change departure time, force boarding, or teleport citizens.
 
 ### Status report included
 After the city runs a bit, check the Options menu to see current status.
-- *Skipped* shows how many late solo passengers have been skipped today (so they do not hold up transit).
+- *Skipped* shows how many late passengers have been skipped today (so they do not hold up transit).
 - Example usage: Worst stop shows 10+ minutes, check it for traffic, bad placement, not enough vehicles, or replace the stop.
 - This is a one-shot button that does not run in the city per-frame, so no real performance impact.
 - When checking things, I like to click the Stats button every ~20+ min, then compare the report later to see where the worst stops are and more (Scene Explorer mod helps locate the Entity ID numbers).
@@ -46,7 +47,6 @@ After the city runs a bit, check the Options menu to see current status.
 Some players report no issues with Smart Transportation + Better Boarding together.
 - Mod is intended to be a lighter, safer alternative than replacing the game's whole transport system files approach.
 - This mod works nicely with [All Transit + Trucks](https://mods.paradoxplaza.com/mods/138390/Windows) to solve many transit issues.
-- Future: Groups/families traveling together are left to vanilla methods so they are not split up (they are few in number and could still cause delays, more research needed for groups).
 - Safe to remove anytime. No Harmony patches; lightweight design for low overhead.
 
 ### Support and feedback
@@ -57,13 +57,19 @@ Some players report no issues with Smart Transportation + Better Boarding togeth
 - River-Mochi - mod author
 - Inspiration and thanks to bcallender's All Aboard mod and Wayze's InstantBoarding.
 - yenyang (Anarchy) - code review/feedback and testing.
-- MayorCheeks, Empiiey Neco1996, Gagaxm - testing
+- MayorCheeks, Empiiey, Neco1996, Gagaxm - testing
 - elGendo87 - Thumbnail straightener
 
 If you got this far, congrats, say hi, there is a senryu poem I wrote just for you in images. Click Like button, it's hard, I know, and so tiny.
 
 ### 15+ Languages
 Hello, Bonjour, Hallo, Hola, Ciao, 你好, 안녕하세요, Olá, 你好, こんにちは, Cześć, สวัสดี, Xin chào, Merhaba, Привіт
+
+
+### How does it work
+- Cims traveling as a group and is late:
+- If the leader remains outside, the group is safely released through vanilla.
+- If the leader is aboard, Better Boarding nudges vanilla to finish boarding lagging child or pet members.
 
 tags: boarding time, bus stop, slow stuck transit, debunching, unbunching
 
@@ -86,10 +92,10 @@ tags: boarding time, bus stop, slow stuck transit, debunching, unbunching
 <Dependency Id=""/>
 <!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
 <ChangeLog>
-- Cims Run Sooner now supports Trains.
-- Improved boarding status and diagnostics.
-- Updated for game patch 1.6.2.
-- Renamed Fast Boarding to now Better Boarding.
+- Cims Run Sooner now supports Trains and Subways too (already did bus, trams).
+- Added handling for Late group/family members traveling together.
+- Improved boarding status and un-bunching diagnostics.
+-  Updated for game patch 1.6.2.Renamed Fast Boarding to Better Boarding.
 </ChangeLog>
 <!--External link. supported types are discord, github, youtube, twitch, x, paypal, patreon, buymeacoffee, kofi, crowdin, gitlab-->
 <ExternalLink Type="github" Url="https://github.com/River-Mochi/BetterBoarding"/>
