@@ -128,7 +128,7 @@ namespace BetterBoarding
                     "- Jeśli lider jest już w pojeździe, Better Boarding pozwala vanilla dokończyć wejście spóźnionych dzieci/zwierząt, aby jedna osoba nie blokowała pojazdu aż do długiego timeoutu vanilla.\n" +
                     "- Pominięci spóźnieni mieszkańcy nie są usuwani; vanilla może naturalnie kontynuować lub wyznaczyć im nową trasę."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cimy biegną wcześniej: autobus + cała kolej" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cimy biegną wcześniej (patrz opis, 3. panel)" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
                     "Obywatele, którzy są <spóźnieni>, zaczynają <biec wcześniej>, aby zdążyć **przed** czasem odjazdu.\n" +
                     "- Działa dla autobusów, tramwajów, pociągów i metra, szczególnie na długich peronach.\n" +

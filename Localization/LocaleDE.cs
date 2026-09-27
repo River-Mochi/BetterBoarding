@@ -128,7 +128,7 @@ namespace BetterBoarding
                     "- Ist der Gruppenleiter bereits an Bord, lässt Better Boarding Vanilla nachhängende Kinder/Haustiere fertig einsteigen, damit ein einzelner Nachzügler das Fahrzeug nicht bis zum langen Vanilla-Timeout festhält.\n" +
                     "- Übersprungene verspätete Bürger werden nicht gelöscht; Vanilla kann ihre Reise normal fortsetzen oder sie neu routen."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cims laufen früher: Bus + alle Bahnen" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cims laufen früher (siehe Tooltip, 3. Bereich)" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
                     "Verspätete Bürger beginnen <früher zu laufen>, damit sie es **vor** der Abfahrtszeit schaffen.\n" +
                     "- Funktioniert für Busse, Straßenbahnen, Züge und U-Bahnen, besonders auf langen Bahnsteigen.\n" +

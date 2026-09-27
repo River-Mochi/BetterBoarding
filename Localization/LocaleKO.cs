@@ -128,7 +128,7 @@ namespace BetterBoarding
                     "- 리더가 이미 탑승했다면, 뒤처진 어린이/반려동물이 vanilla 방식으로 탑승을 마치도록 도와 한 명 때문에 긴 vanilla 타임아웃까지 차량이 붙잡히지 않게 합니다.\n" +
                     "- 건너뛴 늦은 시민은 삭제되지 않으며, vanilla가 자연스럽게 이동을 계속하거나 경로를 다시 잡습니다."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "더 일찍 달리기: 버스+철도 전체" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "더 일찍 달리기(도움말 참고, 세 번째 패널)" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
                     "<늦은> 시민이 출발 시간 **전**에 도착하도록 <더 일찍 달리기> 시작합니다.\n" +
                     "- 버스, 트램, 기차, 지하철에서 작동하며 특히 긴 승강장에서 유용합니다.\n" +

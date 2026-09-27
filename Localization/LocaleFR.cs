@@ -128,7 +128,7 @@ namespace BetterBoarding
                     "- Si le chef est déjà à bord, Better Boarding laisse vanilla terminer l’embarquement des enfants/animaux à la traîne afin qu’un seul retardataire ne bloque pas le véhicule jusqu’au long timeout vanilla.\n" +
                     "- Les citoyens en retard ignorés ne sont pas supprimés ; vanilla peut naturellement poursuivre ou recalculer leur trajet."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cims courent plus tôt : bus + tout le rail" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cims courent plus tôt (voir l’infobulle, 3e panneau)" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
                     "Les citoyens <en retard> commencent à <courir plus tôt> pour essayer d’arriver **avant** l’heure de départ.\n" +
                     "- Fonctionne pour les bus, trams, trains et métros, surtout sur les longs quais.\n" +

@@ -128,7 +128,7 @@ namespace BetterBoarding
                     "- Se il capogruppo è già a bordo, Better Boarding lascia che vanilla completi l’imbarco di bambini/animali rimasti indietro, così un solo ritardatario non blocca il veicolo fino al lungo timeout vanilla.\n" +
                     "- I cittadini in ritardo saltati non vengono eliminati; vanilla può continuare o ricalcolare naturalmente il loro viaggio."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cim corrono prima: bus + ferrovia" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "I cim corrono prima (vedi tooltip, 3° pannello)" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
                     "I cittadini <in ritardo> iniziano a <correre prima> per provare ad arrivare **prima** dell’orario di partenza.\n" +
                     "- Funziona con bus, tram, treni e metropolitane, soprattutto sulle banchine lunghe.\n" +

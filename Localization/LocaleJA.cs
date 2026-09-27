@@ -128,7 +128,7 @@ namespace BetterBoarding
                     "- リーダーがすでに乗車済みなら、遅れている子ども/ペットの乗車完了を vanilla に促し、1人の遅れで長い vanilla タイムアウトまで車両が止まらないようにします。\n" +
                     "- スキップされた遅れた市民は削除されません。vanilla が自然に移動を続けるか経路を再設定します。"
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "早めに走る: バス+鉄道全般" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "早めに走る（説明を参照、3番目のパネル）" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
                     "<遅れている>市民が出発時刻**前**に間に合うよう、<早めに走り始め>ます。\n" +
                     "- バス、トラム、列車、地下鉄で動作し、特に長いホームで有効です。\n" +

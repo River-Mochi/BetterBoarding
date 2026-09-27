@@ -128,7 +128,7 @@ namespace BetterBoarding
                     "- Si el líder ya está a bordo, Better Boarding deja que vanilla termine de subir a niños/mascotas rezagados para que uno solo no retenga el vehículo hasta el largo timeout de vanilla.\n" +
                     "- Los ciudadanos omitidos por llegar tarde no se eliminan; vanilla puede continuar su viaje o redirigirlos de forma natural."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cims corren antes: bus + red ferroviaria" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cims corren antes (ver descripción, 3.er panel)" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
                     "Los ciudadanos que van <tarde> empiezan a <correr antes> para intentar llegar **antes** de la hora de salida.\n" +
                     "- Funciona con buses, tranvías, trenes y metros, sobre todo en andenes largos.\n" +
