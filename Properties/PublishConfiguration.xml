@@ -19,7 +19,7 @@ The game can keep a vehicle stuck wait for passengers long past departure time �
 Vanilla only releases a stuck vehicle after ~10 minutes.
 └──────────────────────────────────────────────────────────────┘
 
-**Better Boarding helps before that by reducing Late Passenger delays to keep transit moving which in turn helps vanilla un-bunch vehicles.**
+**Better Boarding helps before that by reducing Late Passengers to keep transit moving which in turn helps vanilla un-bunch vehicles.**
 
 This mod mostly targets citizen behavior as the bus schedule doesn't matter if a cim 4 blocks away can stop the bus from leaving.
 
