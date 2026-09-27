@@ -11,14 +11,14 @@
 
 namespace BetterBoarding
 {
-    using System;           // DateTime
+    using System;               // DateTime
     using System.Collections.Generic; // HashSet
     using CS2Shared.RiverMochi; // LogUtils
-    using Game;             // GameSystemBase
-    using Game.Common;      // Deleted, Destroyed
-    using Game.Creatures;   // CurrentVehicle, CreatureVehicleFlags
-    using Game.Vehicles;    // PublicTransport, Passenger
-    using Unity.Entities;   // Entity
+    using Game;                 // GameSystemBase
+    using Game.Common;          // Deleted, Destroyed
+    using Game.Creatures;       // CurrentVehicle, CreatureVehicleFlags
+    using Game.Vehicles;        // PublicTransport, Passenger
+    using Unity.Entities;       // Entity
     using TransportType = Game.Prefabs.TransportType; // bus/train/etc.
 
     public partial class LateBoarderCancelSystem : GameSystemBase

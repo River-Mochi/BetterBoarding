@@ -19,7 +19,6 @@ namespace BetterBoarding
     using Game.Common;
     using Game.Creatures;
     using Game.Pathfind;
-    using Game.Simulation;
     using Game.Tools;
     using Game.Vehicles;
     using Unity.Collections;
@@ -51,7 +50,7 @@ namespace BetterBoarding
         private EntityQuery m_PathBufferQuery;
         private EntityQuery m_GroupCreatureQuery;
         private EntityQuery m_TransformQuery;
-        private SimulationSystem? m_SimulationSystem;
+        private Game.Simulation.SimulationSystem? m_SimulationSystem;
 
         public override int GetUpdateInterval(SystemUpdatePhase phase)
         {
@@ -62,7 +61,7 @@ namespace BetterBoarding
         protected override void OnCreate()
         {
             base.OnCreate();
-            m_SimulationSystem = World.GetOrCreateSystemManaged<SimulationSystem>();
+            m_SimulationSystem = World.GetOrCreateSystemManaged<Game.Simulation.SimulationSystem>();
 
             // Passenger is not required because some multi-car layouts store passengers on child vehicles.
             m_VehicleQuery = SystemAPI.QueryBuilder()
