@@ -20,18 +20,16 @@ Better Boarding mainly targets citizen behavior because the schedule does not he
 
 - Late solo passengers can miss the vehicle after departure instead of holding everyone.
 - Skipped cims are not deleted; vanilla can naturally reassign or reroute them.
-- If a family/group leader is still outside, the whole group can be released from that vehicle using vanilla behavior.
-- If the leader is already aboard, Better Boarding helps vanilla finish boarding a lagging child or pet so the family stays together and the vehicle can leave.
+- Families/groups are kept together where possible. If the leader is already aboard, a separated child or pet can be instantly placed on the same vehicle so it can leave.
 
 ### Cims Run Sooner
 
 Vanilla normally starts assigned late cims running at departure time, which can already be too late.
 
-Better Boarding lets assigned passengers start running 512 frames earlier for:
+Better Boarding starts assigned passengers running up to 512 frames earlier.
 
-- Bus, Tram, Train, or Subway
-
-It does not change schedules or departure times, force boarding, or teleport citizens.
+- Especially useful on long train/subway platforms when cims are hanging around far from the doors.
+- Run Sooner does not change schedules or departure times, force boarding, or teleport citizens.
 
 ### Safe Design
 
