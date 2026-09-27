@@ -190,12 +190,13 @@ namespace BetterBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.EnableVerboseLogging)), "詳細ログを有効化" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.EnableVerboseLogging)),
                     "**デバッグ / テスト専用**\n" +
+                    "用途が分かっている場合を除き、常に **OFF** のままにすることをおすすめします。\n" +
                     "都市実行中に <Logs/BetterBoarding.log> へ <live> 詳細を追加します。\n" +
                     "**通常プレイでは有効にしないでください。**\n" +
                     "有効のままにすると、性能が下がり、巨大なログファイルが作成されることがあります。\n" +
                     "古いログファイルは後で削除できます。\n" +
-                    "注: <Statsをログへ> は、その時点のレポートと今日の遅れた乗客スキップ数です。詳細ログとは異なります。\n" +
-                    "時間経過を見たい場合は、詳細ログを15～20分実行してください。\n" +
+                    "注: <Statsをログへ> は現在の状態と今日の遅れた乗客スキップ数を記録するレポートで、詳細ログのような継続的な性能への影響はありません。\n" +
+                    "時間経過を確認したい場合は詳細ログを10～15分実行できますが、多くのデータが記録されます。\n" +
                     "通常プレイ前に **OFF** に戻すのを忘れないでください。"
                 },
 

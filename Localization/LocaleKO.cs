@@ -190,12 +190,13 @@ namespace BetterBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.EnableVerboseLogging)), "자세한 로그 사용" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.EnableVerboseLogging)),
                     "**디버그 / 테스트 전용**\n" +
+                    "용도를 정확히 아는 경우가 아니라면 항상 **OFF**로 두는 것을 권장합니다.\n" +
                     "도시가 실행되는 동안 <Logs/BetterBoarding.log>에 <live> 세부 정보를 추가합니다.\n" +
                     "**일반 플레이에서는 켜지 마세요.**\n" +
                     "켜 둔 상태는 성능을 낮추고 거대한 로그 파일을 만들 수 있습니다.\n" +
                     "오래된 로그 파일은 나중에 삭제할 수 있습니다.\n" +
-                    "참고: <Stats를 로그로>는 특정 시점 보고서와 오늘의 늦은 승객 건너뛰기 카운터입니다. 자세한 로그와는 다릅니다.\n" +
-                    "시간 흐름을 보고 싶으면 자세한 로그를 15-20분 동안 실행하세요.\n" +
+                    "참고: <Stats를 로그로>는 현재 상태와 오늘의 늦은 승객 건너뛰기 카운터를 기록하는 보고서이며, 자세한 로그처럼 지속적인 성능 영향은 없습니다.\n" +
+                    "시간 흐름을 보고 싶으면 자세한 로그를 10-15분 동안 실행하세요. 다만 많은 데이터가 기록됩니다.\n" +
                     "일반 플레이 전에 다시 **OFF**로 바꾸는 것을 잊지 마세요."
                 },
 

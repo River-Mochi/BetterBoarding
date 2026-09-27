@@ -190,12 +190,13 @@ namespace BetterBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.EnableVerboseLogging)), "Ausführliches Logging aktivieren" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.EnableVerboseLogging)),
                     "**Nur Debug / Tests**\n" +
+                    "Am besten immer **AUS** lassen, außer du weißt genau, wofür es gedacht ist.\n" +
                     "Fügt <live>-Details zu <Logs/BetterBoarding.log> hinzu, während die Stadt läuft.\n" +
                     "**Nicht für normales Spielen aktivieren.**\n" +
                     "Aktiviert lassen kann die Leistung senken und riesige Logdateien erzeugen.\n" +
                     "Alte Logdateien können später gelöscht werden.\n" +
-                    "Hinweis: <Stats ins Log> ist ein Zeitpunktbericht plus heutige Zähler für übersprungene verspätete Fahrgäste; das ist etwas anderes als das ausführliche Log.\n" +
-                    "Für eine Zeitlinie der Ereignisse das ausführliche Logging 15-20 Min. laufen lassen.\n" +
+                    "Hinweis: <Stats ins Log> ist ein Bericht zum aktuellen Zeitpunkt mit den heutigen Zählern für übersprungene verspätete Fahrgäste; er hat nicht die Leistungsauswirkungen des ausführlichen Loggings.\n" +
+                    "Für eine Zeitlinie der Ereignisse das ausführliche Logging 10-15 Min. laufen lassen, aber dabei entstehen viele Daten.\n" +
                     "Vor normalem Spielen wieder **AUS** schalten."
                 },
 
