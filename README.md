@@ -21,7 +21,7 @@ Better Boarding mainly targets citizen behavior because the schedule does not he
 - Late solo passengers can miss the vehicle after departure instead of holding everyone.
 - Skipped cims are not deleted; vanilla can naturally reassign or reroute them.
 - If a family/group leader is still outside, the whole group can be released from that vehicle using vanilla behavior.
-- If the leader is already aboard, Better Boarding helps vanilla finish boarding a lagging child or pet.
+- If the leader is already aboard, Better Boarding helps vanilla finish boarding a lagging child or pet so the family stays together and the vehicle can leave.
 
 ### Cims Run Sooner
 

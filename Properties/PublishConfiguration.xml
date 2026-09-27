@@ -35,7 +35,7 @@ This mod mostly targets citizen behavior as the bus schedule doesn't matter if a
 - Vanilla starts cims running at departure time, which can be too late if they are not already at the stop/station.
 - In real life, people start running from a block away, not just at the stop.
 - Bus, Tram, Train, or Subway
-- Helps reduce how many cims miss their ride and need to be reassigned; does not change schedules, departure time, or teleport citizens.
+- Helps reduce how many cims miss their ride and need to be reassigned; does not change schedules, or departure time - allows vanilla to safely finish transactions.
 
 ### Boarding/Loading
 - ✅ Adjust boarding/loading times.
@@ -77,8 +77,8 @@ Better Boarding leaves vanilla transport, departure scheduling, and un-bunching 
 
 **Late groups/families**
 
-- If the leader remains outside, the whole group is released from that vehicle using vanilla methods.
-- If the leader is aboard, Better Boarding nudges the game's normal system to finish boarding a lagging child or pet.
+- If the leader is still outside, the whole group can miss the vehicle together (vanilla methods).
+- If the leader is already aboard, Better Boarding nudges the game's normal system to finish boarding a child/pet so the family stays together and the vehicle can leave.
 
 **Run Sooner**
 
