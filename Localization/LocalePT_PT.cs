@@ -7,7 +7,7 @@
 // ================= </copyright> ======================
 
 // File: Localization/LocalePT_PT.cs
-// Purpose: Portuguese (Portugal) pt-PT locale entries for Better Boarding.
+// Purpose: European Portuguese pt-PT locale entries for Better Boarding.
 
 namespace BetterBoarding
 {
@@ -15,14 +15,14 @@ namespace BetterBoarding
     using Colossal;
 
     /// <summary>
-    /// Portuguese (Portugal) localization source.
+    /// European Portuguese localization source.
     /// </summary>
     public sealed class LocalePT_PT : IDictionarySource
     {
         private readonly BBoardSettings m_Setting;
 
         /// <summary>
-        /// Constructs the Portuguese (Portugal) locale.
+        /// Constructs the European Portuguese locale.
         /// </summary>
         /// <param name="setting">Settings object used for locale IDs.</param>
         public LocalePT_PT(BBoardSettings setting)
@@ -31,7 +31,7 @@ namespace BetterBoarding
         }
 
         /// <summary>
-        /// Creates all Portuguese (Portugal) localization entries for this mod.
+        /// Creates all European Portuguese localization entries for this mod.
         /// </summary>
         public IEnumerable<KeyValuePair<string, string>> ReadEntries(
             IList<IDictionaryEntryError> errors,
@@ -47,7 +47,6 @@ namespace BetterBoarding
                     "<1x = vanilla>\n" +
                     extraLine +
                     $"Valores mais altos reduzem o tempo de embarque e carregamento em {transitName}.\n" +
-        
                     "Ajuda as filas normais a andar mais depressa, mas um passageiro atrasado ainda pode atrasar a partida devido ao funcionamento do vanilla.\n" +
                     $"Use [✓] <{ToggleName}> se quiser que cims atrasados possam perder o veículo depois da hora de partida.\n" +
                     "Os cidadãos atrasados ignorados não são apagados; o vanilla volta a encaminhá-los naturalmente.\n" +
@@ -70,7 +69,7 @@ namespace BetterBoarding
                     "**Pior** paragem = maior espera média numa só paragem.\n" +
                     "As piores paragens são bons locais para verificar acidentes, trânsito bloqueado, paragens com problemas ou falta de veículos.\n" +
                     $"**Atrasados hoje** = passageiros solo atrasados ignorados hoje por <{ToggleName}>.\n" +
-                    "Use <Stats to Log> para um relatório detalhado: nomes das paragens, IDs de entidades e mais.";
+                    "Use <Stats para o log> para um relatório detalhado: nomes das paragens, IDs de entidades e mais.";
             }
 
             return new Dictionary<string, string>
@@ -94,28 +93,28 @@ namespace BetterBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.BusBoardingSpeedFactor)), "Velocidade de embarque do autocarro" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.BusBoardingSpeedFactor)),
                     SpeedDescription(
-                        "paragem de autocarro",
+                        "paragens de autocarro",
                         "autocarro",
                         string.Empty)
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.RailBoardingSpeedFactor)), "Velocidade de embarque ferroviário" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.RailBoardingSpeedFactor)),
                     SpeedDescription(
-                        "paragem de comboio, elétrico e metro",
+                        "paragens de comboio, elétrico e metro",
                         "veículo",
                         "Aplica-se a paragens de comboio, elétrico e metro.\n")
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.WaterBoardingSpeedFactor)), "Velocidade de navio + ferry" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.WaterBoardingSpeedFactor)),
                     SpeedDescription(
-                        "paragem de navio e ferry",
+                        "paragens de navio e ferry",
                         "veículo",
                         "Aplica-se a paragens de navio e ferry.\n")
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)), "Velocidade de avião" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)),
                     SpeedDescription(
-                        "terminal de avião",
+                        "terminais de avião",
                         "avião",
                         "Aplica-se a terminais de aviões de passageiros.\n")
                 },
@@ -124,19 +123,19 @@ namespace BetterBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CancelLateBoarders)), ToggleName },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CancelLateBoarders)),
                     "<Passageiros atrasados> que continuem <não prontos> depois da <hora de partida> podem perder o veículo.\n" +
-                    "- Nota: só ignoramos cidadãos solo atrasados.\n" +
-                    "- Grupos/famílias que viajam juntos e estão atrasados <não são ignorados> e podem continuar a atrasar o transporte como no vanilla.\n" +
-                    "- Os grupos são uma pequena parte da multidão; a maior parte do benefício vem de ignorar cims solo atrasados.\n" +
-                    "- Os cidadãos atrasados ignorados não são apagados; o jogo volta a atribuí-los naturalmente."
+                    "- Passageiros solo atrasados são libertados após uma pequena tolerância para o transporte poder partir.\n" +
+                    "- Grupos/famílias recebem um pouco mais de tolerância. Se o líder ainda estiver fora, o grupo inteiro é libertado através do cancelamento de grupo do vanilla.\n" +
+                    "- Se o líder já estiver a bordo, Better Boarding deixa o vanilla terminar o embarque de crianças/animais atrasados para que um único retardatário não prenda o veículo até ao longo timeout do vanilla.\n" +
+                    "- Os cidadãos atrasados ignorados não são apagados; o vanilla pode continuar a viagem ou reencaminhá-los naturalmente."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cims correm mais cedo: Autocarro + elétrico + comboio" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cims correm mais cedo: autocarro + toda a rede ferroviária" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
                     "Cidadãos <atrasados> começam a <correr mais cedo> para tentar chegar **antes** da hora de partida.\n" +
-                    "- Funciona com autocarros, elétricos e comboios, sobretudo em plataformas de comboio longas.\n" +
+                    "- Funciona com autocarros, elétricos, comboios e metro, sobretudo em plataformas longas.\n" +
                     "- Só afeta cims já atribuídos a um veículo que está a embarcar.\n" +
                     "- No vanilla, os cims só começam a correr à hora de partida, o que pode ser tarde demais.\n" +
                     $"- Funciona bem com <{ToggleName}> porque pode reduzir quantos cims perdem o veículo e precisam de nova atribuição.\n" +
-                    "- Não altera a hora de partida do veículo, não força o embarque nem teletransporta cidadãos."
+                    "- Não altera a hora de partida, não força o embarque nem teletransporta cidadãos."
                 },
 
                 // Status overview
@@ -147,7 +146,7 @@ namespace BetterBoarding
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)), "Cims correm mais cedo" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)),
-                    "Se estiver ativo [x], conta todos os cims (hoje) que começaram a **correr mais cedo** para apanhar um autocarro, elétrico ou comboio antes da partida.\n" +
+                    "Se estiver ativo [x], conta todos os cims (hoje) que começaram a **correr mais cedo** para apanhar autocarro, elétrico, comboio ou metro antes da partida.\n" +
                     "Os cims correm 512 frames mais cedo do que no vanilla (~2-8 segundos mais cedo em tempo real, ~2 minutos no jogo)."
                 },
 
@@ -195,9 +194,9 @@ namespace BetterBoarding
                     "**Não ative durante jogo normal.**\n" +
                     "Deixar isto ligado pode reduzir o desempenho e criar ficheiros de log enormes.\n" +
                     "Pode apagar ficheiros de log antigos mais tarde.\n" +
-                    "Nota: <Stats to Log> é um relatório pontual mais os contadores de atrasados ignorados de hoje; é diferente do registo detalhado.\n" +
+                    "Nota: <Stats para o log> é um relatório pontual mais os contadores de passageiros atrasados ignorados hoje; é diferente do registo detalhado.\n" +
                     "Use o registo detalhado durante 15-20 min se quiser uma linha temporal do que aconteceu.\n" +
-                    "Não se esqueça de voltar a desligar o registo detalhado antes de jogar normalmente."
+                    "Não se esqueça de o desligar antes de jogar normalmente."
                 },
 
                 // Runtime status strings
@@ -209,19 +208,19 @@ namespace BetterBoarding
                 { WaitStatus.KeyStatusLateSkipped, "{0} atrasados hoje" },
                 { WaitStatus.KeyStatusSkipOff, "ignorar OFF" },
 
-                { WaitStatus.KeyStatusOverviewLine, "{0} turistas/mês | {1} cidadãos/mês | atualizado {2}" },
+                { WaitStatus.KeyStatusOverviewLine, "{0} turistas/mês | {1} cidadãos/mês | atual. {2}" },
                 { WaitStatus.KeyStatusRunSoonerLine, "{0}" },
-                { WaitStatus.KeyStatusRunSoonerOff, "correr mais cedo OFF" },
+                { WaitStatus.KeyStatusRunSoonerOff, "correr cedo OFF" },
 
                 // Stats-to-log report strings
                 { WaitStatus.KeyReportNoCityLoaded, "[BBoard] Relatório pedido, mas não há cidade carregada." },
-                { WaitStatus.KeyReportTitle, "Snapshot Stats to Log - Better Boarding" },
+                { WaitStatus.KeyReportTitle, "Snapshot Stats para o log - Better Boarding" },
                 { WaitStatus.KeyReportSettings, "Definições: {0}" },
                 { WaitStatus.KeyReportNote, "A pista de linha vem do waypoint com maior espera nessa paragem." },
                 { WaitStatus.KeyReportTesterHintsHeader, "Dicas para testes" },
-                { WaitStatus.KeyReportHintWorstStops, "Piores paragens: veja primeiro no jogo ou com o mod Scene Explorer (localize pelo ID da entidade). Procure trânsito, má localização da paragem ou uma paragem com problemas." },
-                { WaitStatus.KeyReportHintSkippedCims, "Cims solo ignorados: passageiros atrasados que ignoramos para deixar o transporte partir. Depois, o estado normalmente deve passar para 'tem caminho' ou 'atribuído'. Se continuar 'sem caminho', inspecione a entidade mais tarde." },
-                { WaitStatus.KeyReportHintLateGroups, "Grupos atrasados (famílias): deixados de propósito ao vanilla para ficarem juntos; são poucos comparados com muitos viajantes solo." },
+                { WaitStatus.KeyReportHintWorstStops, "Piores paragens: veja primeiro no jogo ou com o mod Scene Explorer (localize pelo ID da entidade). Procure trânsito, má localização ou uma paragem com problemas." },
+                { WaitStatus.KeyReportHintSkippedCims, "Cims solo ignorados: passageiros atrasados libertados para deixar o transporte partir. Depois, o estado normalmente deve passar para 'has path' ou 'assigned'. Se continuar 'no path yet', inspecione a entidade mais tarde." },
+                { WaitStatus.KeyReportHintLateGroups, "Grupos atrasados (famílias): mostra os grupos ainda por resolver no instante do relatório. Better Boarding dá-lhes uma pequena tolerância extra; se o líder ainda estiver fora, liberta o grupo, e se já estiver a bordo, ajuda o vanilla a terminar o embarque dos membros atrasados." },
                 { WaitStatus.KeyReportFamilyHeader, "{0}" },
                 { WaitStatus.KeyReportServedStops, "Paragens servidas: {0}" },
                 { WaitStatus.KeyReportStopsWithWaiting, "Paragens com passageiros à espera: {0}" },
@@ -237,8 +236,8 @@ namespace BetterBoarding
                 { WaitStatus.KeyReportWorstLineEntity, "Entidade da pior linha: {0}" },
                 { WaitStatus.KeyReportWorstLineWaypointAverage, "Média do waypoint da pior linha: {0} com {1} à espera" },
                 { WaitStatus.KeyReportTopWorstStopsHeader, "Top {0} piores paragens por espera média:" },
-                { WaitStatus.KeyReportTopWorstStopLine, "{0}. {1} | média {2} | à espera {3} | entidade paragem {4} | entidade waypoint {5} | entidade linha {6} | pista linha {7}" },
-                { WaitStatus.KeyReportLateGroups, "Cims atrasados em grupo deixados em paz: {0} passageiros em {1} grupos em {2} veículos" },
+                { WaitStatus.KeyReportTopWorstStopLine, "{0}. {1} | média {2} | à espera {3} | paragem {4} | waypoint {5} | linha {6} | pista {7}" },
+                { WaitStatus.KeyReportLateGroups, "Cims de grupos atrasados ainda por resolver: {0} passageiros em {1} grupos e {2} veículos" },
                 { WaitStatus.KeyReportLastSkippedSamplesHeader, "Exemplos de cims solo atrasados ignorados" },
                 { WaitStatus.KeyReportLastSkippedSampleLine, "{0}. {1} | passageiro {2} | veículo perdido {3} | hora {4} | agora {5}" },
                 { WaitStatus.KeyReportNone, "nenhum" },

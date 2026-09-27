@@ -34,8 +34,5 @@ Use only one boarding-behavior mod at a time, if you use this mod, don't use All
 - River-Mochi: mod author
 - bcallender's All Aboard and Wayze's InstantBoarding: inspiration
 - yenyang: testing and code feedback
-- Neco1996: testing
-- MayorCheeks: testing
-- gagaxm: testing
-- Empiiey: testing
+- MayorCheeks, Gagaxm, Neco1996, Empiiey: testing
 - elGaucho87: thumbnail straightener

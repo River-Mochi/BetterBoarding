@@ -39,11 +39,6 @@ namespace BetterBoarding
         {
             string title = Mod.ModName;
 
-            if (!string.IsNullOrEmpty(Mod.ModVersion))
-            {
-                title = title + " (" + Mod.ModVersion + ")";
-            }
-
             const string ToggleName = "늦은 승객 건너뛰기";
 
             string SpeedDescription(string transitName, string shortName, string extraLine)
@@ -52,18 +47,16 @@ namespace BetterBoarding
                     "<1x = vanilla>\n" +
                     extraLine +
                     $"값이 높을수록 {transitName}의 탑승 및 적재 시간이 줄어듭니다.\n" +
-                    $"3x가 권장 기본값입니다.\n" +
-                    $"5x가 최대값입니다.\n" +
-                    $"일반 대기열은 더 빨리 줄어들지만, vanilla 설계상 늦은 승객이 여전히 출발을 지연시킬 수 있습니다.\n" +
+                    "일반 대기열은 더 빨리 줄어들지만, vanilla 설계상 늦은 승객이 여전히 출발을 지연시킬 수 있습니다.\n" +
                     $"출발 시간 이후 늦은 cim이 차량을 놓치게 하려면 [✓] <{ToggleName}>를 사용하세요.\n" +
-                    $"건너뛴 늦은 시민은 삭제되지 않으며, 게임이 자연스럽게 경로를 다시 배정합니다.\n" +
+                    "건너뛴 늦은 시민은 삭제되지 않으며, vanilla가 자연스럽게 경로를 다시 잡습니다.\n" +
                     "<==========================>\n" +
                     "적재 값:\n" +
                     "1x = 100% vanilla 정차\n" +
                     "2x = 계획 정차의 약 1/2\n" +
                     "3x = 계획 정차의 약 1/3 (권장)\n" +
                     "5x = 계획 정차의 약 1/5 (최대)\n" +
-                    $"이것은 <{ToggleName}>와 같지 않습니다. 해당 체크박스는 출발 시간 이후 늦은 cim이 {shortName}을 놓칠 수 있는지를 결정합니다.";
+                    $"이것은 <{ToggleName}>와 다릅니다. 이 체크박스는 출발 시간 이후 늦은 cim이 {shortName}을 놓칠 수 있는지를 결정합니다.";
             }
 
             // One helper keeps all seven status tooltips in sync for future translations.
@@ -129,31 +122,31 @@ namespace BetterBoarding
                 // Late passenger behavior
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CancelLateBoarders)), ToggleName },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CancelLateBoarders)),
-                    "출발 시간 이후에도 <준비 안 됨> 상태인 늦은 승객은 차량을 놓칠 수 있습니다.\n" +
-                    "참고: 혼자 늦은 시민만 건너뜁니다.\n" +
-                    "함께 이동하는 그룹/가족이 늦은 경우에는 <건너뛰지 않으며>, vanilla처럼 대중교통 지연을 계속 일으킬 수 있습니다.\n" +
-                    "그룹은 군중의 작은 부분입니다. 대부분의 효과는 늦게 뛰어오는 혼자 cim을 건너뛰는 데서 옵니다.\n" +
-                    "건너뛴 늦은 시민은 삭제되지 않으며, 게임이 자연스럽게 다시 배정합니다."
+                    "<늦은 승객>이 <출발 시간> 이후에도 <준비 안 됨> 상태이면 차량을 놓칠 수 있습니다.\n" +
+                    "- 혼자 늦은 승객은 짧은 유예 후 해제되어 대중교통이 출발할 수 있습니다.\n" +
+                    "- 그룹/가족은 조금 더 유예를 받습니다. 리더가 아직 밖에 있으면 vanilla의 그룹 취소로 전체 그룹이 해제됩니다.\n" +
+                    "- 리더가 이미 탑승했다면, 뒤처진 어린이/반려동물이 vanilla 방식으로 탑승을 마치도록 도와 한 명 때문에 긴 vanilla 타임아웃까지 차량이 붙잡히지 않게 합니다.\n" +
+                    "- 건너뛴 늦은 시민은 삭제되지 않으며, vanilla가 자연스럽게 이동을 계속하거나 경로를 다시 잡습니다."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "더 일찍 달리기: 버스+트램+기차" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "더 일찍 달리기: 버스+철도 전체" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
-                    "<늦은> 시민이 출발 시간 **전**에 도착해 보도록 <더 일찍 달리기> 시작합니다.\n" +
-                    "버스, 트램, 기차가 일정대로 움직이는 데 도움을 주며, 특히 긴 기차 승강장에서 유용합니다.\n" +
-                    "현재 승차 중인 차량에 이미 배정된 cim에게만 적용됩니다.\n" +
-                    "바닐라는 출발 시간이 되어야 cim이 달리기 시작해서 너무 늦을 수 있습니다.\n" +
-                    $"<{ToggleName}>와 잘 맞으며, 차량을 놓쳐 다시 배정되어야 하는 cim 수를 줄일 수 있습니다.\n" +
-                    "차량 출발 시간을 바꾸거나 강제 승차 또는 시민 텔레포트를 하지 않습니다."
+                    "<늦은> 시민이 출발 시간 **전**에 도착하도록 <더 일찍 달리기> 시작합니다.\n" +
+                    "- 버스, 트램, 기차, 지하철에서 작동하며 특히 긴 승강장에서 유용합니다.\n" +
+                    "- 현재 탑승 중인 차량에 이미 배정된 cim에게만 적용됩니다.\n" +
+                    "- vanilla는 출발 시간이 되어야 cim이 달리기 시작해서 너무 늦을 수 있습니다.\n" +
+                    $"- <{ToggleName}>와 잘 맞으며 차량을 놓쳐 다시 배정되어야 하는 cim 수를 줄일 수 있습니다.\n" +
+                    "- 차량 출발 시간을 바꾸거나 강제 탑승 또는 시민 텔레포트를 하지 않습니다."
                 },
 
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusOverview)), "전체 이용량" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusOverview)),
                     "게임의 교통 정보 보기에서 가져온 월간 대중교통 이용량입니다.\n" +
-                    "업데이트 시간은 이 상태 스냅샷을 찍은 시각을 표시합니다(보통 옵션 메뉴에 들어간 뒤)."
+                    "업데이트 시간은 이 상태 스냅샷을 찍은 시각입니다(보통 옵션 메뉴에 들어간 뒤)."
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)), "cim 더 일찍 달리기" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)),
-                    "켜져 있으면 [x], 오늘 출발 전에 버스, 트램 또는 기차를 잡으려고 **더 일찍 달리기 시작한** cim을 셉니다.\n" +
+                    "켜져 있으면 [x], 오늘 출발 전에 버스, 트램, 기차, 지하철을 잡으려고 **더 일찍 달리기 시작한** cim을 셉니다.\n" +
                     "cim은 vanilla보다 512프레임 일찍 달립니다(실시간 약 2-8초 빠름, 게임 내 약 2분)."
                 },
 
@@ -177,12 +170,12 @@ namespace BetterBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatsToLog)), "Stats를 로그로" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatsToLog)),
                     "**BetterBoarding.log**에 일회성 자세한 보고서를 기록합니다.\n" +
-                    "대기 총합, 모드별 최악 정류장 Top 3, 건너뛴 cim 예시, 엔티티 ID, 노선 힌트를 포함합니다."
+                    "대기 총합, 교통수단별 최악 정류장 Top 3, 건너뛴 cim 예시, 엔티티 ID, 노선 힌트를 포함합니다."
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.OpenLog)), "로그 열기" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.OpenLog)),
                     "존재하면 **BetterBoarding.log**를 엽니다.\n" +
-                    "파일을 아직 찾을 수 없으면 Logs 폴더를 대신 엽니다."
+                    "파일이 아직 없으면 Logs 폴더를 대신 엽니다."
                 },
 
                 // About
@@ -201,7 +194,7 @@ namespace BetterBoarding
                     "**일반 플레이에서는 켜지 마세요.**\n" +
                     "켜 둔 상태는 성능을 낮추고 거대한 로그 파일을 만들 수 있습니다.\n" +
                     "오래된 로그 파일은 나중에 삭제할 수 있습니다.\n" +
-                    "참고: <Stats를 로그로>는 특정 시점 보고서와 오늘의 late-skip 카운터입니다.\n" +
+                    "참고: <Stats를 로그로>는 특정 시점 보고서와 오늘의 늦은 승객 건너뛰기 카운터입니다. 자세한 로그와는 다릅니다.\n" +
                     "시간 흐름을 보고 싶으면 자세한 로그를 15-20분 동안 실행하세요.\n" +
                     "일반 플레이 전에 다시 **OFF**로 바꾸는 것을 잊지 마세요."
                 },
@@ -226,8 +219,8 @@ namespace BetterBoarding
                 { WaitStatus.KeyReportNote, "노선 힌트는 해당 정류장에서 대기 시간이 가장 높은 waypoint에서 가져옵니다." },
                 { WaitStatus.KeyReportTesterHintsHeader, "테스터 힌트" },
                 { WaitStatus.KeyReportHintWorstStops, "최악 정류장: 먼저 게임 안이나 Scene Explorer 모드로 확인하세요(엔티티 ID로 위치 찾기). 교통, 나쁜 정류장 위치, 버그난 정류장을 확인하세요." },
-                { WaitStatus.KeyReportHintSkippedCims, "건너뛴 혼자 cim: 대중교통이 출발할 수 있도록 건너뛴 늦은 승객입니다. 이후 상태는 보통 'has path' 또는 'assigned'가 되어야 합니다. 'no path yet'에 머물면 시간이 더 지난 뒤 해당 cim 엔티티를 확인하세요." },
-                { WaitStatus.KeyReportHintLateGroups, "늦은 그룹(가족): 함께 있도록 의도적으로 바닐라에 맡겼습니다. 많은 단독 승객에 비해 적은 편입니다." },
+                { WaitStatus.KeyReportHintSkippedCims, "건너뛴 혼자 cim: 대중교통이 출발할 수 있도록 해제한 늦은 승객입니다. 이후 상태는 보통 'has path' 또는 'assigned'가 되어야 합니다. 'no path yet'에 머물면 시간이 더 지난 뒤 해당 cim 엔티티를 확인하세요." },
+                { WaitStatus.KeyReportHintLateGroups, "늦은 그룹(가족): 보고서를 찍는 순간 아직 해결되지 않은 그룹입니다. Better Boarding은 조금 더 유예를 주며, 리더가 밖에 있으면 그룹을 해제하고 이미 탑승했다면 vanilla가 뒤처진 멤버의 탑승을 마치도록 돕습니다." },
                 { WaitStatus.KeyReportFamilyHeader, "{0}" },
                 { WaitStatus.KeyReportServedStops, "운행 정류장: {0}" },
                 { WaitStatus.KeyReportStopsWithWaiting, "대기 승객이 있는 정류장: {0}" },
@@ -244,7 +237,7 @@ namespace BetterBoarding
                 { WaitStatus.KeyReportWorstLineWaypointAverage, "최악 노선 waypoint 평균: {0}, 대기 {1}" },
                 { WaitStatus.KeyReportTopWorstStopsHeader, "평균 대기 기준 최악 정류장 Top {0}:" },
                 { WaitStatus.KeyReportTopWorstStopLine, "{0}. {1} | 평균 {2} | 대기 {3} | 정류장 {4} | waypoint {5} | 노선 {6} | 힌트 {7}" },
-                { WaitStatus.KeyReportLateGroups, "그룹으로 이동 중인 늦은 cim은 그대로 둠: 승객 {0}명, 그룹 {1}개, 차량 {2}대" },
+                { WaitStatus.KeyReportLateGroups, "현재도 해결되지 않은 늦은 그룹 cim: 승객 {0}명, 그룹 {1}개, 차량 {2}대" },
                 { WaitStatus.KeyReportLastSkippedSamplesHeader, "건너뛴 혼자 늦은 cim 예시" },
                 { WaitStatus.KeyReportLastSkippedSampleLine, "{0}. {1} | 승객 {2} | 놓친 차량 {3} | 시간 {4} | 현재 {5}" },
                 { WaitStatus.KeyReportNone, "없음" },

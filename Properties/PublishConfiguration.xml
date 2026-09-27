@@ -57,7 +57,7 @@ Some players report no issues with Smart Transportation + Better Boarding togeth
 - River-Mochi - mod author
 - Inspiration and thanks to bcallender's All Aboard mod and Wayze's InstantBoarding.
 - yenyang (Anarchy) - code review/feedback and testing.
-- Empiiey, MayorCheeks, Neco1996, Gagaxm - testing
+- MayorCheeks, Empiiey Neco1996, Gagaxm - testing
 - elGendo87 - Thumbnail straightener
 
 If you got this far, congrats, say hi, there is a senryu poem I wrote just for you in images. Click Like button, it's hard, I know, and so tiny.
@@ -74,7 +74,6 @@ tags: boarding time, bus stop, slow stuck transit, debunching, unbunching
 <Screenshot Value="Properties/image10-BoardingSpeed.jpg"/>
 <Screenshot Value="Properties/image30-Status.jpg"/>
 <Screenshot Value="Properties/image60-senryu-BoardingFix.jpg"/>
-
 <!--Tag, can be set multiple times-->
 <Tag Value=""/>
 <!--Link to the forum post where the mod can be discussed-->
@@ -87,9 +86,9 @@ tags: boarding time, bus stop, slow stuck transit, debunching, unbunching
 <Dependency Id=""/>
 <!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
 <ChangeLog>
-- Updated for game patch 1.6.2.
 - Cims Run Sooner now supports Trains.
 - Improved boarding status and diagnostics.
+- Updated for game patch 1.6.2.
 - Renamed Fast Boarding to now Better Boarding.
 </ChangeLog>
 <!--External link. supported types are discord, github, youtube, twitch, x, paypal, patreon, buymeacoffee, kofi, crowdin, gitlab-->

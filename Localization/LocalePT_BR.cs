@@ -39,11 +39,6 @@ namespace BetterBoarding
         {
             string title = Mod.ModName;
 
-            if (!string.IsNullOrEmpty(Mod.ModVersion))
-            {
-                title = title + " (" + Mod.ModVersion + ")";
-            }
-
             const string ToggleName = "Pular passageiros atrasados";
 
             string SpeedDescription(string transitName, string shortName, string extraLine)
@@ -52,18 +47,16 @@ namespace BetterBoarding
                     "<1x = vanilla>\n" +
                     extraLine +
                     $"Valores maiores reduzem o tempo de embarque e carregamento em {transitName}.\n" +
-                    $"3x é o padrão recomendado.\n" +
-                    $"5x é o máximo.\n" +
-                    $"Isso ajuda filas normais a andar mais rápido, mas um passageiro atrasado ainda pode atrasar a partida por causa do design vanilla.\n" +
-                    $"Use [✓] <{ToggleName}> se quiser que cims atrasados percam o veículo depois do horário de partida.\n" +
-                    $"Cidadãos atrasados pulados não são excluídos; o jogo os redireciona naturalmente.\n" +
+                    "Isso ajuda as filas normais a andar mais rápido, mas um passageiro atrasado ainda pode atrasar a partida por causa do funcionamento vanilla.\n" +
+                    $"Use [✓] <{ToggleName}> se quiser que cims atrasados possam perder o veículo depois do horário de partida.\n" +
+                    "Cidadãos atrasados pulados não são excluídos; vanilla os redireciona naturalmente.\n" +
                     "<==========================>\n" +
                     "Valor de carregamento:\n" +
-                    "1x = 100% parada vanilla\n" +
+                    "1x = 100% da parada vanilla\n" +
                     "2x = ~1/2 da parada planejada\n" +
                     "3x = ~1/3 da parada planejada (recomendado)\n" +
                     "5x = ~1/5 da parada planejada (máx.)\n" +
-                    $"Isso não é a mesma coisa que <{ToggleName}>; essa caixa decide se cims atrasados podem perder o {shortName} depois do horário de partida.";
+                    $"Isso não é o mesmo que <{ToggleName}>; essa opção decide se cims atrasados podem perder o {shortName} depois do horário de partida.";
             }
 
             // One helper keeps all seven status tooltips in sync for future translations.
@@ -74,9 +67,9 @@ namespace BetterBoarding
                     "**Esperando** = total de passageiros esperando agora.\n" +
                     "**Média** = tempo médio de espera desses passageiros.\n" +
                     "**Pior** parada = maior espera média em uma parada.\n" +
-                    "As piores paradas são bons lugares para procurar acidentes, paradas bloqueadas/bugadas ou necessidade de mais veículos atribuídos.\n" +
+                    "As piores paradas são bons lugares para procurar acidentes, paradas bloqueadas/com problema ou falta de veículos atribuídos.\n" +
                     $"**Atrasados hoje** = passageiros solo atrasados pulados hoje por <{ToggleName}>.\n" +
-                    "Use <Stats para log> para relatório detalhado: nomes de paradas, IDs de entidades e mais.";
+                    "Use <Stats para log> para um relatório detalhado: nomes de paradas, IDs de entidades e mais.";
             }
 
             return new Dictionary<string, string>
@@ -100,60 +93,60 @@ namespace BetterBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.BusBoardingSpeedFactor)), "Velocidade do ônibus" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.BusBoardingSpeedFactor)),
                     SpeedDescription(
-                        "ponto de ônibus",
+                        "pontos de ônibus",
                         "ônibus",
                         string.Empty)
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.RailBoardingSpeedFactor)), "Velocidade ferroviária" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.RailBoardingSpeedFactor)),
                     SpeedDescription(
-                        "parada de trem, bonde e metrô",
+                        "paradas de trem, bonde e metrô",
                         "veículo",
                         "Aplica-se a paradas de trem, bonde e metrô.\n")
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.WaterBoardingSpeedFactor)), "Navio + balsa" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.WaterBoardingSpeedFactor)),
                     SpeedDescription(
-                        "parada de navio e balsa",
+                        "paradas de navio e balsa",
                         "veículo",
                         "Aplica-se a paradas de navio e balsa.\n")
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)), "Velocidade do avião" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)),
                     SpeedDescription(
-                        "terminal de avião",
+                        "terminais de avião",
                         "avião",
-                        "Aplica-se a terminais de avião de passageiros.\n")
+                        "Aplica-se a terminais de aviões de passageiros.\n")
                 },
 
                 // Late passenger behavior
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CancelLateBoarders)), ToggleName },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CancelLateBoarders)),
-                    "Passageiros atrasados que ainda estão <não prontos> depois do horário de partida podem perder o veículo.\n" +
-                    "Nota: pulamos apenas cidadãos solo atrasados.\n" +
-                    "Grupos/famílias viajando juntos que estão atrasados <não são pulados> e ainda podem causar atrasos como no vanilla.\n" +
-                    "Grupos são uma pequena parte da multidão; a maior parte do benefício vem de pular cims solo atrasados.\n" +
-                    "Cidadãos atrasados pulados não são excluídos; eles são naturalmente reatribuídos pelo jogo."
+                    "<Passageiros atrasados> que ainda estão <não prontos> depois do <horário de partida> podem perder o veículo.\n" +
+                    "- Passageiros solo atrasados são liberados após uma pequena tolerância para que o transporte possa partir.\n" +
+                    "- Grupos/famílias recebem um pouco mais de tolerância. Se o líder ainda estiver fora, o grupo inteiro é liberado pelo cancelamento de grupo do vanilla.\n" +
+                    "- Se o líder já estiver a bordo, Better Boarding deixa o vanilla concluir o embarque de crianças/animais atrasados para que um único retardatário não segure o veículo até o longo timeout do vanilla.\n" +
+                    "- Cidadãos atrasados pulados não são excluídos; vanilla pode continuar a viagem ou redirecioná-los naturalmente."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cims correm antes: ônibus + bondes + trens" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cims correm antes: ônibus + todos os trilhos" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
-                    "Cidadãos <atrasados> começam a <correr antes> para tentar chegar **antes** da hora de partida.\n" +
-                    "Ajuda ônibus, bondes e trens a manterem o horário, especialmente em plataformas longas.\n" +
-                    "Afeta apenas cims já atribuídos a um veículo que está embarcando.\n" +
-                    "No vanilla, os cims só começam a correr na hora de partida, o que pode ser tarde demais.\n" +
-                    $"Combina bem com <{ToggleName}> porque pode reduzir quantos cims perdem o veículo e precisam ser reatribuídos.\n" +
-                    "Não altera a hora de partida do veículo, não força embarque nem teleporta cidadãos."
+                    "Cidadãos <atrasados> começam a <correr antes> para tentar chegar **antes** do horário de partida.\n" +
+                    "- Funciona com ônibus, bondes, trens e metrôs, especialmente em plataformas longas.\n" +
+                    "- Afeta apenas cims já atribuídos a um veículo que está embarcando.\n" +
+                    "- No vanilla, os cims só começam a correr no horário de partida, o que pode ser tarde demais.\n" +
+                    $"- Combina bem com <{ToggleName}> porque pode reduzir quantos cims perdem o veículo e precisam ser reatribuídos.\n" +
+                    "- Não altera o horário de partida, não força embarque nem teleporta cidadãos."
                 },
 
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusOverview)), "Uso total" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusOverview)),
                     "Uso mensal do transporte público a partir da infoview Transporte do jogo.\n" +
-                    "O horário atualizado mostra quando este snapshot de status foi tirado (geralmente depois de entrar no menu Opções)."
+                    "O horário de atualização mostra quando este status foi registrado (geralmente ao entrar no menu Opções)."
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)), "Cims correm antes" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)),
-                    "Se ativado [x], conta todos os cims (hoje) que começaram a **correr antes** para tentar pegar um ônibus, bonde ou trem antes da partida.\n" +
+                    "Se ativado [x], conta todos os cims (hoje) que começaram a **correr antes** para tentar pegar ônibus, bonde, trem ou metrô antes da partida.\n" +
                     "Os cims correm 512 frames antes do vanilla (~2-8 segundos antes em tempo real, ~2 minutos no jogo)."
                 },
 
@@ -177,12 +170,12 @@ namespace BetterBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatsToLog)), "Stats para log" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatsToLog)),
                     "Escreve um relatório detalhado único em **BetterBoarding.log**.\n" +
-                    "Inclui totais de espera, top 3 piores paradas por modo, exemplos de cims pulados, IDs de entidades e dicas de linha."
+                    "Inclui totais de espera, as 3 piores paradas por modo, exemplos de cims pulados, IDs de entidades e dicas de linha."
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.OpenLog)), "Abrir log" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.OpenLog)),
                     "Abre **BetterBoarding.log** se existir.\n" +
-                    "Se o arquivo ainda não for encontrado, abre a pasta Logs."
+                    "Se o arquivo ainda não existir, abre a pasta Logs."
                 },
 
                 // About
@@ -201,7 +194,7 @@ namespace BetterBoarding
                     "**Não ative para jogo normal.**\n" +
                     "Deixar isso ligado pode reduzir o desempenho e criar arquivos de log enormes.\n" +
                     "Você pode excluir logs antigos depois.\n" +
-                    "Nota: <Stats para log> é um relatório pontual com os contadores de atrasados pulados de hoje; é diferente dos logs detalhados.\n" +
+                    "Nota: <Stats para log> é um relatório pontual mais os contadores de passageiros atrasados pulados hoje; é diferente do log detalhado.\n" +
                     "Execute o log detalhado por 15-20 min se quiser uma linha do tempo do que aconteceu.\n" +
                     "Só não esqueça de voltar para **OFF** antes do jogo normal."
                 },
@@ -215,7 +208,7 @@ namespace BetterBoarding
                 { WaitStatus.KeyStatusLateSkipped, "{0} atrasados hoje" },
                 { WaitStatus.KeyStatusSkipOff, "skip OFF" },
 
-                { WaitStatus.KeyStatusOverviewLine, "{0} turistas/mês | {1} cidadãos/mês | atualizado {2}" },
+                { WaitStatus.KeyStatusOverviewLine, "{0} turistas/mês | {1} cidadãos/mês | atual. {2}" },
                 { WaitStatus.KeyStatusRunSoonerLine, "{0}" },
                 { WaitStatus.KeyStatusRunSoonerOff, "correr antes OFF" },
 
@@ -225,9 +218,9 @@ namespace BetterBoarding
                 { WaitStatus.KeyReportSettings, "Configurações: {0}" },
                 { WaitStatus.KeyReportNote, "A dica de linha vem do waypoint com maior espera nessa parada." },
                 { WaitStatus.KeyReportTesterHintsHeader, "Dicas para testes" },
-                { WaitStatus.KeyReportHintWorstStops, "Piores paradas: inspecione primeiro no jogo ou com o mod Scene Explorer (encontre locais pelo ID da entidade). Procure trânsito, local ruim da parada ou parada bugada." },
-                { WaitStatus.KeyReportHintSkippedCims, "Cims solo pulados: passageiros atrasados que pulamos para permitir que o transporte saia. Depois, o estado normalmente deve virar 'has path' ou 'assigned'. Se ficar em 'no path yet', inspecione essa entidade cim depois de mais tempo." },
-                { WaitStatus.KeyReportHintLateGroups, "Grupos atrasados (famílias): deixados intencionalmente no vanilla para ficarem juntos e seguirem o comportamento vanilla; são poucos comparados a muitos viajantes sozinhos." },
+                { WaitStatus.KeyReportHintWorstStops, "Piores paradas: inspecione primeiro no jogo ou com o mod Scene Explorer (encontre locais pelo ID da entidade). Procure trânsito, localização ruim ou parada com problema." },
+                { WaitStatus.KeyReportHintSkippedCims, "Cims solo pulados: passageiros atrasados liberados para permitir que o transporte saia. Depois, o estado normalmente deve virar 'has path' ou 'assigned'. Se ficar em 'no path yet', inspecione essa entidade cim depois de mais tempo." },
+                { WaitStatus.KeyReportHintLateGroups, "Grupos atrasados (famílias): mostra grupos que ainda estão sem solução no instante do relatório. Better Boarding dá uma tolerância extra curta; se o líder ainda estiver fora, libera o grupo, e se já estiver a bordo, ajuda o vanilla a concluir o embarque dos membros atrasados." },
                 { WaitStatus.KeyReportFamilyHeader, "{0}" },
                 { WaitStatus.KeyReportServedStops, "Paradas atendidas: {0}" },
                 { WaitStatus.KeyReportStopsWithWaiting, "Paradas com passageiros esperando: {0}" },
@@ -244,7 +237,7 @@ namespace BetterBoarding
                 { WaitStatus.KeyReportWorstLineWaypointAverage, "Média do waypoint da pior linha: {0} com {1} esperando" },
                 { WaitStatus.KeyReportTopWorstStopsHeader, "Top {0} piores paradas por espera média:" },
                 { WaitStatus.KeyReportTopWorstStopLine, "{0}. {1} | méd. {2} | esperando {3} | parada {4} | waypoint {5} | linha {6} | dica {7}" },
-                { WaitStatus.KeyReportLateGroups, "Cims atrasados viajando em grupo deixados em paz: {0} passageiros em {1} grupos em {2} veículos" },
+                { WaitStatus.KeyReportLateGroups, "Cims de grupos atrasados ainda sem solução: {0} passageiros em {1} grupos e {2} veículos" },
                 { WaitStatus.KeyReportLastSkippedSamplesHeader, "Exemplos de cims solo atrasados pulados" },
                 { WaitStatus.KeyReportLastSkippedSampleLine, "{0}. {1} | passageiro {2} | veículo perdido {3} | hora {4} | agora {5}" },
                 { WaitStatus.KeyReportNone, "nenhum" },

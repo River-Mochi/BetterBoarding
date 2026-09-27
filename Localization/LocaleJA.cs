@@ -39,11 +39,6 @@ namespace BetterBoarding
         {
             string title = Mod.ModName;
 
-            if (!string.IsNullOrEmpty(Mod.ModVersion))
-            {
-                title = title + " (" + Mod.ModVersion + ")";
-            }
-
             const string ToggleName = "遅れた乗客をスキップ";
 
             string SpeedDescription(string transitName, string shortName, string extraLine)
@@ -52,11 +47,9 @@ namespace BetterBoarding
                     "<1x = vanilla>\n" +
                     extraLine +
                     $"値を上げると、{transitName}での乗車・積み込み時間が短くなります。\n" +
-                    $"3x が推奨デフォルトです。\n" +
-                    $"5x が最大です。\n" +
-                    $"通常の行列は早く解消されますが、vanilla の仕様により、遅れた乗客が出発を遅らせることはあります。\n" +
+                    "通常の行列は早く解消されますが、vanilla の仕様により、遅れた乗客が出発を遅らせることはあります。\n" +
                     $"出発時刻後に遅れた cim が車両を逃してよい場合は [✓] <{ToggleName}> を使ってください。\n" +
-                    $"スキップされた遅れた市民は削除されません。ゲームが自然に経路を再割り当てします。\n" +
+                    "スキップされた遅れた市民は削除されません。vanilla が自然に経路を再設定します。\n" +
                     "<==========================>\n" +
                     "読み込み値:\n" +
                     "1x = 100% vanilla 停車\n" +
@@ -74,7 +67,7 @@ namespace BetterBoarding
                     "**待機中** = 現在待っている乗客の合計。\n" +
                     "**平均** = その乗客たちの平均待ち時間。\n" +
                     "**最悪**停留所 = 1つの停留所で最も高い平均待ち時間。\n" +
-                    "最悪の停留所は、事故、詰まり/バグった停留所、割り当て車両不足を調べるのに向いています。\n" +
+                    "最悪の停留所は、事故、詰まり/不具合のある停留所、車両不足を確認するのに向いています。\n" +
                     $"**今日の遅れ** = <{ToggleName}> により今日スキップされた単独の遅れた乗客。\n" +
                     "<Statsをログへ> で、停留所名、エンティティIDなどを含む詳細レポートを出力します。";
             }
@@ -129,31 +122,31 @@ namespace BetterBoarding
                 // Late passenger behavior
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CancelLateBoarders)), ToggleName },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CancelLateBoarders)),
-                    "出発時刻後も <準備未完了> の遅れた乗客は、車両を逃すことがあります。\n" +
-                    "注: スキップするのは単独の遅れた市民のみです。\n" +
-                    "一緒に移動するグループ/家族が遅れている場合は <スキップされません>。vanilla と同じように交通機関を遅らせることがあります。\n" +
-                    "グループは群衆の一部にすぎません。主な効果は、遅れて走っている単独 cim のスキップから得られます。\n" +
-                    "スキップされた遅れた市民は削除されません。ゲームにより自然に再割り当てされます。"
+                    "<遅れた乗客>が<出発時刻>を過ぎても<準備未完了>なら、車両を逃すことがあります。\n" +
+                    "- 単独の遅れた乗客は短い猶予の後に解放され、交通機関が出発できるようになります。\n" +
+                    "- グループ/家族には少し長い猶予があります。リーダーがまだ外にいる場合は、vanilla のグループキャンセルで全員が解放されます。\n" +
+                    "- リーダーがすでに乗車済みなら、遅れている子ども/ペットの乗車完了を vanilla に促し、1人の遅れで長い vanilla タイムアウトまで車両が止まらないようにします。\n" +
+                    "- スキップされた遅れた市民は削除されません。vanilla が自然に移動を続けるか経路を再設定します。"
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "早めに走る: バス+トラム+列車" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "早めに走る: バス+鉄道全般" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
                     "<遅れている>市民が出発時刻**前**に間に合うよう、<早めに走り始め>ます。\n" +
-                    "バス、トラム、列車の定時運行を助けます。特に長い列車ホームで役立ちます。\n" +
-                    "現在乗車中の車両にすでに割り当てられている cim だけに影響します。\n" +
-                    "vanilla では出発時刻になってから cim が走り始めるため、遅すぎる場合があります。\n" +
-                    $"<{ToggleName}> と相性がよく、車両を逃して再割り当てが必要になる cim を減らせる場合があります。\n" +
-                    "車両の出発時刻を変更せず、強制乗車や市民のテレポートも行いません。"
+                    "- バス、トラム、列車、地下鉄で動作し、特に長いホームで有効です。\n" +
+                    "- 現在乗車中の車両にすでに割り当てられている cim だけに影響します。\n" +
+                    "- vanilla では出発時刻になってから cim が走り始めるため、遅すぎる場合があります。\n" +
+                    $"- <{ToggleName}> と相性がよく、車両を逃して再割り当てが必要になる cim を減らせる場合があります。\n" +
+                    "- 車両の出発時刻を変えず、強制乗車や市民のテレポートも行いません。"
                 },
 
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusOverview)), "総利用状況" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusOverview)),
                     "ゲームの交通インフォビューから取得した月間公共交通利用数。\n" +
-                    "更新時刻は、このステータス snapshot が取得された時刻です（通常はオプションメニューを開いた後）。"
+                    "更新時刻は、このステータスを取得した時刻です（通常はオプションメニューを開いた後）。"
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)), "早めに走る cim" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)),
-                    "有効 [x] の場合、今日、出発前にバス、トラム、列車へ間に合うよう **早めに走り始めた** cim を数えます。\n" +
+                    "有効 [x] の場合、今日、出発前にバス、トラム、列車、地下鉄へ間に合うよう **早めに走り始めた** cim を数えます。\n" +
                     "cim は vanilla より 512 フレーム早く走ります（実時間で約 2～8 秒早く、ゲーム内で約 2 分）。"
                 },
 
@@ -177,12 +170,12 @@ namespace BetterBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatsToLog)), "Statsをログへ" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatsToLog)),
                     "**BetterBoarding.log** に1回限りの詳細レポートを書き込みます。\n" +
-                    "待機合計、モードごとのワースト停留所上位3件、スキップされた cim 例、エンティティID、路線ヒントを含みます。"
+                    "待機合計、交通種別ごとのワースト停留所上位3件、スキップされた cim 例、エンティティID、路線ヒントを含みます。"
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.OpenLog)), "ログを開く" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.OpenLog)),
                     "存在する場合は **BetterBoarding.log** を開きます。\n" +
-                    "ファイルがまだ見つからない場合は、代わりに Logs フォルダーを開きます。"
+                    "まだファイルがない場合は、代わりに Logs フォルダーを開きます。"
                 },
 
                 // About
@@ -201,8 +194,8 @@ namespace BetterBoarding
                     "**通常プレイでは有効にしないでください。**\n" +
                     "有効のままにすると、性能が下がり、巨大なログファイルが作成されることがあります。\n" +
                     "古いログファイルは後で削除できます。\n" +
-                    "注: <Statsをログへ> は、その時点のレポートと今日の late-skip カウンターです。詳細ログとは異なります。\n" +
-                    "時間経過の流れを見たい場合は、詳細ログを15～20分実行してください。\n" +
+                    "注: <Statsをログへ> は、その時点のレポートと今日の遅れた乗客スキップ数です。詳細ログとは異なります。\n" +
+                    "時間経過を見たい場合は、詳細ログを15～20分実行してください。\n" +
                     "通常プレイ前に **OFF** に戻すのを忘れないでください。"
                 },
 
@@ -217,7 +210,7 @@ namespace BetterBoarding
 
                 { WaitStatus.KeyStatusOverviewLine, "{0} 観光客/月 | {1} 市民/月 | 更新 {2}" },
                 { WaitStatus.KeyStatusRunSoonerLine, "{0}" },
-                { WaitStatus.KeyStatusRunSoonerOff, "早走りOFF" },
+                { WaitStatus.KeyStatusRunSoonerOff, "早走り OFF" },
 
                 // Stats-to-log report strings
                 { WaitStatus.KeyReportNoCityLoaded, "[BBoard] 統計レポートが要求されましたが、都市が読み込まれていません。" },
@@ -225,9 +218,9 @@ namespace BetterBoarding
                 { WaitStatus.KeyReportSettings, "設定: {0}" },
                 { WaitStatus.KeyReportNote, "路線ヒントは、その停留所で最も待ち時間が高い waypoint から取得されます。" },
                 { WaitStatus.KeyReportTesterHintsHeader, "テスター向けヒント" },
-                { WaitStatus.KeyReportHintWorstStops, "最悪の停留所: まずゲーム内または Scene Explorer mod で確認してください（エンティティIDで場所を探せます）。交通、悪い停留所配置、バグった停留所を探します。" },
-                { WaitStatus.KeyReportHintSkippedCims, "スキップされた単独 cim: 交通機関を出発させるためにスキップした遅れた乗客です。後の状態は通常 'has path' または 'assigned' になります。'no path yet' のままなら、時間を置いてその cim エンティティを確認してください。" },
-                { WaitStatus.KeyReportHintLateGroups, "遅れたグループ（家族）: 一緒にいられるよう、意図的に vanilla に任せています。単独旅行者が多い中では少数です。" },
+                { WaitStatus.KeyReportHintWorstStops, "最悪の停留所: まずゲーム内または Scene Explorer mod で確認してください（エンティティIDで場所を探せます）。交通、悪い停留所配置、不具合のある停留所を確認します。" },
+                { WaitStatus.KeyReportHintSkippedCims, "スキップされた単独 cim: 交通機関を出発させるために解放した遅れた乗客です。後の状態は通常 'has path' または 'assigned' になります。'no path yet' のままなら、時間を置いてその cim エンティティを確認してください。" },
+                { WaitStatus.KeyReportHintLateGroups, "遅れたグループ（家族）: レポート取得時点でまだ未解決のグループです。Better Boarding は少し長い猶予を与え、リーダーが外ならグループを解放し、すでに乗車済みなら vanilla に遅れたメンバーの乗車完了を促します。" },
                 { WaitStatus.KeyReportFamilyHeader, "{0}" },
                 { WaitStatus.KeyReportServedStops, "提供中の停留所: {0}" },
                 { WaitStatus.KeyReportStopsWithWaiting, "待機乗客がいる停留所: {0}" },
@@ -244,7 +237,7 @@ namespace BetterBoarding
                 { WaitStatus.KeyReportWorstLineWaypointAverage, "最悪路線 waypoint 平均: {0}、待機 {1}" },
                 { WaitStatus.KeyReportTopWorstStopsHeader, "平均待ち時間による最悪停留所 Top {0}:" },
                 { WaitStatus.KeyReportTopWorstStopLine, "{0}. {1} | 平均 {2} | 待機 {3} | 停留所 {4} | waypoint {5} | 路線 {6} | ヒント {7}" },
-                { WaitStatus.KeyReportLateGroups, "グループで移動中の遅れた cim はそのまま: {0} 人、{1} グループ、{2} 台の車両" },
+                { WaitStatus.KeyReportLateGroups, "現在も未解決の遅れたグループ cim: {0}人、{1}グループ、{2}台の車両" },
                 { WaitStatus.KeyReportLastSkippedSamplesHeader, "スキップされた遅れた単独 cim の例" },
                 { WaitStatus.KeyReportLastSkippedSampleLine, "{0}. {1} | 乗客 {2} | 逃した車両 {3} | 時刻 {4} | 現在 {5}" },
                 { WaitStatus.KeyReportNone, "なし" },
