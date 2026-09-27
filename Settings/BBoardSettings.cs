@@ -36,6 +36,7 @@ namespace BetterBoarding
         public const string StatusButtonsRow = "StatusButtonsRow";
         public const string AboutInfoGroup = "ModInfo";
         public const string AboutLinksGroup = "Links";
+        public const string AboutLogButtonsRow = "AboutLogButtonsRow";
         public const string DebugGroup = "Debug";
 
         private const string kUrlParadox =
@@ -260,8 +261,27 @@ namespace BetterBoarding
         }
 
         [SettingsUISection(AboutTab, DebugGroup)]
+        [SettingsUIDisplayName("BetterBoarding.BetterBoarding.Mod.BBoardSettings.StatsToLog")]
+        [SettingsUIDescription("BetterBoarding.BetterBoarding.Mod.BBoardSettings.StatsToLog")]
+        [SettingsUIButtonGroup(AboutLogButtonsRow)]
+        [SettingsUIButton]
+        public bool StatsToLogAbout
+        {
+            set
+            {
+                if (!value)
+                {
+                    return;
+                }
+
+                WaitStatus.LogDetailedReport();
+            }
+        }
+
+        [SettingsUISection(AboutTab, DebugGroup)]
         [SettingsUIDisplayName("BetterBoarding.BetterBoarding.Mod.BBoardSettings.OpenLog")]
         [SettingsUIDescription("BetterBoarding.BetterBoarding.Mod.BBoardSettings.OpenLog")]
+        [SettingsUIButtonGroup(AboutLogButtonsRow)]
         [SettingsUIButton]
         public bool OpenLogAbout
         {
