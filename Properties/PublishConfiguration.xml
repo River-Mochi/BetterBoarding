@@ -24,9 +24,9 @@ Vanilla only releases a stuck vehicle after ~10 in-game minutes.
 
 ### 🏃‍➡️🏃‍♀️‍➡️🏃‍♂️‍➡️ 🚍 More Boarding
 
-- ✅ **Skip Late Passengers** — cims who still aren't ready after departure can miss that vehicle instead of holding it up. Groups/families are handled too.
+- ✅ **Skip Late Passengers** — cims who still aren't ready after known departure time can miss that vehicle instead of holding it up. Groups/families are handled too.
 - ✅ **Cims Run Sooner** — assigned passengers start running before vanilla normally tells them to.
-- ✅ **Helps long train platforms** — cims hanging around far from the doors get a head start instead of waiting until departure time to run. Vanilla doesn't start cims running until departure time.
+- ✅ **Helps long train platforms** — cims hanging around far from the doors get a head start instead of waiting until departure time to start running (vanilla behavior).
 - ✅ **Adjust Boarding/Loading** — shorten planned dwell/loading times from 1x vanilla up to 5x.
 - Late cims aren't deleted; the game can naturally continue or reroute them.
 
