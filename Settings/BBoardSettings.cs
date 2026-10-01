@@ -71,11 +71,6 @@ namespace BetterBoarding
         [SettingsUISetter(typeof(BBoardSettings), nameof(SetRailBoardingSpeedFactorLive))]
         public int RailBoardingSpeedFactor { get; set; }
 
-        // Legacy serialized property retained so older .coc files load safely.
-        // Ship and ferry stop tuning is no longer exposed or applied.
-        [SettingsUIHidden]
-        public int WaterBoardingSpeedFactor { get; set; }
-
         [SettingsUISlider(
             min = MinSpeedFactor,
             max = MaxSpeedFactor,
@@ -154,6 +149,16 @@ namespace BetterBoarding
         }
 
         [SettingsUISection(ActionsTab, StatusGroup)]
+        public string StatusAir
+        {
+            get
+            {
+                try { WaitStatus.RefreshIfNeeded(); } catch { }
+                return WaitStatus.AirSummary ?? string.Empty;
+            }
+        }
+
+        [SettingsUISection(ActionsTab, StatusGroup)]
         public string StatusFerry
         {
             get
@@ -170,16 +175,6 @@ namespace BetterBoarding
             {
                 try { WaitStatus.RefreshIfNeeded(); } catch { }
                 return WaitStatus.ShipSummary ?? string.Empty;
-            }
-        }
-
-        [SettingsUISection(ActionsTab, StatusGroup)]
-        public string StatusAir
-        {
-            get
-            {
-                try { WaitStatus.RefreshIfNeeded(); } catch { }
-                return WaitStatus.AirSummary ?? string.Empty;
             }
         }
 
@@ -371,7 +366,6 @@ namespace BetterBoarding
         {
             BusBoardingSpeedFactor = ClampSpeedFactor(BusBoardingSpeedFactor);
             RailBoardingSpeedFactor = ClampSpeedFactor(RailBoardingSpeedFactor);
-            WaterBoardingSpeedFactor = VanillaSpeedFactor;
             AirBoardingSpeedFactor = ClampSpeedFactor(AirBoardingSpeedFactor);
         }
 
@@ -475,7 +469,6 @@ namespace BetterBoarding
         {
             BusBoardingSpeedFactor = DefaultSpeedFactor;
             RailBoardingSpeedFactor = DefaultSpeedFactor;
-            WaterBoardingSpeedFactor = VanillaSpeedFactor;
             AirBoardingSpeedFactor = DefaultSpeedFactor;
             CancelLateBoarders = true;
             CimsRunSoonerToCatchBuses = true;

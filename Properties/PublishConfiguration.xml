@@ -118,7 +118,7 @@ tags: boarding time, bus stop issues, slow stuck transit, debunching, unbunching
 <Dependency Id=""/>
 <!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
 <ChangeLog>
-- Boarding speed changed to cover Bus, Trains, Trams, Subway, Airplane. Ships/ferries just use game's normal vanilla boarding speeds.
+- Removed boarding speed sliders for ships and ferries; Mod supports buses, trams, trains, subways, airplanes.
 - Added help for Late groups/family members traveling together.
 - Improved boarding status and un-bunching.
 - Works for game patch 1.6.2

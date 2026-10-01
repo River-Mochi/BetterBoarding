@@ -198,10 +198,6 @@ namespace BetterBoarding
                 case TransportType.Tram:
                 case TransportType.Subway:
                     return BoardingRuntimeSettings.RailBoardingSpeedFactor;
-                case TransportType.Ship:
-                case TransportType.Ferry:
-                    // Water transport remains at vanilla values.
-                    return BBoardSettings.VanillaSpeedFactor;
                 case TransportType.Airplane:
                     return BoardingRuntimeSettings.AirBoardingSpeedFactor;
                 default:
