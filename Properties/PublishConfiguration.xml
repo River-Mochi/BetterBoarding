@@ -12,13 +12,13 @@
 
 - Like Japanese oshiya 👨‍✈️ pushers, but in a mod 😊
 
-┌────────────────────────────────────────────────────────────┐
+┌─────────────────────────────────────────────────────────┐
 
 The game can keep transit stuck waiting long past departure time — even when the cim is far away!
 
 Vanilla only releases a stuck vehicle after ~10 in-game minutes.
 
-└────────────────────────────────────────────────────────────┘
+└─────────────────────────────────────────────────────────┘
 
 **Better Boarding steps in sooner so late passengers don't keep everyone waiting and transit keeps moving.**
 
@@ -58,10 +58,11 @@ Better Boarding leaves vanilla routes, schedules, and un-bunching in control. It
 - Late cims get a short grace after departure, then can miss that vehicle instead of holding everyone.
 - Families/groups are kept together where possible. If the leader is already aboard, a separated child or pet can be instantly placed on the same vehicle so it can leave.
 
-**Run Sooner**
+**Cims Run Sooner**
 
 - Vanilla normally waits until departure time before telling an assigned cim to run.
 - Better Boarding can start them running **512 frames earlier**, especially useful on long platforms.
+- Works with buses, trains, trams, subways.
 - Run Sooner itself does not change schedules or departure times.
 
 **Boarding / Loading speed**
@@ -106,19 +107,17 @@ tags: boarding time, bus stop issues, slow stuck transit, debunching, unbunching
 <!--Link to the forum post where the mod can be discussed-->
 <ForumLink Value="https://forum.paradoxplaza.com/forum/threads/fast-boarding.1918695/"/>
 <!--Version of the mod-->
-<ModVersion Value="1.2.1"/>
+<ModVersion Value="1.3.0"/>
 <!--Recommended version of the base game to use the mod-->
 <GameVersion Value="1.6.*"/>
 <!--Dependency for the mod, can be set multiple times-->
 <Dependency Id=""/>
 <!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
 <ChangeLog>
-- Spanish edits
-- Cims Run Sooner now supports Trains and Subways too (bus, trams were already supported).
+- Boarding speed changed to cover Bus, Trains, Trams, Subway, Airplane. Ships/ferries just use game's normal vanilla boarding speeds.
 - Added help for Late groups/family members traveling together.
-- Improved boarding status and un-bunching diagnostics.
-- Updated for game patch 1.6.2.
-- Renamed Fast Boarding to Better Boarding.
+- Improved boarding status and un-bunching.
+- Works for game patch 1.6.2
 </ChangeLog>
 <!--External link. supported types are discord, github, youtube, twitch, x, paypal, patreon, buymeacoffee, kofi, crowdin, gitlab-->
 <ExternalLink Type="github" Url="https://github.com/River-Mochi/BetterBoarding"/>

@@ -8,7 +8,7 @@ Better Boarding helps much sooner by improving late-passenger behavior while lea
 
 ### What It Does
 
-- Faster boarding/loading sliders for bus, rail, and airplane.
+- Faster Boarding/loading sliders for bus, rail, and airplane.
 - `Skip Late Passengers`: late solo cims can miss a vehicle after a short grace instead of holding everyone.
 - Groups/families get extra help so one lagging child, pet, or group member does not cause a long delay.
 - `Cims Run Sooner`: assigned late passengers start running earlier for bus, tram, train, and subway.
