@@ -104,13 +104,6 @@ namespace BetterBoarding
                         "车辆",
                         "适用于火车、有轨电车和地铁站。\n")
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.WaterBoardingSpeedFactor)), "船舶 + 渡轮速度" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.WaterBoardingSpeedFactor)),
-                    SpeedDescription(
-                        "船舶和渡轮站",
-                        "车辆",
-                        "适用于船舶和渡轮站。\n")
-                },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)), "飞机速度" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)),
                     SpeedDescription(

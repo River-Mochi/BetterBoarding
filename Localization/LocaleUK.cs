@@ -104,13 +104,6 @@ namespace BetterBoarding
                         "транспорт",
                         "Застосовується до зупинок потяга, трамвая й метро.\n")
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.WaterBoardingSpeedFactor)), "Швидкість корабля + порома" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.WaterBoardingSpeedFactor)),
-                    SpeedDescription(
-                        "зупинках корабля й порома",
-                        "транспорт",
-                        "Застосовується до зупинок кораблів і поромів.\n")
-                },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)), "Швидкість літака" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)),
                     SpeedDescription(

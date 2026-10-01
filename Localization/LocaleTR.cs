@@ -104,13 +104,6 @@ namespace BetterBoarding
                         "aracı",
                         "Tren, tramvay ve metro duraklarına uygulanır.\n")
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.WaterBoardingSpeedFactor)), "Gemi + feribot hızı" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.WaterBoardingSpeedFactor)),
-                    SpeedDescription(
-                        "gemi ve feribot durakları",
-                        "aracı",
-                        "Gemi ve feribot duraklarına uygulanır.\n")
-                },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)), "Uçak hızı" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)),
                     SpeedDescription(

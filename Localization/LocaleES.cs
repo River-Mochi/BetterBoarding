@@ -104,13 +104,6 @@ namespace BetterBoarding
                         "vehículo",
                         "Se aplica a paradas de tren, tranvía y metro.\n")
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.WaterBoardingSpeedFactor)), "Barco + ferry" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.WaterBoardingSpeedFactor)),
-                    SpeedDescription(
-                        "paradas de barco y ferry",
-                        "vehículo",
-                        "Se aplica a paradas de barco y ferry.\n")
-                },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)), "Velocidad de los aviones" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)),
                     SpeedDescription(

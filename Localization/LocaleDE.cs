@@ -104,13 +104,6 @@ namespace BetterBoarding
                         "Fahrzeug",
                         "Gilt für Zug-, Straßenbahn- und U-Bahn-Haltestellen.\n")
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.WaterBoardingSpeedFactor)), "Schiff + Fähre" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.WaterBoardingSpeedFactor)),
-                    SpeedDescription(
-                        "Schiffs- und Fährhaltestellen",
-                        "Fahrzeug",
-                        "Gilt für Schiffs- und Fährhaltestellen.\n")
-                },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)), "Flugzeug-Geschwindigkeit" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)),
                     SpeedDescription(

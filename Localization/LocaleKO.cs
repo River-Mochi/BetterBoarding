@@ -104,13 +104,6 @@ namespace BetterBoarding
                         "차량",
                         "기차, 트램, 지하철 정류장에 적용됩니다.\n")
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.WaterBoardingSpeedFactor)), "선박 + 페리 속도" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.WaterBoardingSpeedFactor)),
-                    SpeedDescription(
-                        "선박 및 페리 정류장",
-                        "차량",
-                        "선박 및 페리 정류장에 적용됩니다.\n")
-                },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)), "항공기 속도" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)),
                     SpeedDescription(

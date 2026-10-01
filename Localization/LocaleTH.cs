@@ -104,13 +104,6 @@ namespace BetterBoarding
                         "รถ",
                         "ใช้กับป้ายรถไฟ รถราง และรถไฟใต้ดิน\n")
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.WaterBoardingSpeedFactor)), "ความเร็วเรือ + เฟอร์รี" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.WaterBoardingSpeedFactor)),
-                    SpeedDescription(
-                        "ท่าเรือและเฟอร์รี",
-                        "รถ",
-                        "ใช้กับท่าเรือและเฟอร์รี\n")
-                },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)), "ความเร็วเครื่องบิน" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)),
                     SpeedDescription(

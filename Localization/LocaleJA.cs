@@ -104,13 +104,6 @@ namespace BetterBoarding
                         "車両",
                         "列車、トラム、地下鉄の停車場に適用されます。\n")
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.WaterBoardingSpeedFactor)), "船＋フェリー速度" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.WaterBoardingSpeedFactor)),
-                    SpeedDescription(
-                        "船・フェリー停留所",
-                        "車両",
-                        "船とフェリーの停留所に適用されます。\n")
-                },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)), "飛行機速度" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)),
                     SpeedDescription(

@@ -23,7 +23,6 @@ namespace BetterBoarding
         public static int LateBoarderRevision { get; private set; }
         public static int BusBoardingSpeedFactor { get; private set; } = BBoardSettings.DefaultSpeedFactor;
         public static int RailBoardingSpeedFactor { get; private set; } = BBoardSettings.DefaultSpeedFactor;
-        public static int WaterBoardingSpeedFactor { get; private set; } = BBoardSettings.DefaultSpeedFactor;
         public static int AirBoardingSpeedFactor { get; private set; } = BBoardSettings.DefaultSpeedFactor;
         public static bool CancelLateBoarders { get; private set; } = false;
         public static bool CimsRunSoonerToCatchBuses { get; private set; } = false;
@@ -34,7 +33,6 @@ namespace BetterBoarding
         {
             int bus = ClampSpeedFactor(settings.BusBoardingSpeedFactor);
             int rail = ClampSpeedFactor(settings.RailBoardingSpeedFactor);
-            int water = ClampSpeedFactor(settings.WaterBoardingSpeedFactor);
             int air = ClampSpeedFactor(settings.AirBoardingSpeedFactor);
 
             bool stopChanged = false;
@@ -48,12 +46,6 @@ namespace BetterBoarding
             if (RailBoardingSpeedFactor != rail)
             {
                 RailBoardingSpeedFactor = rail;
-                stopChanged = true;
-            }
-
-            if (WaterBoardingSpeedFactor != water)
-            {
-                WaterBoardingSpeedFactor = water;
                 stopChanged = true;
             }
 
@@ -116,19 +108,6 @@ namespace BetterBoarding
             return true;
         }
 
-        public static bool SetWaterBoardingSpeedFactor(int value)
-        {
-            value = ClampSpeedFactor(value);
-            if (WaterBoardingSpeedFactor == value)
-            {
-                return false;
-            }
-
-            WaterBoardingSpeedFactor = value;
-            StopTuningRevision++;
-            return true;
-        }
-
         public static bool SetAirBoardingSpeedFactor(int value)
         {
             value = ClampSpeedFactor(value);
@@ -181,7 +160,7 @@ namespace BetterBoarding
         {
             return
                 $"bus={BusBoardingSpeedFactor}x, rail={RailBoardingSpeedFactor}x, " +
-                $"ship+ferry={WaterBoardingSpeedFactor}x, air={AirBoardingSpeedFactor}x, " +
+                $"air={AirBoardingSpeedFactor}x, " +
                 $"skipLatePassengers={CancelLateBoarders}, " +
                 $"runSooner={CimsRunSoonerToCatchBuses}";
         }

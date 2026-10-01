@@ -104,13 +104,6 @@ namespace BetterBoarding
                         "pojazd",
                         "Dotyczy przystanków pociągów, tramwajów i metra.\n")
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.WaterBoardingSpeedFactor)), "Statek + prom" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.WaterBoardingSpeedFactor)),
-                    SpeedDescription(
-                        "przystankach statków i promów",
-                        "pojazd",
-                        "Dotyczy przystanków statków i promów.\n")
-                },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)), "Szybkość samolotów" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)),
                     SpeedDescription(

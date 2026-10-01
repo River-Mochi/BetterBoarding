@@ -104,13 +104,6 @@ namespace BetterBoarding
                         "phương tiện",
                         "Áp dụng cho điểm dừng tàu hỏa, tàu điện và metro.\n")
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.WaterBoardingSpeedFactor)), "Tốc độ tàu + phà" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.WaterBoardingSpeedFactor)),
-                    SpeedDescription(
-                        "điểm dừng tàu và phà",
-                        "phương tiện",
-                        "Áp dụng cho điểm dừng tàu và phà.\n")
-                },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)), "Tốc độ máy bay" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)),
                     SpeedDescription(
