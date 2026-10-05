@@ -10,7 +10,7 @@
 <LongDescription>
 #### Late Passengers stop holding up transit
 
-*   Like Japanese oshiya 👨‍✈️ pushers, but in a mod 😊
+* Like Japanese oshiya 👨‍✈️ pushers, but in a mod 😊
 
 ┌─────────────────────────────────────────────────────────┐
 
@@ -27,8 +27,8 @@ Vanilla only releases a stuck vehicle after ~10 in-game minutes.
 *   ✅ **Skip Late Passengers** — cims who still aren't ready after known departure time can miss that vehicle instead of holding it up. Groups/families are handled too.
 *   ✅ **Cims Run Sooner** — assigned passengers start running before vanilla normally tells them to.
 *   ✅ **Helps long train platforms** — cims hanging around far from the doors get a head start instead of waiting until departure time to start running (vanilla behavior).
-*   ✅ **Boarding/Loading** — adjust from **1x vanilla to 5x faster**, for shorter planned dwell/loading times.
-*   Vanilla may still **hold a vehicle briefly for spacing** them out as part of its un-bunching system.
+*   ✅ **Boarding/Loading** — adjust from **1x vanilla to 5x**, for shorter planned dwell/loading times.
+*   Vanilla may still **hold a vehicle briefly for spacing** as part of its un-bunching system.
 *   Late cims aren't deleted; the game can naturally continue or reroute them.
 
 Reduce boarding delays, traffic backups, and vehicles bunching up — especially in busy transit cities.
@@ -39,7 +39,7 @@ Reduce boarding delays, traffic backups, and vehicles bunching up — especially
 *   Some players report no issues using Smart Transportation with Better Boarding.
 *   Works nicely with [All Transit + Trucks](https://mods.paradoxplaza.com/mods/138390/Windows).
 *   Safe to remove anytime. No Harmony patches and no replacement of the game's transport systems.
-* This doesn't fix severe traffic or poor road design that causes transit vehicle backups.. This is a helper not a miracle :)
+*   This doesn't fix severe traffic or poor road design that causes transit vehicle backups. This is a helper, not a miracle :)
 
 ### Support and feedback
 
@@ -51,15 +51,18 @@ Reduce boarding delays, traffic backups, and vehicles bunching up — especially
 Better Boarding mainly fixes citizen behavior that can keep boarding open too long.
 
 **Late passengers / families**
+
 *   Late cims get a short grace after departure, then can miss that vehicle instead of holding everyone.
 *   Families/groups are kept together where possible. If the leader is already aboard, a separated child or pet can be **finished aboard** so one straggler doesn't hold it up.
 
 **Cims Run Sooner**
+
 *   Vanilla normally waits until departure time before telling an assigned cim to run.
 *   Better Boarding can start them running earlier (~2 - 8 seconds), especially useful on long platforms.
 *   Works with buses, trains, trams, subways.
 
 **Boarding / Loading speed**
+
 *   Changes stop/loading time.
 *   1x = vanilla, 3x = recommended, 5x = shortest dwell.
 *   This is separate from Skip Late and Run Sooner.
