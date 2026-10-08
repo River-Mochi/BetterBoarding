@@ -44,12 +44,8 @@ namespace BetterBoarding
         private const uint kLatePassengerCancelGraceFrames = 128u;
 
         private EntityQuery m_VehicleQuery;
-        private EntityQuery m_CurrentVehicleQuery;
-        private EntityQuery m_HumanResidentQuery;
-        private EntityQuery m_PassengerBufferQuery;
-        private EntityQuery m_PathBufferQuery;
-        private EntityQuery m_GroupCreatureQuery;
-        private EntityQuery m_TransformQuery;
+        private readonly HashSet<Entity> m_PendingCancellation = new HashSet<Entity>();
+        private readonly HashSet<Entity> m_CanceledPassengers = new HashSet<Entity>();
         private Game.Simulation.SimulationSystem? m_SimulationSystem;
 
         public override int GetUpdateInterval(SystemUpdatePhase phase)
@@ -67,26 +63,6 @@ namespace BetterBoarding
             m_VehicleQuery = SystemAPI.QueryBuilder()
                 .WithAll<Game.Vehicles.PublicTransport>()
                 .WithNone<Deleted, Destroyed, Temp, Overridden>()
-                .Build();
-
-            // These queries are only used to complete dependencies for data this system edits directly.
-            m_CurrentVehicleQuery = SystemAPI.QueryBuilder()
-                .WithAll<CurrentVehicle>()
-                .Build();
-            m_HumanResidentQuery = SystemAPI.QueryBuilder()
-                .WithAll<Human, Game.Creatures.Resident>()
-                .Build();
-            m_PassengerBufferQuery = SystemAPI.QueryBuilder()
-                .WithAll<Passenger>()
-                .Build();
-            m_PathBufferQuery = SystemAPI.QueryBuilder()
-                .WithAll<PathOwner, PathElement>()
-                .Build();
-            m_GroupCreatureQuery = SystemAPI.QueryBuilder()
-                .WithAll<GroupCreature>()
-                .Build();
-            m_TransformQuery = SystemAPI.QueryBuilder()
-                .WithAll<Game.Objects.Transform>()
                 .Build();
 
             RequireForUpdate(m_VehicleQuery);
@@ -120,7 +96,7 @@ namespace BetterBoarding
                 LogActiveOnce();
 
                 // Active game tools do not require pausing this GameSimulation pass.
-                // ECS dependencies are completed before the boarding-assist data is read or edited.
+                // ECS dependencies are synchronized only when each required data type is accessed.
                 // One pass handles both behavior toggles, then older samples are checked separately.
                 PassStats stats = RunCancellationPass();
                 uint currentFrame = m_SimulationSystem?.frameIndex ?? 0;
@@ -175,17 +151,19 @@ namespace BetterBoarding
             uint frame = m_SimulationSystem?.frameIndex ?? 0;
             bool cancelLateBoarders = BoardingRuntimeSettings.CancelLateBoarders;
             bool cimsRunSoonerToCatchBuses = BoardingRuntimeSettings.CimsRunSoonerToCatchBuses;
-            HashSet<Entity> pendingCancellation = new HashSet<Entity>();
-            HashSet<Entity> canceledPassengers = new HashSet<Entity>();
+            HashSet<Entity> pendingCancellation = m_PendingCancellation;
+            HashSet<Entity> canceledPassengers = m_CanceledPassengers;
+
+            // Reuse managed sets across passes so this hot path creates no recurring GC work.
+            pendingCancellation.Clear();
+            canceledPassengers.Clear();
 
             try
             {
-                // This pass reads vehicle/passenger data directly on the main thread.
-                // Safety: wait for earlier ECS jobs touching the same vehicle/passenger/path data first.
-                CompleteBoardingAssistDependencies();
+                // Gather entity IDs without pre-completing city-wide component sets. EntityManager
+                // accessors below synchronize each component type lazily, after a relevant boarding
+                // vehicle is found, instead of draining human/path jobs on every assist pass.
                 vehicles = m_VehicleQuery.ToEntityArray(Allocator.Temp);
-                ecb = new EntityCommandBuffer(Allocator.Temp);
-                hasCommandBuffer = true;
 
                 foreach (Entity vehicleEntity in vehicles)
                 {
@@ -223,6 +201,7 @@ namespace BetterBoarding
                             publicTransport,
                             frame,
                             latestDepartureFrame,
+                            ref hasCommandBuffer,
                             ref sampledRunSoonerSoloPassengerCount,
                             ref sampledRunSoonerGroupCount);
                         runSoonerAssists += queuedRunSooner;
@@ -254,7 +233,7 @@ namespace BetterBoarding
 
                     bool hasPassengerBuffer = EntityManager.HasBuffer<Passenger>(vehicleEntity);
                     DynamicBuffer<Passenger> passengers = hasPassengerBuffer
-                        ? EntityManager.GetBuffer<Passenger>(vehicleEntity)
+                        ? EntityManager.GetBuffer<Passenger>(vehicleEntity, isReadOnly: true)
                         : default;
 
                     if (!hasPassengerBuffer || passengers.Length == 0)
@@ -318,7 +297,11 @@ namespace BetterBoarding
                             break;
                         }
 
-                        if (QueuePassengerCancellation(ref ecb, vehicleEntity, passenger))
+                        if (QueuePassengerCancellation(
+                                ref ecb,
+                                ref hasCommandBuffer,
+                                vehicleEntity,
+                                passenger))
                         {
                             canceledPassengers.Add(passenger);
                             cancellationsThisUpdate++;
@@ -364,8 +347,11 @@ namespace BetterBoarding
                     }
                 }
 
-                // Mutate after scanning so buffers/components are not edited while enumerated.
-                ecb.Playback(EntityManager);
+                if (hasCommandBuffer)
+                {
+                    // Mutate after scanning so buffers/components are not edited while enumerated.
+                    ecb.Playback(EntityManager);
+                }
 
                 // Update UI counters only after all queued ECS edits have succeeded.
                 RecordCanceledCounts(
@@ -413,17 +399,6 @@ namespace BetterBoarding
                     vehicles.Dispose();
                 }
             }
-        }
-
-        private void CompleteBoardingAssistDependencies()
-        {
-            m_VehicleQuery.CompleteDependency();
-            m_CurrentVehicleQuery.CompleteDependency();
-            m_HumanResidentQuery.CompleteDependency();
-            m_PassengerBufferQuery.CompleteDependency();
-            m_PathBufferQuery.CompleteDependency();
-            m_GroupCreatureQuery.CompleteDependency();
-            m_TransformQuery.CompleteDependency();
         }
 
         private static bool IsRealGameLoad(Purpose purpose, GameMode mode)

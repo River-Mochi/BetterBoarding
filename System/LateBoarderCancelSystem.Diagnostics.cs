@@ -49,6 +49,7 @@ namespace BetterBoarding
         private readonly HashSet<RunSoonerSpeedSampleKey> m_LoggedRunSoonerSpeedSamples =
             new HashSet<RunSoonerSpeedSampleKey>();
         private int m_FollowUpCount;
+        private int m_ActiveFollowUpCount;
         private int m_NextFollowUpSample;
 
         private readonly struct RunSoonerSpeedSampleKey : IEquatable<RunSoonerSpeedSampleKey>
@@ -78,7 +79,7 @@ namespace BetterBoarding
                 return ((int)TransportType * 397) ^ HumanPrefab.GetHashCode();
             }
         }
-   
+
         private static double FramesToGameMinutes(uint frames)
         {
             return frames * 1440.0 / 262144.0;
@@ -151,10 +152,12 @@ namespace BetterBoarding
                     frame,
                     DateTime.Now);
 
-            if (m_FollowUpCount < m_FollowUpSamples.Length)
+            if (slot >= m_FollowUpCount)
             {
-                m_FollowUpCount++;
+                m_FollowUpCount = slot + 1;
             }
+
+            m_ActiveFollowUpCount++;
         }
 
         private void TrackRunSoonerFollowUpSample(
@@ -194,10 +197,12 @@ namespace BetterBoarding
 
             m_FollowUpSamples[slot] = sample;
 
-            if (m_FollowUpCount < m_FollowUpSamples.Length)
+            if (slot >= m_FollowUpCount)
             {
-                m_FollowUpCount++;
+                m_FollowUpCount = slot + 1;
             }
+
+            m_ActiveFollowUpCount++;
         }
 
         private void LogRunSoonerSpeedSample(
@@ -291,15 +296,12 @@ namespace BetterBoarding
 
         private void LogFollowUps(uint frame)
         {
-            if (!ShouldLogDiagnostics() || m_FollowUpCount == 0)
+            if (!ShouldLogDiagnostics() || m_ActiveFollowUpCount == 0)
             {
                 return;
             }
 
-            // Follow-up checks read the same live ECS data and wait for earlier jobs too.
-            CompleteBoardingAssistDependencies();
-
-            TransitWaitStatusSystem followUpStatusSystem = World.GetOrCreateSystemManaged<TransitWaitStatusSystem>();
+            TransitWaitStatusSystem? followUpStatusSystem = null;
             int loggedThisUpdate = 0;
             for (int i = 0; i < m_FollowUpCount; i++)
             {
@@ -318,14 +320,22 @@ namespace BetterBoarding
                 {
                     bool departureCheckpoint =
                         sample.RunSoonerCheckpoint == RunSoonerFollowUpCheckpoint.DepartureGrace;
+                    bool followUpDue = IsRunSoonerFollowUpDue(sample, frame);
+                    if (departureCheckpoint && !followUpDue)
+                    {
+                        continue;
+                    }
+
                     bool stillBoarding = IsRunSoonerVehicleStillBoarding(sample.ControllerVehicle);
                     bool boardingEndedCheckpoint = !departureCheckpoint && !stillBoarding;
-                    if (!IsRunSoonerFollowUpDue(sample, frame) && !boardingEndedCheckpoint)
+                    if (!followUpDue && !boardingEndedCheckpoint)
                     {
                         continue;
                     }
 
                     DateTime followUpLocalTime = DateTime.Now;
+                    followUpStatusSystem ??=
+                        World.GetOrCreateSystemManaged<TransitWaitStatusSystem>();
                     TransitWaitStatusSystem.FollowUpSnapshot followUpSnapshot =
                         followUpStatusSystem.BuildLateBoarderFollowUpSnapshot(
                             sample.Passenger,
@@ -369,9 +379,7 @@ namespace BetterBoarding
                     }
                     else
                     {
-                        sample.Logged = true;
-                        sample.Active = false;
-                        m_FollowUpSamples[i] = sample;
+                        DeactivateFollowUpSample(i, sample);
                     }
 
                     continue;
@@ -384,12 +392,12 @@ namespace BetterBoarding
                     continue;
                 }
 
-                sample.Logged = true;
-                sample.Active = false;
-                m_FollowUpSamples[i] = sample;
+                DeactivateFollowUpSample(i, sample);
                 loggedThisUpdate++;
 
                 DateTime canceledFollowUpLocalTime = DateTime.Now;
+                followUpStatusSystem ??=
+                    World.GetOrCreateSystemManaged<TransitWaitStatusSystem>();
                 TransitWaitStatusSystem.FollowUpSnapshot canceledFollowUpSnapshot =
                     followUpStatusSystem.BuildLateBoarderFollowUpSnapshot(
                         sample.Passenger,
@@ -409,6 +417,18 @@ namespace BetterBoarding
                 LogUtils.Info(
                     Mod.s_Log,
                     () => $"Skipped Late Passenger: {sample.TransportType} | cim={sample.Passenger} | missed={sample.Vehicle} | skipped={sample.LocalTime:HH:mm:ss} | followUp={canceledFollowUpLocalTime:HH:mm:ss} | state={DescribeFollowUpState(canceledFollowUpSnapshot, sample.Vehicle, sample.Passenger, frame)}");
+            }
+        }
+
+        private void DeactivateFollowUpSample(int index, FollowUpSample sample)
+        {
+            sample.Logged = true;
+            sample.Active = false;
+            m_FollowUpSamples[index] = sample;
+
+            if (m_ActiveFollowUpCount > 0)
+            {
+                m_ActiveFollowUpCount--;
             }
         }
 
@@ -804,11 +824,7 @@ namespace BetterBoarding
 
         private static bool ShouldLogDiagnostics()
         {
-#if DEBUG
-            return true;
-#else
             return BoardingRuntimeSettings.EnableVerboseLogging;
-#endif
         }
 
         private void ResetDiagnosticsForCityLoad()
@@ -818,7 +834,9 @@ namespace BetterBoarding
             m_TotalRunSoonerAssists = 0;
             m_LoggedActive = false;
             m_FollowUpCount = 0;
+            m_ActiveFollowUpCount = 0;
             m_NextFollowUpSample = 0;
+            Array.Clear(m_FollowUpSamples, 0, m_FollowUpSamples.Length);
             m_LoggedRunSoonerSpeedSamples.Clear();
         }
     }

@@ -979,11 +979,7 @@ namespace BetterBoarding
 
         private static bool ShouldCollectDiagnostics()
         {
-#if DEBUG
-            return true;
-#else
             return BoardingRuntimeSettings.EnableVerboseLogging;
-#endif
         }
 
         private static void AppendSectionHeader(StringBuilder sb, string title)

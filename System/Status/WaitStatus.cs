@@ -994,11 +994,7 @@ namespace BetterBoarding
 
         private static bool IsVerboseFollowUpCollectionEnabled()
         {
-#if DEBUG
-            return true;
-#else
             return BoardingRuntimeSettings.EnableVerboseLogging;
-#endif
         }
 
         private static string DescribeFollowUpState(LateBoarderFollowUpSample sample)
