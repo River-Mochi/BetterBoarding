@@ -86,7 +86,9 @@ namespace BetterBoarding
             int groupsReleased = 0;
             int groupsAssisted = 0;
             int membersPrompted = 0;
+#if DEBUG
             long performanceSampleStarted = BoardingPerformanceStats.BeginSample();
+#endif
 
             try
             {
@@ -224,6 +226,7 @@ namespace BetterBoarding
                     ecb.Dispose();
                 }
 
+#if DEBUG
                 BoardingPerformanceStats.RecordLateGroups(
                     performanceSampleStarted,
                     controllersScanned,
@@ -232,6 +235,7 @@ namespace BetterBoarding
                     groupsAssisted,
                     membersPrompted,
                     playedCommandBuffer);
+#endif
             }
         }
 

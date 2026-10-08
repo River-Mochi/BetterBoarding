@@ -91,7 +91,9 @@ namespace BetterBoarding
                 return;
             }
 
+#if DEBUG
             long performanceSampleStarted = BoardingPerformanceStats.BeginSample();
+#endif
             PassStats stats = default;
 
             try
@@ -117,6 +119,7 @@ namespace BetterBoarding
                     () => $"{Mod.ModTag} Boarding assist disabled after {ex.GetType().Name}: {ex.Message}",
                     ex);
             }
+#if DEBUG
             finally
             {
                 BoardingPerformanceStats.RecordBoardingAssist(
@@ -128,6 +131,7 @@ namespace BetterBoarding
                     stats.RunSoonerAssists,
                     stats.PlayedCommandBuffer);
             }
+#endif
         }
 
         private PassStats RunCancellationPass()

@@ -345,7 +345,9 @@ namespace BetterBoarding
             s_WasInGame = true;
             s_CurrentDayKey = int.MinValue;
             s_LastSimulationFrame = uint.MaxValue;
+#if DEBUG
             BoardingPerformanceStats.ResetForCityLoad();
+#endif
             ResetDailyCounters();
             InvalidateCache();
         }
@@ -479,7 +481,9 @@ namespace BetterBoarding
 
                 AppendTesterHints(sb);
                 AppendSummaryReport(sb, snapshot);
+#if DEBUG
                 AppendPerformanceReport(sb);
+#endif
 
                 AppendFamilyReport(sb, "Bus", snapshot.Bus, s_BusLateBoardersToday, s_BusSkippedSamples, s_BusFollowUpOutcomes, s_BusFollowUpSamples);
                 AppendFamilyReport(sb, "Tram", snapshot.Tram, s_TramLateBoardersToday, s_TramSkippedSamples, s_TramFollowUpOutcomes, s_TramFollowUpSamples);
@@ -522,6 +526,7 @@ namespace BetterBoarding
                 "or nudges vanilla to finish members whose leader is already aboard."));
         }
 
+#if DEBUG
         private static void AppendPerformanceReport(StringBuilder sb)
         {
             BoardingPerformanceStats.Snapshot snapshot =
@@ -603,6 +608,7 @@ namespace BetterBoarding
         {
             return milliseconds.ToString("F3", CultureInfo.InvariantCulture) + " ms";
         }
+#endif
 
         internal static void RecordLateBoardersCanceled(World world, TransportType transportType, int count)
         {
@@ -832,7 +838,9 @@ namespace BetterBoarding
                 sb,
                 "Late groups unresolved now",
                 $"{LocaleUtils.FormatN0(family.LateGroupPassengers)} passengers | {LocaleUtils.FormatN0(family.LateGroupGroups)} groups | {LocaleUtils.FormatN0(family.LateGroupVehicles)} vehicles");
+#if DEBUG
             AppendField(sb, "Follow-up outcomes (verbose)", FormatFollowUpOutcomes(followUpOutcomes));
+#endif
 
             if (family.WaitingPassengers <= 0)
             {
@@ -875,6 +883,7 @@ namespace BetterBoarding
             LateBoarderFollowUpSampleRing followUpSamples)
         {
             sb.AppendLine();
+#if DEBUG
             AppendSubHeader(sb, "Skipped solo Late cim follow-up examples");
             sb.AppendLine("Legend: state=same vehicle/different vehicle means assigned; has path means repathing or walking; no path yet means unresolved.");
             sb.AppendLine("        next=stop/lane/waypoint/vehicle/target shows the cim's next path target.");
@@ -893,6 +902,9 @@ namespace BetterBoarding
 
                 return;
             }
+#else
+            AppendSubHeader(sb, "Recent skipped solo cim examples");
+#endif
 
             if (skippedSamples.Count == 0)
             {
@@ -900,7 +912,9 @@ namespace BetterBoarding
                 return;
             }
 
+#if DEBUG
             sb.AppendLine(GetFollowUpWaitingMessage());
+#endif
             for (int i = 0; i < skippedSamples.Count; i++)
             {
                 SkippedPassengerSample sample = skippedSamples.GetNewest(i);

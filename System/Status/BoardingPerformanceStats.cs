@@ -7,7 +7,9 @@
 // ================= </copyright> ======================
 
 // File: System/Status/BoardingPerformanceStats.cs
-// Purpose: Low-overhead in-memory timing and workload counters for the on-demand stats report.
+// Purpose: Debug-only in-memory timing and workload counters for performance test reports.
+
+#if DEBUG
 
 namespace BetterBoarding
 {
@@ -287,3 +289,4 @@ namespace BetterBoarding
         }
     }
 }
+#endif
