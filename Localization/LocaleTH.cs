@@ -131,6 +131,14 @@ namespace BetterBoarding
                     "- ไม่เปลี่ยนเวลาออก ไม่บังคับขึ้นรถ และไม่เทเลพอร์ตพลเมือง"
                 },
 
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.SpacingAssist)), "ตัวช่วยเว้นระยะ" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.SpacingAssist)),
+                    "**ลดการเกาะกลุ่ม:** ช่วยเว้นระยะรถบัส รถราง รถไฟ และรถไฟใต้ดิน ไม่ให้วิ่งติดกันเป็นขบวน\n" +
+                    "- ส่งความคืบหน้าการขึ้นรถจริงให้ระบบเว้นระยะของ vanilla\n" +
+                    "- ใช้การคำนวณลดการเกาะกลุ่มของ vanilla เอง ไม่วาร์ปรถและไม่ข้ามป้ายที่มีการร้องขอให้จอด\n" +
+                    "- รถบัสที่เต็มและไม่มีผู้โดยสารลงยังคงผ่านป้ายได้ด้วยตรรกะการร้องขอให้จอดตามปกติของ vanilla"
+                },
+
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusOverview)), "การใช้งานรวม" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusOverview)),

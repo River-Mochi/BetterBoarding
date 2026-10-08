@@ -133,6 +133,12 @@ namespace BetterBoarding
                 updateSystem.UpdateBefore<LateBoarderCancelSystem, HumanMoveSystem>(
                     SystemUpdatePhase.GameSimulation);
 
+                // Keep vanilla's waypoint timing aligned with real boarding progress so
+                // the next vehicle's built-in unbunching calculation is not based on an
+                // earlier scheduled departure. HumanMoveSystem follows all transit AIs.
+                updateSystem.UpdateBefore<TransitSpacingAssistSystem, HumanMoveSystem>(
+                    SystemUpdatePhase.GameSimulation);
+
                 // Group assistance runs after navigation but before pet/resident AI. This lets
                 // vanilla consume adjusted approach/timeout state in the normal boarding path
                 // and avoids conflicting with commands those systems defer to EndFrameBarrier.
@@ -155,6 +161,9 @@ namespace BetterBoarding
 
                 updateSystem.World.GetOrCreateSystemManaged<LateGroupBoardingSystem>().Enabled =
                     BoardingRuntimeSettings.CancelLateBoarders;
+
+                updateSystem.World.GetOrCreateSystemManaged<TransitSpacingAssistSystem>().Enabled =
+                    BoardingRuntimeSettings.SpacingAssist;
             }
             catch (Exception ex)
             {

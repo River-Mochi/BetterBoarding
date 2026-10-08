@@ -131,6 +131,14 @@ namespace BetterBoarding
                     "- Không thay đổi giờ khởi hành, không ép lên xe và không dịch chuyển công dân."
                 },
 
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.SpacingAssist)), "Hỗ trợ giãn cách" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.SpacingAssist)),
+                    "**Giảm dồn chuyến:** giúp giãn cách xe buýt, tàu điện, tàu hỏa và metro thay vì để chúng chạy nối đuôi nhau.\n" +
+                    "- Cập nhật tiến độ đón khách thực tế cho cơ chế giãn cách vanilla.\n" +
+                    "- Dùng phép tính chống dồn chuyến của vanilla; không dịch chuyển phương tiện hay bỏ qua điểm dừng được yêu cầu.\n" +
+                    "- Xe buýt đầy mà không có ai xuống vẫn có thể đi qua điểm dừng nhờ cơ chế yêu cầu dừng bình thường của vanilla."
+                },
+
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusOverview)), "Tổng lượt sử dụng" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusOverview)),

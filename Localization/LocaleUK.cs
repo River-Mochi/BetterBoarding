@@ -131,6 +131,14 @@ namespace BetterBoarding
                     "- Не змінює час відправлення, не змушує сідати й не телепортує громадян."
                 },
 
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.SpacingAssist)), "Допомога з інтервалами" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.SpacingAssist)),
+                    "**Зменшення скупчення:** допомагає рівномірніше розподіляти автобуси, трамваї, потяги й метро, щоб вони не їхали один за одним.\n" +
+                    "- Передає системі інтервалів vanilla фактичний перебіг посадки у транспорт.\n" +
+                    "- Використовує власний розрахунок розподілу vanilla; не телепортує транспорт і не пропускає зупинки, на яких потрібно зупинитися.\n" +
+                    "- Заповнений автобус, з якого ніхто не виходить, і далі може проїхати зупинку за звичайною логікою запиту зупинки vanilla."
+                },
+
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusOverview)), "Загальне використання" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusOverview)),

@@ -131,6 +131,14 @@ namespace BetterBoarding
                     "- Não altera o horário de partida, não força embarque nem teleporta cidadãos."
                 },
 
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.SpacingAssist)), "Assistência de espaçamento" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.SpacingAssist)),
+                    "**Desagrupamento:** ajuda a espaçar ônibus, bondes, trens e metrôs em vez de deixá-los andar um atrás do outro.\n" +
+                    "- Mantém o espaçamento vanilla informado sobre o progresso real do embarque do veículo.\n" +
+                    "- Usa o cálculo de desagrupamento do vanilla; não teleporta veículos nem ignora paradas solicitadas.\n" +
+                    "- Um ônibus cheio sem ninguém para descer ainda pode passar por uma parada pela lógica normal de solicitação de parada do vanilla."
+                },
+
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusOverview)), "Uso total" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusOverview)),

@@ -7,7 +7,7 @@
 		<PublishConfigurationPath>Properties\PublishConfiguration.xml</PublishConfigurationPath>
         <!-- Path to the PowerShell that syncs PublishConfiguration.xml + mod.json with $(Version). -->
         <PublishConfigScript>$(MSBuildProjectDirectory)\Scripts\Update-PublishConfig.ps1</PublishConfigScript>
-		
+
 		<!-- Enable nullable reference types project-wide -->
 		<Nullable>enable</Nullable>
 
@@ -56,6 +56,9 @@
 		</Reference>
 
 		<Reference Include="UnityEngine.CoreModule">
+			<Private>false</Private>
+		</Reference>
+		<Reference Include="Unity.Burst">
 			<Private>false</Private>
 		</Reference>
 		<Reference Include="Unity.Collections">

@@ -481,6 +481,7 @@ namespace BetterBoarding
 
                 AppendTesterHints(sb);
                 AppendSummaryReport(sb, snapshot);
+                AppendSpacingAssistReport(sb, world);
 #if DEBUG
                 AppendPerformanceReport(sb);
 #endif
@@ -524,6 +525,52 @@ namespace BetterBoarding
                 "Late groups (families): groups still unresolved when this report was taken. " +
                 "BetterBoarding gives them extra grace, then safely releases an outside group " +
                 "or nudges vanilla to finish members whose leader is already aboard."));
+        }
+
+        private static void AppendSpacingAssistReport(StringBuilder sb, World world)
+        {
+            AppendSectionHeader(sb, "Spacing Assist since city load");
+            AppendField(
+                sb,
+                "Status",
+                BoardingRuntimeSettings.SpacingAssist ? "enabled" : "disabled");
+            AppendField(sb, "Scope", "Bus, Tram, Train, Subway passenger lines");
+
+            TransitSpacingAssistSystem? system =
+                world.GetExistingSystemManaged<TransitSpacingAssistSystem>();
+            if (system == null)
+            {
+                AppendField(sb, "Observed boarding stops", "system unavailable");
+                return;
+            }
+
+            TransitSpacingAssistSystem.StatisticsSnapshot snapshot =
+                system.GetStatisticsSnapshot();
+
+            AppendField(
+                sb,
+                "Observed boarding stops",
+                LocaleUtils.FormatN0(snapshot.TotalStops));
+            AppendField(
+                sb,
+                "By mode",
+                $"Bus {LocaleUtils.FormatN0(snapshot.BusStops)} | " +
+                $"Tram {LocaleUtils.FormatN0(snapshot.TramStops)} | " +
+                $"Train {LocaleUtils.FormatN0(snapshot.TrainStops)} | " +
+                $"Subway {LocaleUtils.FormatN0(snapshot.SubwayStops)}");
+            AppendField(
+                sb,
+                "Timing refreshes",
+                LocaleUtils.FormatN0(snapshot.Refreshes));
+            AppendField(
+                sb,
+                "Method",
+                "keeps vanilla last-departure timing current while vehicles board; " +
+                "the next vehicle still uses vanilla's own unbunching formula");
+            AppendField(
+                sb,
+                "Collection cost",
+                "counters are updated inside the same Burst timing job; Stats to Log only reads them on demand");
         }
 
 #if DEBUG

@@ -88,6 +88,10 @@ namespace BetterBoarding
         [SettingsUISetter(typeof(BBoardSettings), nameof(SetCimsRunSoonerToCatchBusesLive))]
         public bool CimsRunSoonerToCatchBuses { get; set; }
 
+        [SettingsUISection(ActionsTab, BehaviorGroup)]
+        [SettingsUISetter(typeof(BBoardSettings), nameof(SetSpacingAssistLive))]
+        public bool SpacingAssist { get; set; }
+
         [SettingsUISection(ActionsTab, StatusGroup)]
         public string StatusOverview
         {
@@ -340,6 +344,19 @@ namespace BetterBoarding
             }
         }
 
+        private void SetSpacingAssistLive(bool value)
+        {
+            if (BoardingRuntimeSettings.SetSpacingAssist(value))
+            {
+                LogUtils.Info(
+                    Mod.s_Log,
+                    () => $"Options Settings: spacingAssist={value}");
+
+                TrySetSpacingAssistSystemEnabled(value);
+                WaitStatus.MarkDirty();
+            }
+        }
+
         private void SetEnableVerboseLoggingLive(bool value)
         {
             if (BoardingRuntimeSettings.SetEnableVerboseLogging(value))
@@ -460,6 +477,32 @@ namespace BetterBoarding
             }
         }
 
+        private static void TrySetSpacingAssistSystemEnabled(bool enabled)
+        {
+            if (!TryGetLoadedWorld(out World? world))
+            {
+                return;
+            }
+
+            try
+            {
+                TransitSpacingAssistSystem system =
+                    world.GetExistingSystemManaged<TransitSpacingAssistSystem>() ??
+                    world.GetOrCreateSystemManaged<TransitSpacingAssistSystem>();
+
+                system.Enabled = enabled;
+            }
+            catch (Exception ex)
+            {
+                LogUtils.Warn(
+                    Mod.s_Log,
+                    () =>
+                        $"Failed updating TransitSpacingAssistSystem state: " +
+                        $"{ex.GetType().Name}: {ex.Message}",
+                    ex);
+            }
+        }
+
         private static bool TryGetLoadedWorld(out World world)
         {
             world = World.DefaultGameObjectInjectionWorld;
@@ -480,6 +523,7 @@ namespace BetterBoarding
             AirBoardingSpeedFactor = DefaultSpeedFactor;
             CancelLateBoarders = true;
             CimsRunSoonerToCatchBuses = true;
+            SpacingAssist = true;
             EnableVerboseLogging = false;
         }
     }

@@ -131,6 +131,14 @@ namespace BetterBoarding
                     "- 차량 출발 시간을 바꾸거나 강제 탑승 또는 시민 텔레포트를 하지 않습니다."
                 },
 
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.SpacingAssist)), "배차 간격 보정" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.SpacingAssist)),
+                    "**몰림 완화:** 버스, 트램, 기차, 지하철이 연달아 붙어 다니지 않도록 간격을 벌리는 데 도움을 줍니다.\n" +
+                    "- 차량의 실제 탑승 진행 상황을 vanilla 간격 조정에 반영합니다.\n" +
+                    "- vanilla의 자체 몰림 방지 계산을 사용하며 차량을 순간이동하거나 요청된 정류장을 건너뛰지 않습니다.\n" +
+                    "- 내릴 승객이 없는 만원 버스는 vanilla의 일반 정차 요청 로직에 따라 정류장을 통과할 수 있습니다."
+                },
+
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusOverview)), "전체 이용량" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusOverview)),

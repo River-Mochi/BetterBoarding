@@ -52,7 +52,7 @@ namespace BetterBoarding
                     "<1x = vanilla>\n" +
                     extraLine +
                     $"Higher values reduce {transitName} boarding and loading time.\n" +
-        
+
                     "This helps normal queues clear faster, but a late passenger can still delay departure because of vanilla design.\n" +
                     $"Use [✓] <{ToggleName}> if you want late cims to miss the vehicle after departure time.\n" +
                     "Skipped late citizens are not deleted; vanilla will naturally reroute them.\n" +
@@ -135,6 +135,14 @@ namespace BetterBoarding
                     "- Vanilla only starts cims running at departure time, which can be too late to help.\n" +
                     $"- Pairs well with <{ToggleName}> because it may reduce how many cims miss the vehicle and need to be reassigned.\n" +
                     "- Does not change the vehicle's departure time, force boarding, or teleport citizens."
+                },
+
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.SpacingAssist)), "Spacing Assist" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.SpacingAssist)),
+                    "**Unbunching:** helps spread out buses, trams, trains, and subways instead of letting them follow back-to-back.\n" +
+                    "- Keeps vanilla spacing informed by the vehicle's real boarding progress.\n" +
+                    "- Uses vanilla's own unbunching calculation; it does not teleport vehicles or skip requested stops.\n" +
+                    "- A full bus with nobody getting off can still pass a stop through vanilla's normal stop-request logic."
                 },
 
                 // Status overview

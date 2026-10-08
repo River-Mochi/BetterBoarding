@@ -131,6 +131,14 @@ namespace BetterBoarding
                     "- Aracın kalkış saatini değiştirmez, zorla bindirmez ve vatandaşları ışınlamaz."
                 },
 
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.SpacingAssist)), "Aralık Desteği" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.SpacingAssist)),
+                    "**Kümelenmeyi azaltma:** otobüs, tramvay, tren ve metroların arka arkaya gitmesi yerine daha eşit aralıklarla dağılmasına yardım eder.\n" +
+                    "- Vanilla aralık sistemini aracın gerçek biniş ilerlemesiyle güncel tutar.\n" +
+                    "- Vanilla’nın kendi kümelenme önleme hesabını kullanır; araçları ışınlamaz veya durması istenen durakları atlamaz.\n" +
+                    "- Kimsenin inmeyeceği dolu bir otobüs, vanilla’nın normal durma isteği mantığıyla durağı geçmeye devam edebilir."
+                },
+
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusOverview)), "Toplam kullanım" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusOverview)),

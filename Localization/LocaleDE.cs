@@ -131,6 +131,14 @@ namespace BetterBoarding
                     "- Ändert die Abfahrtszeit nicht, erzwingt kein Einsteigen und teleportiert keine Bürger."
                 },
 
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.SpacingAssist)), "Abstandshilfe" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.SpacingAssist)),
+                    "**Entzerrung:** hilft, Busse, Straßenbahnen, Züge und U-Bahnen gleichmäßiger zu verteilen, statt sie direkt hintereinander fahren zu lassen.\n" +
+                    "- Hält Vanillas Abstandslogik über den tatsächlichen Fortschritt beim Einsteigen auf dem Laufenden.\n" +
+                    "- Verwendet Vanillas eigene Entzerrungsberechnung; Fahrzeuge werden weder teleportiert noch werden angeforderte Halte übersprungen.\n" +
+                    "- Ein voller Bus, aus dem niemand aussteigen will, kann über Vanillas normale Halteanforderung weiterhin an einer Haltestelle vorbeifahren."
+                },
+
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusOverview)), "Gesamtnutzung" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusOverview)),

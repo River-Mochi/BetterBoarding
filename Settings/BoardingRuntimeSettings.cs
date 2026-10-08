@@ -26,6 +26,7 @@ namespace BetterBoarding
         public static int AirBoardingSpeedFactor { get; private set; } = BBoardSettings.DefaultSpeedFactor;
         public static bool CancelLateBoarders { get; private set; } = false;
         public static bool CimsRunSoonerToCatchBuses { get; private set; } = false;
+        public static bool SpacingAssist { get; private set; } = true;
         public static bool BoardingAssistEnabled => CancelLateBoarders || CimsRunSoonerToCatchBuses;
         public static bool EnableVerboseLogging { get; private set; } = false;
 
@@ -78,6 +79,8 @@ namespace BetterBoarding
             {
                 LateBoarderRevision++;
             }
+
+            SpacingAssist = settings.SpacingAssist;
 
 #if DEBUG
             EnableVerboseLogging = settings.EnableVerboseLogging;
@@ -149,6 +152,17 @@ namespace BetterBoarding
             return true;
         }
 
+        public static bool SetSpacingAssist(bool value)
+        {
+            if (SpacingAssist == value)
+            {
+                return false;
+            }
+
+            SpacingAssist = value;
+            return true;
+        }
+
         public static bool SetEnableVerboseLogging(bool value)
         {
 #if !DEBUG
@@ -169,7 +183,8 @@ namespace BetterBoarding
                 $"bus={BusBoardingSpeedFactor}x, rail={RailBoardingSpeedFactor}x, " +
                 $"air={AirBoardingSpeedFactor}x, " +
                 $"skipLatePassengers={CancelLateBoarders}, " +
-                $"runSooner={CimsRunSoonerToCatchBuses}";
+                $"runSooner={CimsRunSoonerToCatchBuses}, " +
+                $"spacingAssist={SpacingAssist}";
         }
 
         public static string DescribeVerboseForLog(bool enabled)

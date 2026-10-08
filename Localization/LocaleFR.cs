@@ -131,6 +131,14 @@ namespace BetterBoarding
                     "- Ne modifie pas l’heure de départ, ne force pas l’embarquement et ne téléporte pas les citoyens."
                 },
 
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.SpacingAssist)), "Aide à l’espacement" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.SpacingAssist)),
+                    "**Désembouteillage :** aide à espacer les bus, trams, trains et métros au lieu de les laisser se suivre de près.\n" +
+                    "- Informe l’espacement vanilla de la progression réelle de l’embarquement du véhicule.\n" +
+                    "- Utilise le calcul de dégroupage de vanilla ; ne téléporte pas les véhicules et n’ignore pas les arrêts demandés.\n" +
+                    "- Un bus plein dont personne ne descend peut toujours passer un arrêt grâce à la logique normale de demande d’arrêt de vanilla."
+                },
+
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusOverview)), "Utilisation totale" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusOverview)),

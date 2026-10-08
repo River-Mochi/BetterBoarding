@@ -131,6 +131,14 @@ namespace BetterBoarding
                     "- Non cambia l’orario di partenza, non forza l’imbarco e non teletrasporta i cittadini."
                 },
 
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.SpacingAssist)), "Assistenza distanziamento" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.SpacingAssist)),
+                    "**Distanziamento:** aiuta a distribuire autobus, tram, treni e metropolitane invece di lasciarli viaggiare uno dietro l’altro.\n" +
+                    "- Mantiene il distanziamento vanilla aggiornato sull’effettivo avanzamento dell’imbarco del veicolo.\n" +
+                    "- Usa il calcolo di distanziamento di vanilla; non teletrasporta i veicoli e non salta le fermate richieste.\n" +
+                    "- Un autobus pieno da cui non scende nessuno può comunque oltrepassare una fermata tramite la normale logica di richiesta fermata di vanilla."
+                },
+
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusOverview)), "Uso totale" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusOverview)),

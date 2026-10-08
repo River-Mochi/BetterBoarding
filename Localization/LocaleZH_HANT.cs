@@ -131,6 +131,14 @@ namespace BetterBoarding
                     "- 不會更改車輛發車時間、強制上車或傳送市民。"
                 },
 
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.SpacingAssist)), "間隔輔助" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.SpacingAssist)),
+                    "**緩解車輛扎堆：**幫助公車、路面電車、火車和地鐵保持間隔，避免前後緊跟。\n" +
+                    "- 將車輛實際上下客進度提供給 vanilla 的間隔控制。\n" +
+                    "- 使用 vanilla 內建的防扎堆計算；不會傳送車輛，也不會跳過有停車需求的站點。\n" +
+                    "- 如果滿載公車沒有乘客要下車，仍可透過 vanilla 的正常停車請求邏輯直接駛過站點。"
+                },
+
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusOverview)), "總使用量" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusOverview)),
