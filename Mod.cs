@@ -126,17 +126,10 @@ namespace BetterBoarding
                 updateSystem.UpdateBefore<TransportStopTuningSystem, TransportStopSystem>(
                     SystemUpdatePhase.GameSimulation);
 
-                // Vanilla decides boarding first; we handle late cims before they move.
-                updateSystem.UpdateAfter<LateBoarderCancelSystem, TransportCarAISystem>(
-                    SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateAfter<LateBoarderCancelSystem, TransportTrainAISystem>(
-                    SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateAfter<LateBoarderCancelSystem, TransportWatercraftAISystem>(
-                    SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateAfter<LateBoarderCancelSystem, TransportAircraftAISystem>(
-                    SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateAfter<LateBoarderCancelSystem, ResidentAISystem.Actions>(
-                    SystemUpdatePhase.GameSimulation);
+                // One registration is one executable update entry in CS2; registering against
+                // every earlier system would run this full pass multiple times. HumanMoveSystem
+                // already follows the transport AI systems and ResidentAISystem.Actions in
+                // vanilla order, so this single anchor preserves the intended behavior window.
                 updateSystem.UpdateBefore<LateBoarderCancelSystem, HumanMoveSystem>(
                     SystemUpdatePhase.GameSimulation);
 
@@ -146,10 +139,12 @@ namespace BetterBoarding
                 updateSystem.UpdateBefore<LateGroupBoardingSystem, PetAISystem>(
                     SystemUpdatePhase.GameSimulation);
 
-                // Read-only verbose diagnostics run after vanilla and Better Boarding have
-                // updated boarding state. They never change vehicle or route components.
+#if DEBUG
+                // Continuous read-only diagnostics are a Debug-only testing tool. Release
+                // builds use the on-demand Stats to Log report without this recurring scan.
                 updateSystem.UpdateAfter<TransitHeadwayDiagnosticSystem>(
                     SystemUpdatePhase.GameSimulation);
+#endif
 
                 // Retune once on load even if Options was never opened.
                 updateSystem.World.GetOrCreateSystemManaged<TransportStopTuningSystem>().Enabled = true;

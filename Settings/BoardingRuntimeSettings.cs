@@ -79,7 +79,11 @@ namespace BetterBoarding
                 LateBoarderRevision++;
             }
 
+#if DEBUG
             EnableVerboseLogging = settings.EnableVerboseLogging;
+#else
+            EnableVerboseLogging = false;
+#endif
         }
 
         public static bool SetBusBoardingSpeedFactor(int value)
@@ -147,6 +151,9 @@ namespace BetterBoarding
 
         public static bool SetEnableVerboseLogging(bool value)
         {
+#if !DEBUG
+            value = false;
+#endif
             if (EnableVerboseLogging == value)
             {
                 return false;

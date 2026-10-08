@@ -47,15 +47,6 @@ namespace BetterBoarding
         private const int kMaxGroupsPerUpdate = 32;
 
         private EntityQuery m_VehicleQuery;
-        private EntityQuery m_CurrentVehicleQuery;
-        private EntityQuery m_HumanResidentQuery;
-        private EntityQuery m_HumanLaneQuery;
-        private EntityQuery m_AnimalLaneQuery;
-        private EntityQuery m_PassengerBufferQuery;
-        private EntityQuery m_LayoutBufferQuery;
-        private EntityQuery m_PathQuery;
-        private EntityQuery m_GroupCreatureQuery;
-        private EntityQuery m_GroupMemberQuery;
 
         private SimulationSystem? m_SimulationSystem;
 
@@ -76,43 +67,6 @@ namespace BetterBoarding
                 .WithNone<Deleted, Destroyed, Temp, Overridden>()
                 .Build();
 
-            // Dependency-only queries for data read or edited directly below.
-            m_CurrentVehicleQuery = SystemAPI.QueryBuilder()
-                .WithAll<CurrentVehicle>()
-                .Build();
-
-            m_HumanResidentQuery = SystemAPI.QueryBuilder()
-                .WithAll<Human, Game.Creatures.Resident>()
-                .Build();
-
-            m_HumanLaneQuery = SystemAPI.QueryBuilder()
-                .WithAll<HumanCurrentLane>()
-                .Build();
-
-            m_AnimalLaneQuery = SystemAPI.QueryBuilder()
-                .WithAll<AnimalCurrentLane>()
-                .Build();
-
-            m_PassengerBufferQuery = SystemAPI.QueryBuilder()
-                .WithAll<Passenger>()
-                .Build();
-
-            m_LayoutBufferQuery = SystemAPI.QueryBuilder()
-                .WithAll<LayoutElement>()
-                .Build();
-
-            m_PathQuery = SystemAPI.QueryBuilder()
-                .WithAll<PathOwner, PathElement>()
-                .Build();
-
-            m_GroupCreatureQuery = SystemAPI.QueryBuilder()
-                .WithAll<GroupCreature>()
-                .Build();
-
-            m_GroupMemberQuery = SystemAPI.QueryBuilder()
-                .WithAll<GroupMember>()
-                .Build();
-
             RequireForUpdate(m_VehicleQuery);
         }
 
@@ -126,16 +80,23 @@ namespace BetterBoarding
 
             EntityCommandBuffer ecb = default;
             bool hasCommandBuffer = false;
+            bool playedCommandBuffer = false;
+            int controllersScanned = 0;
+            int candidateCount = 0;
+            int groupsReleased = 0;
+            int groupsAssisted = 0;
+            int membersPrompted = 0;
+#if DEBUG
+            long performanceSampleStarted = BoardingPerformanceStats.BeginSample();
+#endif
 
             try
             {
-                CompleteDependencies();
-
                 uint frame = m_SimulationSystem.frameIndex;
-                int groupsReleased = 0;
-                int groupsAssisted = 0;
-                int membersPrompted = 0;
 
+                // Gather entity IDs without pre-completing city-wide component sets. Scattered
+                // EntityManager reads below synchronize their component types lazily and only
+                // after a genuinely late boarding controller is found.
                 using NativeArray<Entity> controllers =
                     m_VehicleQuery.ToEntityArray(Allocator.Temp);
                 using NativeList<GroupCandidate> candidates =
@@ -144,6 +105,8 @@ namespace BetterBoarding
                     new NativeList<Entity>(kMaxGroupsPerUpdate, Allocator.Temp);
                 using NativeList<Entity> releasedVehicles =
                     new NativeList<Entity>(kMaxGroupsPerUpdate, Allocator.Temp);
+
+                controllersScanned = controllers.Length;
 
                 for (int i = 0;
                     i < controllers.Length && candidates.Length < kMaxGroupsPerUpdate;
@@ -159,6 +122,8 @@ namespace BetterBoarding
 
                     CollectLateGroupCandidates(controllerVehicle, candidates);
                 }
+
+                candidateCount = candidates.Length;
 
                 for (int i = 0; i < candidates.Length; i++)
                 {
@@ -182,14 +147,9 @@ namespace BetterBoarding
                             continue;
                         }
 
-                        if (!hasCommandBuffer)
-                        {
-                            ecb = new EntityCommandBuffer(Allocator.Temp);
-                            hasCommandBuffer = true;
-                        }
-
                         if (TryQueueOutsideGroupLeaderCancellation(
                                 ref ecb,
+                                ref hasCommandBuffer,
                                 candidate.Leader,
                                 candidate.AssignedVehicle))
                         {
@@ -207,7 +167,9 @@ namespace BetterBoarding
                     if (IsBoardedHuman(candidate.Leader))
                     {
                         DynamicBuffer<GroupCreature> group =
-                            EntityManager.GetBuffer<GroupCreature>(candidate.Leader);
+                            EntityManager.GetBuffer<GroupCreature>(
+                                candidate.Leader,
+                                isReadOnly: true);
 
                         if (TryAssistLateGroup(
                                 candidate.Leader,
@@ -231,6 +193,7 @@ namespace BetterBoarding
                     // Apply structural and buffer changes only after every live source buffer
                     // used by this pass has finished being read.
                     ecb.Playback(EntityManager);
+                    playedCommandBuffer = true;
                 }
 
                 if (BoardingRuntimeSettings.EnableVerboseLogging &&
@@ -239,7 +202,7 @@ namespace BetterBoarding
                     LogUtils.Info(
                         Mod.s_Log,
                         () =>
-                            $"{Mod.ModTag} Late groups: candidates={candidates.Length}, " +
+                            $"{Mod.ModTag} Late groups: candidates={candidateCount}, " +
                             $"released={groupsReleased}, assisted={groupsAssisted}, " +
                             $"membersPrompted={membersPrompted}");
                 }
@@ -262,6 +225,17 @@ namespace BetterBoarding
                 {
                     ecb.Dispose();
                 }
+
+#if DEBUG
+                BoardingPerformanceStats.RecordLateGroups(
+                    performanceSampleStarted,
+                    controllersScanned,
+                    candidateCount,
+                    groupsReleased,
+                    groupsAssisted,
+                    membersPrompted,
+                    playedCommandBuffer);
+#endif
             }
         }
 
@@ -309,7 +283,9 @@ namespace BetterBoarding
             if (EntityManager.HasBuffer<LayoutElement>(controllerVehicle))
             {
                 DynamicBuffer<LayoutElement> layout =
-                    EntityManager.GetBuffer<LayoutElement>(controllerVehicle);
+                    EntityManager.GetBuffer<LayoutElement>(
+                        controllerVehicle,
+                        isReadOnly: true);
 
                 for (int i = 0;
                     i < layout.Length && candidates.Length < kMaxGroupsPerUpdate;
@@ -342,7 +318,7 @@ namespace BetterBoarding
             }
 
             DynamicBuffer<Passenger> passengers =
-                EntityManager.GetBuffer<Passenger>(assignedVehicle);
+                EntityManager.GetBuffer<Passenger>(assignedVehicle, isReadOnly: true);
 
             for (int i = 0;
                 i < passengers.Length && candidates.Length < kMaxGroupsPerUpdate;
@@ -366,7 +342,7 @@ namespace BetterBoarding
 
                 if (currentVehicle.m_Vehicle != assignedVehicle ||
                     (currentVehicle.m_Flags & CreatureVehicleFlags.Ready) != 0 ||
-                    EntityManager.GetBuffer<GroupCreature>(leader).Length == 0)
+                    EntityManager.GetBuffer<GroupCreature>(leader, isReadOnly: true).Length == 0)
                 {
                     continue;
                 }
@@ -400,12 +376,13 @@ namespace BetterBoarding
             }
 
             DynamicBuffer<GroupCreature> group =
-                EntityManager.GetBuffer<GroupCreature>(leader);
+                EntityManager.GetBuffer<GroupCreature>(leader, isReadOnly: true);
             return group.Length > 0;
         }
 
         private bool TryQueueOutsideGroupLeaderCancellation(
             ref EntityCommandBuffer ecb,
+            ref bool hasCommandBuffer,
             Entity leader,
             Entity assignedVehicle)
         {
@@ -420,7 +397,7 @@ namespace BetterBoarding
 
             PathOwner pathOwner = EntityManager.GetComponentData<PathOwner>(leader);
             DynamicBuffer<PathElement> pathElements =
-                EntityManager.GetBuffer<PathElement>(leader);
+                EntityManager.GetBuffer<PathElement>(leader, isReadOnly: true);
 
             int startIndex = Math.Max(0, pathOwner.m_ElementIndex);
             int vehiclePathIndex = -1;
@@ -437,6 +414,12 @@ namespace BetterBoarding
             if (vehiclePathIndex < 0)
             {
                 return false;
+            }
+
+            if (!hasCommandBuffer)
+            {
+                ecb = new EntityCommandBuffer(Allocator.Temp);
+                hasCommandBuffer = true;
             }
 
             Game.Creatures.Resident resident =
@@ -693,7 +676,7 @@ namespace BetterBoarding
             }
 
             DynamicBuffer<Passenger> passengers =
-                EntityManager.GetBuffer<Passenger>(vehicle);
+                EntityManager.GetBuffer<Passenger>(vehicle, isReadOnly: true);
 
             for (int i = 0; i < passengers.Length; i++)
             {
@@ -724,7 +707,7 @@ namespace BetterBoarding
                 }
 
                 DynamicBuffer<Passenger> passengers =
-                    EntityManager.GetBuffer<Passenger>(vehicle);
+                    EntityManager.GetBuffer<Passenger>(vehicle, isReadOnly: true);
                 DynamicBuffer<Passenger> newPassengers =
                     ecb.SetBuffer<Passenger>(vehicle);
 
@@ -784,20 +767,6 @@ namespace BetterBoarding
             }
 
             return vehicle;
-        }
-
-        private void CompleteDependencies()
-        {
-            m_VehicleQuery.CompleteDependency();
-            m_CurrentVehicleQuery.CompleteDependency();
-            m_HumanResidentQuery.CompleteDependency();
-            m_HumanLaneQuery.CompleteDependency();
-            m_AnimalLaneQuery.CompleteDependency();
-            m_PassengerBufferQuery.CompleteDependency();
-            m_LayoutBufferQuery.CompleteDependency();
-            m_PathQuery.CompleteDependency();
-            m_GroupCreatureQuery.CompleteDependency();
-            m_GroupMemberQuery.CompleteDependency();
         }
 
         private readonly struct GroupCandidate

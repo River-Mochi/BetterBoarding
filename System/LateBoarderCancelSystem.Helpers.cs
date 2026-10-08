@@ -19,6 +19,7 @@ namespace BetterBoarding
     using Game.Pathfind; // PathOwner, PathElement
     using Game.Tools; // Temp
     using Game.Vehicles; // CargoTransport, LayoutElement, Passenger
+    using Unity.Collections; // Allocator
     using Unity.Entities; // DynamicBuffer, Entity, EntityCommandBuffer
     using Unity.Mathematics; // math
     using PrefabRef = Game.Prefabs.PrefabRef; // prefab lookup
@@ -54,7 +55,8 @@ namespace BetterBoarding
             }
 
             PathOwner pathOwner = EntityManager.GetComponentData<PathOwner>(passenger);
-            DynamicBuffer<PathElement> pathElements = EntityManager.GetBuffer<PathElement>(passenger);
+            DynamicBuffer<PathElement> pathElements =
+                EntityManager.GetBuffer<PathElement>(passenger, isReadOnly: true);
 
             // Only inspect the remaining path from the current cursor forward.
             // Older elements before m_ElementIndex are already behind the cim.
@@ -117,6 +119,7 @@ namespace BetterBoarding
             Game.Vehicles.PublicTransport publicTransport,
             uint frame,
             uint latestDepartureFrame,
+            ref bool hasCommandBuffer,
             ref int sampledRunSoonerSoloPassengers,
             ref int sampledRunSoonerGroups)
         {
@@ -139,7 +142,7 @@ namespace BetterBoarding
             }
 
             if (EntityManager.HasBuffer<LoadingResources>(vehicleEntity) &&
-                EntityManager.GetBuffer<LoadingResources>(vehicleEntity).Length > 0)
+                EntityManager.GetBuffer<LoadingResources>(vehicleEntity, isReadOnly: true).Length > 0)
             {
                 return 0;
             }
@@ -148,7 +151,8 @@ namespace BetterBoarding
             if (EntityManager.HasBuffer<LayoutElement>(vehicleEntity))
             {
                 int queued = 0;
-                DynamicBuffer<LayoutElement> layout = EntityManager.GetBuffer<LayoutElement>(vehicleEntity);
+                DynamicBuffer<LayoutElement> layout =
+                    EntityManager.GetBuffer<LayoutElement>(vehicleEntity, isReadOnly: true);
                 for (int i = 0; i < layout.Length; i++)
                 {
                     queued += QueueRunForPassengersOnVehicle(
@@ -157,6 +161,7 @@ namespace BetterBoarding
                         layout[i].m_Vehicle,
                         transportType,
                         latestDepartureFrame,
+                        ref hasCommandBuffer,
                         ref sampledRunSoonerSoloPassengers,
                         ref sampledRunSoonerGroups);
                 }
@@ -170,6 +175,7 @@ namespace BetterBoarding
                 vehicleEntity,
                 transportType,
                 latestDepartureFrame,
+                ref hasCommandBuffer,
                 ref sampledRunSoonerSoloPassengers,
                 ref sampledRunSoonerGroups);
         }
@@ -180,6 +186,7 @@ namespace BetterBoarding
             Entity vehicleEntity,
             TransportType transportType,
             uint departureFrame,
+            ref bool hasCommandBuffer,
             ref int sampledRunSoonerSoloPassengers,
             ref int sampledRunSoonerGroups)
         {
@@ -190,7 +197,8 @@ namespace BetterBoarding
             }
 
             int queued = 0;
-            DynamicBuffer<Passenger> passengers = EntityManager.GetBuffer<Passenger>(vehicleEntity);
+            DynamicBuffer<Passenger> passengers =
+                EntityManager.GetBuffer<Passenger>(vehicleEntity, isReadOnly: true);
             for (int i = 0; i < passengers.Length; i++)
             {
                 Entity passenger = passengers[i].m_Passenger;
@@ -219,6 +227,7 @@ namespace BetterBoarding
                 }
 
                 human.m_Flags |= HumanFlags.Run;
+                EnsureCommandBuffer(ref ecb, ref hasCommandBuffer);
                 ecb.SetComponent(passenger, human);
                 queued++;
 
@@ -229,7 +238,8 @@ namespace BetterBoarding
 
                 if (EntityManager.HasBuffer<GroupCreature>(passenger))
                 {
-                    DynamicBuffer<GroupCreature> group = EntityManager.GetBuffer<GroupCreature>(passenger);
+                    DynamicBuffer<GroupCreature> group =
+                        EntityManager.GetBuffer<GroupCreature>(passenger, isReadOnly: true);
                     if (group.Length > 0 &&
                         sampledRunSoonerGroups < kMaxRunSoonerGroupFollowUpSamplesPerUpdate)
                     {
@@ -392,7 +402,11 @@ namespace BetterBoarding
             WaitStatus.RecordLateBoardersCanceled(World, TransportType.Airplane, airCanceled);
         }
 
-        private bool QueuePassengerCancellation(ref EntityCommandBuffer ecb, Entity vehicleEntity, Entity passenger)
+        private bool QueuePassengerCancellation(
+            ref EntityCommandBuffer ecb,
+            ref bool hasCommandBuffer,
+            Entity vehicleEntity,
+            Entity passenger)
         {
             if (!EntityManager.HasComponent<CurrentVehicle>(passenger) ||
                 !EntityManager.HasComponent<Game.Creatures.Resident>(passenger) ||
@@ -404,7 +418,8 @@ namespace BetterBoarding
             }
 
             PathOwner pathOwner = EntityManager.GetComponentData<PathOwner>(passenger);
-            DynamicBuffer<PathElement> pathElements = EntityManager.GetBuffer<PathElement>(passenger);
+            DynamicBuffer<PathElement> pathElements =
+                EntityManager.GetBuffer<PathElement>(passenger, isReadOnly: true);
 
             // Match vanilla's "search from the current path cursor onward" behavior.
             int startIndex = Math.Max(0, pathOwner.m_ElementIndex);
@@ -427,6 +442,7 @@ namespace BetterBoarding
                 return false;
             }
 
+            EnsureCommandBuffer(ref ecb, ref hasCommandBuffer);
             ecb.RemoveComponent<CurrentVehicle>(passenger);
 
             // Clear "in vehicle" state so the cim is treated as no longer attached to this vehicle.
@@ -452,6 +468,19 @@ namespace BetterBoarding
             pathOwner.m_ElementIndex = 0;
             ecb.SetComponent(passenger, pathOwner);
             return true;
+        }
+
+        private static void EnsureCommandBuffer(
+            ref EntityCommandBuffer ecb,
+            ref bool hasCommandBuffer)
+        {
+            if (hasCommandBuffer)
+            {
+                return;
+            }
+
+            ecb = new EntityCommandBuffer(Allocator.Temp);
+            hasCommandBuffer = true;
         }
 
         private static void QueueVehiclePassengerBuffer(
