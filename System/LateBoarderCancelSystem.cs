@@ -84,21 +84,24 @@ namespace BetterBoarding
 
         protected override void OnUpdate()
         {
+            if (!BoardingRuntimeSettings.BoardingAssistEnabled)
+            {
+                // Options UI setter wakes this system only when a boarding assist is enabled.
+                Enabled = false;
+                return;
+            }
+
+            long performanceSampleStarted = BoardingPerformanceStats.BeginSample();
+            PassStats stats = default;
+
             try
             {
-                if (!BoardingRuntimeSettings.BoardingAssistEnabled)
-                {
-                    // Options UI setter wakes this system only when a boarding assist is enabled.
-                    Enabled = false;
-                    return;
-                }
-
                 LogActiveOnce();
 
                 // Active game tools do not require pausing this GameSimulation pass.
                 // ECS dependencies are synchronized only when each required data type is accessed.
                 // One pass handles both behavior toggles, then older samples are checked separately.
-                PassStats stats = RunCancellationPass();
+                stats = RunCancellationPass();
                 uint currentFrame = m_SimulationSystem?.frameIndex ?? 0;
                 LogPassSummary(currentFrame, stats);
                 LogFollowUps(currentFrame);
@@ -113,6 +116,17 @@ namespace BetterBoarding
                     "FB_LATE_BOARDER_CANCEL_EXCEPTION",
                     () => $"{Mod.ModTag} Boarding assist disabled after {ex.GetType().Name}: {ex.Message}",
                     ex);
+            }
+            finally
+            {
+                BoardingPerformanceStats.RecordBoardingAssist(
+                    performanceSampleStarted,
+                    stats.Vehicles,
+                    stats.Passengers,
+                    stats.Candidates,
+                    stats.Canceled,
+                    stats.RunSoonerAssists,
+                    stats.PlayedCommandBuffer);
             }
         }
 
@@ -385,7 +399,13 @@ namespace BetterBoarding
                     }
                 }
 
-                return new PassStats(vehiclesScanned, passengersScanned, candidates, cancellationsThisUpdate, runSoonerAssists);
+                return new PassStats(
+                    vehiclesScanned,
+                    passengersScanned,
+                    candidates,
+                    cancellationsThisUpdate,
+                    runSoonerAssists,
+                    hasCommandBuffer);
             }
             finally
             {

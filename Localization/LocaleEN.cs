@@ -169,7 +169,7 @@ namespace BetterBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatsToLog)), "Stats to Log" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatsToLog)),
                     "Writes a detailed one-time report to **BetterBoarding.log**.\n" +
-                    "Includes waiting totals, top 3 worst stops per mode, skipped cim examples, entity IDs, and line hints."
+                    "Includes performance timings, workload totals, waiting totals, top 3 worst stops per mode, skipped cim examples, entity IDs, and line hints."
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.OpenLog)), "Open Log" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.OpenLog)),

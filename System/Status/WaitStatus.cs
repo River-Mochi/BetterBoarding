@@ -12,6 +12,7 @@
 namespace BetterBoarding
 {
     using System;
+    using System.Globalization;
     using System.Text;
     using CS2Shared.RiverMochi;
     using Game;
@@ -344,6 +345,7 @@ namespace BetterBoarding
             s_WasInGame = true;
             s_CurrentDayKey = int.MinValue;
             s_LastSimulationFrame = uint.MaxValue;
+            BoardingPerformanceStats.ResetForCityLoad();
             ResetDailyCounters();
             InvalidateCache();
         }
@@ -467,7 +469,7 @@ namespace BetterBoarding
                 s_LastSnapshotSimulationFrame =
                     world.GetExistingSystemManaged<SimulationSystem>()?.frameIndex ?? uint.MaxValue;
 
-                // Keep this verbose output in the log, not the cramped Options UI row.
+                // Keep this detailed one-time output in the log, not the cramped Options UI row.
                 StringBuilder sb = new StringBuilder();
                 sb.AppendLine();
                 AppendSectionHeader(sb, Localize(KeyReportTitle, "Better Boarding transit status report"));
@@ -477,6 +479,7 @@ namespace BetterBoarding
 
                 AppendTesterHints(sb);
                 AppendSummaryReport(sb, snapshot);
+                AppendPerformanceReport(sb);
 
                 AppendFamilyReport(sb, "Bus", snapshot.Bus, s_BusLateBoardersToday, s_BusSkippedSamples, s_BusFollowUpOutcomes, s_BusFollowUpSamples);
                 AppendFamilyReport(sb, "Tram", snapshot.Tram, s_TramLateBoardersToday, s_TramSkippedSamples, s_TramFollowUpOutcomes, s_TramFollowUpSamples);
@@ -486,9 +489,11 @@ namespace BetterBoarding
                 AppendFamilyReport(sb, "Ship", snapshot.Ship, s_ShipLateBoardersToday, s_ShipSkippedSamples, s_ShipFollowUpOutcomes, s_ShipFollowUpSamples);
                 AppendFamilyReport(sb, "Airplane", snapshot.Air, s_AirLateBoardersToday, s_AirSkippedSamples, s_AirFollowUpOutcomes, s_AirFollowUpSamples);
 
+#if DEBUG
                 TransitHeadwayDiagnosticSystem headwayDiagnostics =
                     world.GetOrCreateSystemManaged<TransitHeadwayDiagnosticSystem>();
                 headwayDiagnostics.AppendReport(sb);
+#endif
 
                 AppendDivider(sb);
 
@@ -515,6 +520,88 @@ namespace BetterBoarding
                 "Late groups (families): groups still unresolved when this report was taken. " +
                 "BetterBoarding gives them extra grace, then safely releases an outside group " +
                 "or nudges vanilla to finish members whose leader is already aboard."));
+        }
+
+        private static void AppendPerformanceReport(StringBuilder sb)
+        {
+            BoardingPerformanceStats.Snapshot snapshot =
+                BoardingPerformanceStats.GetSnapshot();
+
+            AppendSectionHeader(sb, "Better Boarding performance since city load");
+            AppendField(
+                sb,
+                "Collection started",
+                snapshot.CollectionStartedLocalTime.ToString("HH:mm:ss", CultureInfo.InvariantCulture));
+            AppendField(
+                sb,
+                "Sampling",
+                "in-memory stopwatch totals; no periodic performance log writes");
+            AppendField(
+                sb,
+                "Measured scope",
+                "boarding assist and late-family assist OnUpdate wall-clock time");
+
+            AppendSubHeader(sb, "Boarding assist");
+            AppendTimingFields(sb, snapshot.BoardingAssist);
+            AppendField(sb, "Vehicles scanned", LocaleUtils.FormatN0(snapshot.VehiclesScanned));
+            AppendField(sb, "Passengers scanned", LocaleUtils.FormatN0(snapshot.PassengersScanned));
+            AppendField(sb, "Late solo candidates", LocaleUtils.FormatN0(snapshot.LateSoloCandidates));
+            AppendField(sb, "Late solo canceled", LocaleUtils.FormatN0(snapshot.LateSoloCanceled));
+            AppendField(sb, "Run Sooners applied", LocaleUtils.FormatN0(snapshot.RunSoonerAssists));
+            AppendField(
+                sb,
+                "Command buffer playbacks",
+                LocaleUtils.FormatN0(snapshot.BoardingCommandBufferPlaybacks));
+
+            AppendSubHeader(sb, "Late-family assist");
+            AppendTimingFields(sb, snapshot.LateGroups);
+            AppendField(
+                sb,
+                "Controllers scanned",
+                LocaleUtils.FormatN0(snapshot.GroupControllersScanned));
+            AppendField(sb, "Group candidates", LocaleUtils.FormatN0(snapshot.GroupCandidates));
+            AppendField(sb, "Groups released", LocaleUtils.FormatN0(snapshot.GroupsReleased));
+            AppendField(sb, "Groups assisted", LocaleUtils.FormatN0(snapshot.GroupsAssisted));
+            AppendField(
+                sb,
+                "Members prompted",
+                LocaleUtils.FormatN0(snapshot.GroupMembersPrompted));
+            AppendField(
+                sb,
+                "Command buffer playbacks",
+                LocaleUtils.FormatN0(snapshot.GroupCommandBufferPlaybacks));
+
+            AppendField(
+                sb,
+                "Interpretation",
+                "average/max include any ECS dependency waits triggered inside these systems");
+        }
+
+        private static void AppendTimingFields(
+            StringBuilder sb,
+            BoardingPerformanceStats.TimingSnapshot timing)
+        {
+            AppendField(sb, "Measured updates", LocaleUtils.FormatN0(timing.Updates));
+            AppendField(sb, "Average per update", FormatMilliseconds(timing.AverageMilliseconds));
+            AppendField(sb, "Maximum update", FormatMilliseconds(timing.MaximumMilliseconds));
+            AppendField(sb, "Total measured time", FormatMilliseconds(timing.TotalMilliseconds));
+            AppendField(
+                sb,
+                "Updates over 1 ms",
+                LocaleUtils.FormatN0(timing.UpdatesOverOneMillisecond));
+            AppendField(
+                sb,
+                "Updates over 5 ms",
+                LocaleUtils.FormatN0(timing.UpdatesOverFiveMilliseconds));
+            AppendField(
+                sb,
+                "Updates over 10 ms",
+                LocaleUtils.FormatN0(timing.UpdatesOverTenMilliseconds));
+        }
+
+        private static string FormatMilliseconds(double milliseconds)
+        {
+            return milliseconds.ToString("F3", CultureInfo.InvariantCulture) + " ms";
         }
 
         internal static void RecordLateBoardersCanceled(World world, TransportType transportType, int count)

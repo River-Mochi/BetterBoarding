@@ -239,6 +239,9 @@ namespace BetterBoarding
             }
         }
 
+#if !DEBUG
+        [SettingsUIHidden]
+#endif
         [SettingsUISection(AboutTab, DebugGroup)]
         [SettingsUISetter(typeof(BBoardSettings), nameof(SetEnableVerboseLoggingLive))]
         public bool EnableVerboseLogging { get; set; }
@@ -367,6 +370,11 @@ namespace BetterBoarding
             BusBoardingSpeedFactor = ClampSpeedFactor(BusBoardingSpeedFactor);
             RailBoardingSpeedFactor = ClampSpeedFactor(RailBoardingSpeedFactor);
             AirBoardingSpeedFactor = ClampSpeedFactor(AirBoardingSpeedFactor);
+#if !DEBUG
+            // Release builds never collect continuous verbose diagnostics, even when an older
+            // settings file persisted the toggle as enabled.
+            EnableVerboseLogging = false;
+#endif
         }
 
         private static int ClampSpeedFactor(int value)

@@ -20,13 +20,20 @@ namespace BetterBoarding
     {
         private readonly struct PassStats
         {
-            public PassStats(int vehicles, int passengers, int candidates, int canceled, int runSoonerAssists)
+            public PassStats(
+                int vehicles,
+                int passengers,
+                int candidates,
+                int canceled,
+                int runSoonerAssists,
+                bool playedCommandBuffer)
             {
                 Vehicles = vehicles;
                 Passengers = passengers;
                 Candidates = candidates;
                 Canceled = canceled;
                 RunSoonerAssists = runSoonerAssists;
+                PlayedCommandBuffer = playedCommandBuffer;
             }
 
             public int Vehicles { get; }
@@ -38,6 +45,8 @@ namespace BetterBoarding
             public int Canceled { get; }
 
             public int RunSoonerAssists { get; }
+
+            public bool PlayedCommandBuffer { get; }
         }
 
         private enum FollowUpSampleKind

@@ -80,13 +80,17 @@ namespace BetterBoarding
 
             EntityCommandBuffer ecb = default;
             bool hasCommandBuffer = false;
+            bool playedCommandBuffer = false;
+            int controllersScanned = 0;
+            int candidateCount = 0;
+            int groupsReleased = 0;
+            int groupsAssisted = 0;
+            int membersPrompted = 0;
+            long performanceSampleStarted = BoardingPerformanceStats.BeginSample();
 
             try
             {
                 uint frame = m_SimulationSystem.frameIndex;
-                int groupsReleased = 0;
-                int groupsAssisted = 0;
-                int membersPrompted = 0;
 
                 // Gather entity IDs without pre-completing city-wide component sets. Scattered
                 // EntityManager reads below synchronize their component types lazily and only
@@ -99,6 +103,8 @@ namespace BetterBoarding
                     new NativeList<Entity>(kMaxGroupsPerUpdate, Allocator.Temp);
                 using NativeList<Entity> releasedVehicles =
                     new NativeList<Entity>(kMaxGroupsPerUpdate, Allocator.Temp);
+
+                controllersScanned = controllers.Length;
 
                 for (int i = 0;
                     i < controllers.Length && candidates.Length < kMaxGroupsPerUpdate;
@@ -114,6 +120,8 @@ namespace BetterBoarding
 
                     CollectLateGroupCandidates(controllerVehicle, candidates);
                 }
+
+                candidateCount = candidates.Length;
 
                 for (int i = 0; i < candidates.Length; i++)
                 {
@@ -183,6 +191,7 @@ namespace BetterBoarding
                     // Apply structural and buffer changes only after every live source buffer
                     // used by this pass has finished being read.
                     ecb.Playback(EntityManager);
+                    playedCommandBuffer = true;
                 }
 
                 if (BoardingRuntimeSettings.EnableVerboseLogging &&
@@ -191,7 +200,7 @@ namespace BetterBoarding
                     LogUtils.Info(
                         Mod.s_Log,
                         () =>
-                            $"{Mod.ModTag} Late groups: candidates={candidates.Length}, " +
+                            $"{Mod.ModTag} Late groups: candidates={candidateCount}, " +
                             $"released={groupsReleased}, assisted={groupsAssisted}, " +
                             $"membersPrompted={membersPrompted}");
                 }
@@ -214,6 +223,15 @@ namespace BetterBoarding
                 {
                     ecb.Dispose();
                 }
+
+                BoardingPerformanceStats.RecordLateGroups(
+                    performanceSampleStarted,
+                    controllersScanned,
+                    candidateCount,
+                    groupsReleased,
+                    groupsAssisted,
+                    membersPrompted,
+                    playedCommandBuffer);
             }
         }
 
