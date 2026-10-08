@@ -529,7 +529,7 @@ namespace BetterBoarding
 
         private static void AppendSpacingAssistReport(StringBuilder sb, World world)
         {
-            AppendSectionHeader(sb, "Spacing Assist since city load");
+            AppendSectionHeader(sb, "Spacing Assist collection");
             AppendField(
                 sb,
                 "Status",
@@ -547,6 +547,23 @@ namespace BetterBoarding
             TransitSpacingAssistSystem.StatisticsSnapshot snapshot =
                 system.GetStatisticsSnapshot();
 
+            string collectionStarted = snapshot.CollectionStartedLocalTime == default
+                ? "not started (enable Spacing Assist to begin)"
+                : snapshot.CollectionStartedLocalTime.ToString(
+                    "yyyy-MM-dd HH:mm:ss 'local'",
+                    CultureInfo.InvariantCulture);
+            string collectionStartFrame = snapshot.CollectionStartedSimulationFrame == uint.MaxValue
+                ? "not available"
+                : snapshot.CollectionStartedSimulationFrame.ToString(
+                    "N0",
+                    CultureInfo.InvariantCulture);
+
+            AppendField(sb, "Collection started", collectionStarted);
+            AppendField(sb, "Start simulation frame", collectionStartFrame);
+            AppendField(
+                sb,
+                "Counter scope",
+                "reset when Spacing Assist is enabled or a city is loaded");
             AppendField(
                 sb,
                 "Observed boarding stops",

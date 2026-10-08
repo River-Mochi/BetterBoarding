@@ -11,6 +11,7 @@
 
 namespace BetterBoarding
 {
+    using System;
     using Colossal.Serialization.Entities;
     using Game;
     using Game.Common;
@@ -43,6 +44,8 @@ namespace BetterBoarding
         private SimulationSystem? m_SimulationSystem;
         private NativeArray<long> m_Counters;
         private uint m_LastSimulationFrame = uint.MaxValue;
+        private DateTime m_CollectionStartedLocalTime;
+        private uint m_CollectionStartedSimulationFrame = uint.MaxValue;
 
         public override int GetUpdateInterval(SystemUpdatePhase phase)
         {
@@ -76,9 +79,14 @@ namespace BetterBoarding
             if (mode == GameMode.Game &&
                 (purpose == Purpose.NewGame || purpose == Purpose.LoadGame))
             {
-                Dependency.Complete();
-                ClearCounters();
-                m_LastSimulationFrame = uint.MaxValue;
+                if (BoardingRuntimeSettings.SpacingAssist && m_SimulationSystem != null)
+                {
+                    RestartStatisticsCollection(m_SimulationSystem.frameIndex);
+                }
+                else
+                {
+                    ClearStatisticsCollection();
+                }
             }
         }
 
@@ -93,8 +101,12 @@ namespace BetterBoarding
             if (m_LastSimulationFrame != uint.MaxValue && frame < m_LastSimulationFrame)
             {
                 // Also defend against a city switch while this optional system was disabled.
-                Dependency.Complete();
-                ClearCounters();
+                RestartStatisticsCollection(frame);
+            }
+            else if (m_CollectionStartedLocalTime == default)
+            {
+                // Covers a system first enabled after loading a city while the option was off.
+                RestartStatisticsCollection(frame);
             }
 
             m_LastSimulationFrame = frame;
@@ -140,7 +152,33 @@ namespace BetterBoarding
                 m_Counters[kBusStopCount],
                 m_Counters[kTramStopCount],
                 m_Counters[kTrainStopCount],
-                m_Counters[kSubwayStopCount]);
+                m_Counters[kSubwayStopCount],
+                m_CollectionStartedLocalTime,
+                m_CollectionStartedSimulationFrame);
+        }
+
+        internal void RestartStatisticsCollection()
+        {
+            uint frame = m_SimulationSystem?.frameIndex ?? uint.MaxValue;
+            RestartStatisticsCollection(frame);
+        }
+
+        private void RestartStatisticsCollection(uint frame)
+        {
+            Dependency.Complete();
+            ClearCounters();
+            m_CollectionStartedLocalTime = DateTime.Now;
+            m_CollectionStartedSimulationFrame = frame;
+            m_LastSimulationFrame = frame;
+        }
+
+        private void ClearStatisticsCollection()
+        {
+            Dependency.Complete();
+            ClearCounters();
+            m_CollectionStartedLocalTime = default;
+            m_CollectionStartedSimulationFrame = uint.MaxValue;
+            m_LastSimulationFrame = uint.MaxValue;
         }
 
         private void ClearCounters()
@@ -272,13 +310,17 @@ namespace BetterBoarding
                 long busStops,
                 long tramStops,
                 long trainStops,
-                long subwayStops)
+                long subwayStops,
+                DateTime collectionStartedLocalTime,
+                uint collectionStartedSimulationFrame)
             {
                 Refreshes = refreshes;
                 BusStops = busStops;
                 TramStops = tramStops;
                 TrainStops = trainStops;
                 SubwayStops = subwayStops;
+                CollectionStartedLocalTime = collectionStartedLocalTime;
+                CollectionStartedSimulationFrame = collectionStartedSimulationFrame;
             }
 
             public long Refreshes { get; }
@@ -290,6 +332,10 @@ namespace BetterBoarding
             public long TrainStops { get; }
 
             public long SubwayStops { get; }
+
+            public DateTime CollectionStartedLocalTime { get; }
+
+            public uint CollectionStartedSimulationFrame { get; }
 
             public long TotalStops => BusStops + TramStops + TrainStops + SubwayStops;
         }

@@ -490,6 +490,13 @@ namespace BetterBoarding
                     world.GetExistingSystemManaged<TransitSpacingAssistSystem>() ??
                     world.GetOrCreateSystemManaged<TransitSpacingAssistSystem>();
 
+                if (enabled)
+                {
+                    // Finish any previous job before clearing its counters, then give
+                    // every off-to-on test a clean and clearly timestamped window.
+                    system.RestartStatisticsCollection();
+                }
+
                 system.Enabled = enabled;
             }
             catch (Exception ex)
