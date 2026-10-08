@@ -114,9 +114,8 @@ tags: faster boarding, boarding time, bus stop issues, slow stuck transit, debun
 <Dependency Id=""/>
 <!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
 <ChangeLog>
-- Remove verbose logging option from Release builds.
-- Added on-demand performance debug for Stats to Log button.
-- Works for game patch 1.6.2
+- Improved boarding performance.
+- Removed verbose logging from Release builds.
 </ChangeLog>
 <!--External link. supported types are discord, github, youtube, twitch, x, paypal, patreon, buymeacoffee, kofi, crowdin, gitlab-->
 <ExternalLink Type="github" Url="https://github.com/River-Mochi/BetterBoarding"/>
