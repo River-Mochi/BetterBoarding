@@ -19,6 +19,7 @@ namespace BetterBoarding
     using Game.Pathfind; // PathOwner, PathElement
     using Game.Tools; // Temp
     using Game.Vehicles; // CargoTransport, LayoutElement, Passenger
+    using Unity.Collections; // Allocator
     using Unity.Entities; // DynamicBuffer, Entity, EntityCommandBuffer
     using Unity.Mathematics; // math
     using PrefabRef = Game.Prefabs.PrefabRef; // prefab lookup
