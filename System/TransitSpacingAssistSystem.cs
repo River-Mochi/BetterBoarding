@@ -38,7 +38,10 @@ namespace BetterBoarding
         private const uint kVanillaMaximumLateBoardingFrames = 1800u;
         private const uint kSameVisitToleranceFrames = 512u;
         private const uint kMaximumMeasuredGapFrames = 524288u;
-        private const float kNearbyBusTramDistanceMetres = 512f;
+        // Only treat a follower as physically queued at this stop when it is on
+        // the immediate approach. A broad route-distance proxy suppresses the
+        // very hold that should separate buses on lines with several close stops.
+        private const float kNearbyBusTramDistanceMetres = 40f;
         private const float kNearbyBusTramDistanceSquared =
             kNearbyBusTramDistanceMetres * kNearbyBusTramDistanceMetres;
         private const int kLineStateCapacity = 4096;
@@ -669,8 +672,9 @@ namespace BetterBoarding
                 // m_Testing is intentionally very late: a road vehicle claims it
                 // only after reaching the end-of-path stop test. Also recognize a
                 // same-line bus or tram still approaching this exact waypoint, but
-                // only while it is physically nearby. This avoids holding the lead
-                // vehicle longer when a visible follower is already closing in.
+                // only on the immediate stop approach. This avoids holding the lead
+                // vehicle when a follower is already queued without mistaking a bus
+                // at a nearby stop for that follower.
                 if ((transportType != TransportType.Bus &&
                         transportType != TransportType.Tram) ||
                     !m_RouteVehicles.HasBuffer(route))

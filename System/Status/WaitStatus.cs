@@ -668,7 +668,7 @@ namespace BetterBoarding
                 "Method",
                 "paces actual departures at the first valid boarding stop on each line without extending a stop beyond vanilla's original late-boarding deadline; " +
                 "for bus/tram, avoids or releases its own hold when a same-line vehicle is already testing " +
-                "that stop or is targeting it from within 512 metres; " +
+                "that stop or is targeting it from within 40 metres; " +
                 "gap estimates use the last observed boarding frame; other stops keep vanilla timing " +
                 "and no shared waypoint timing is rewritten");
             AppendField(
