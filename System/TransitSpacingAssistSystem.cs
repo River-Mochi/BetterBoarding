@@ -111,7 +111,8 @@ namespace BetterBoarding
             if (mode == GameMode.Game &&
                 (purpose == Purpose.NewGame || purpose == Purpose.LoadGame))
             {
-                if (BoardingRuntimeSettings.SpacingAssist && m_SimulationSystem != null)
+                bool spacingAssistEnabled = BoardingRuntimeSettings.SpacingAssist;
+                if (spacingAssistEnabled && m_SimulationSystem != null)
                 {
                     RestartStatisticsCollection(m_SimulationSystem.frameIndex);
                 }
@@ -119,6 +120,11 @@ namespace BetterBoarding
                 {
                     ClearStatisticsCollection();
                 }
+
+                // A setting changed from the main menu cannot safely reach this
+                // simulation system. Synchronize the actual ECS update state once
+                // the city is ready so an ON option cannot leave the system idle.
+                Enabled = spacingAssistEnabled;
             }
         }
 

@@ -546,6 +546,11 @@ namespace BetterBoarding
                 return;
             }
 
+            AppendField(
+                sb,
+                "System update state",
+                system.Enabled ? "running" : "inactive");
+
             TransitSpacingAssistSystem.StatisticsSnapshot snapshot =
                 system.GetStatisticsSnapshot();
 
