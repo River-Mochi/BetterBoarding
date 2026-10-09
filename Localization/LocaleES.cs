@@ -134,8 +134,8 @@ namespace BetterBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.SpacingAssist)), "Asistencia de espaciado" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.SpacingAssist)),
                     "**Desagrupación:** ayuda a espaciar autobuses, tranvías, trenes y metros en vez de dejar que circulen uno detrás de otro.\n" +
-                    "- Mantiene informado al espaciado de vanilla del progreso real de embarque del vehículo.\n" +
-                    "- Usa el cálculo de desagrupación de vanilla; no teletransporta vehículos ni omite paradas solicitadas.\n" +
+                    "- Usa la primera parada válida de cada línea como punto de control y acerca las salidas reales al intervalo objetivo de la línea.\n" +
+                    "- Solo añade allí una espera limitada; las demás paradas conservan los tiempos de vanilla. No teletransporta vehículos ni omite paradas solicitadas.\n" +
                     "- Un autobús lleno en el que nadie va a bajar puede seguir pasando una parada mediante la lógica normal de solicitud de parada de vanilla."
                 },
 

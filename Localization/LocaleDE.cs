@@ -134,8 +134,8 @@ namespace BetterBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.SpacingAssist)), "Abstandshilfe" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.SpacingAssist)),
                     "**Entzerrung:** hilft, Busse, Straßenbahnen, Züge und U-Bahnen gleichmäßiger zu verteilen, statt sie direkt hintereinander fahren zu lassen.\n" +
-                    "- Hält Vanillas Abstandslogik über den tatsächlichen Fortschritt beim Einsteigen auf dem Laufenden.\n" +
-                    "- Verwendet Vanillas eigene Entzerrungsberechnung; Fahrzeuge werden weder teleportiert noch werden angeforderte Halte übersprungen.\n" +
+                    "- Verwendet die erste geeignete Haltestelle jeder Linie als Taktpunkt und nähert die tatsächlichen Abfahrten dem Zielintervall der Linie an.\n" +
+                    "- Fügt nur dort eine begrenzte Wartezeit hinzu; alle anderen Haltestellen behalten das Vanilla-Timing. Fahrzeuge werden weder teleportiert noch werden angeforderte Halte übersprungen.\n" +
                     "- Ein voller Bus, aus dem niemand aussteigen will, kann über Vanillas normale Halteanforderung weiterhin an einer Haltestelle vorbeifahren."
                 },
 

@@ -134,8 +134,8 @@ namespace BetterBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.SpacingAssist)), "Asystent odstępów" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.SpacingAssist)),
                     "**Rozdzielanie pojazdów:** pomaga równiej rozstawiać autobusy, tramwaje, pociągi i metro, zamiast pozwalać im jechać jeden za drugim.\n" +
-                    "- Przekazuje logice odstępów vanilla rzeczywisty postęp wsiadania do pojazdu.\n" +
-                    "- Używa własnego obliczenia rozdzielania z vanilla; nie teleportuje pojazdów ani nie pomija żądanych przystanków.\n" +
+                    "- Używa pierwszego prawidłowego przystanku każdej linii jako punktu regulacyjnego i zbliża rzeczywiste odjazdy do docelowego odstępu linii.\n" +
+                    "- Dodaje ograniczone oczekiwanie tylko w tym miejscu; pozostałe przystanki zachowują czasy vanilla. Nie teleportuje pojazdów ani nie pomija żądanych przystanków.\n" +
                     "- Pełny autobus, z którego nikt nie wysiada, nadal może minąć przystanek dzięki zwykłej logice żądania zatrzymania vanilla."
                 },
 

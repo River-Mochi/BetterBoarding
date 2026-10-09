@@ -566,28 +566,76 @@ namespace BetterBoarding
                 "reset when Spacing Assist is enabled or a city is loaded");
             AppendField(
                 sb,
-                "Observed boarding stops",
-                LocaleUtils.FormatN0(snapshot.TotalStops));
+                "Control-point visits",
+                LocaleUtils.FormatN0(snapshot.ControlVisits));
             AppendField(
                 sb,
                 "By mode",
-                $"Bus {LocaleUtils.FormatN0(snapshot.BusStops)} | " +
-                $"Tram {LocaleUtils.FormatN0(snapshot.TramStops)} | " +
-                $"Train {LocaleUtils.FormatN0(snapshot.TrainStops)} | " +
-                $"Subway {LocaleUtils.FormatN0(snapshot.SubwayStops)}");
+                $"Bus {LocaleUtils.FormatN0(snapshot.BusVisits)} | " +
+                $"Tram {LocaleUtils.FormatN0(snapshot.TramVisits)} | " +
+                $"Train {LocaleUtils.FormatN0(snapshot.TrainVisits)} | " +
+                $"Subway {LocaleUtils.FormatN0(snapshot.SubwayVisits)}");
             AppendField(
                 sb,
-                "Timing refreshes",
-                LocaleUtils.FormatN0(snapshot.Refreshes));
+                "Spacing holds",
+                snapshot.ControlVisits > 0
+                    ? $"{LocaleUtils.FormatN0(snapshot.Holds)} " +
+                      $"({((double)snapshot.Holds * 100d / snapshot.ControlVisits).ToString("0.0", CultureInfo.InvariantCulture)}% of visits)"
+                    : "0");
+            AppendField(
+                sb,
+                "Average added hold",
+                FormatSpacingFrames(snapshot.AverageAddedHoldFrames));
+            AppendField(
+                sb,
+                "Maximum added hold",
+                FormatSpacingFrames(snapshot.MaximumAddedHoldFrames));
+            AppendField(
+                sb,
+                "Holds limited by safety cap",
+                LocaleUtils.FormatN0(snapshot.CappedHolds));
+            AppendField(
+                sb,
+                "Control-point departure gaps",
+                LocaleUtils.FormatN0(snapshot.GapSamples));
+            AppendField(
+                sb,
+                "Average gap / target",
+                snapshot.GapSamples > 0
+                    ? $"{FormatSpacingFrames(snapshot.AverageGapFrames)} / " +
+                      FormatSpacingFrames(snapshot.AverageTargetGapFrames)
+                    : "not enough departures yet");
+            AppendField(
+                sb,
+                "Gaps below half target",
+                snapshot.GapSamples > 0
+                    ? $"{LocaleUtils.FormatN0(snapshot.UnderHalfTargetGaps)} of " +
+                      LocaleUtils.FormatN0(snapshot.GapSamples)
+                    : "not enough departures yet");
+            AppendField(
+                sb,
+                "Departure-frame writes",
+                LocaleUtils.FormatN0(snapshot.Writes));
+            AppendField(
+                sb,
+                "State-capacity misses",
+                LocaleUtils.FormatN0(snapshot.LineStateCapacityMisses));
             AppendField(
                 sb,
                 "Method",
-                "keeps vanilla last-departure timing current while vehicles board; " +
-                "the next vehicle still uses vanilla's own unbunching formula");
+                "paces actual departures at the first valid boarding stop on each line; " +
+                "other stops keep vanilla timing and no shared waypoint timing is rewritten");
             AppendField(
                 sb,
                 "Collection cost",
-                "counters are updated inside the same Burst timing job; Stats to Log only reads them on demand");
+                "departure gaps and counters are updated inside the same Burst pacing job; " +
+                "Stats to Log only reads them on demand");
+        }
+
+        private static string FormatSpacingFrames(double frames)
+        {
+            return $"{(frames / 60d).ToString("0.0", CultureInfo.InvariantCulture)} timing sec " +
+                $"({frames.ToString("0", CultureInfo.InvariantCulture)} frames)";
         }
 
 #if DEBUG

@@ -134,8 +134,8 @@ namespace BetterBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.SpacingAssist)), "배차 간격 보정" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.SpacingAssist)),
                     "**몰림 완화:** 버스, 트램, 기차, 지하철이 연달아 붙어 다니지 않도록 간격을 벌리는 데 도움을 줍니다.\n" +
-                    "- 차량의 실제 탑승 진행 상황을 vanilla 간격 조정에 반영합니다.\n" +
-                    "- vanilla의 자체 몰림 방지 계산을 사용하며 차량을 순간이동하거나 요청된 정류장을 건너뛰지 않습니다.\n" +
+                    "- 각 노선의 첫 번째 유효 정류장을 간격 조정 지점으로 사용해 실제 출발 간격을 노선의 목표 간격에 가깝게 맞춥니다.\n" +
+                    "- 그 정류장에서만 제한된 대기 시간을 추가하며 다른 정류장은 vanilla 타이밍을 유지합니다. 차량을 순간이동하거나 요청된 정류장을 건너뛰지 않습니다.\n" +
                     "- 내릴 승객이 없는 만원 버스는 vanilla의 일반 정차 요청 로직에 따라 정류장을 통과할 수 있습니다."
                 },
 

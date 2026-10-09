@@ -133,9 +133,8 @@ namespace BetterBoarding
                 updateSystem.UpdateBefore<LateBoarderCancelSystem, HumanMoveSystem>(
                     SystemUpdatePhase.GameSimulation);
 
-                // Keep vanilla's waypoint timing aligned with real boarding progress so
-                // the next vehicle's built-in unbunching calculation is not based on an
-                // earlier scheduled departure. HumanMoveSystem follows all transit AIs.
+                // Pace departures at one control stop per line after the transport AIs
+                // have finalized boarding state. HumanMoveSystem follows all transit AIs.
                 updateSystem.UpdateBefore<TransitSpacingAssistSystem, HumanMoveSystem>(
                     SystemUpdatePhase.GameSimulation);
 

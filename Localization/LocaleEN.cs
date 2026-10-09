@@ -140,8 +140,8 @@ namespace BetterBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.SpacingAssist)), "Spacing Assist" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.SpacingAssist)),
                     "**Unbunching:** helps spread out buses, trams, trains, and subways instead of letting them follow back-to-back.\n" +
-                    "- Keeps vanilla spacing informed by the vehicle's real boarding progress.\n" +
-                    "- Uses vanilla's own unbunching calculation; it does not teleport vehicles or skip requested stops.\n" +
+                    "- Uses the first valid stop on each line as a timing point and moves actual departures toward the line's target interval.\n" +
+                    "- Adds only a bounded hold there; other stops keep vanilla timing. It does not teleport vehicles or skip requested stops.\n" +
                     "- A full bus with nobody getting off can still pass a stop through vanilla's normal stop-request logic."
                 },
 

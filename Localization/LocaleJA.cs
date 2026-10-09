@@ -134,8 +134,8 @@ namespace BetterBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.SpacingAssist)), "運行間隔アシスト" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.SpacingAssist)),
                     "**団子運転の緩和:** バス、トラム、列車、地下鉄が連続して走らないよう、運行間隔を整えます。\n" +
-                    "- 車両の実際の乗車進行状況を vanilla の間隔調整に反映します。\n" +
-                    "- vanilla 独自の団子運転防止計算を使用し、車両のテレポートや要求された停車のスキップは行いません。\n" +
+                    "- 各路線の最初の有効な停留所を調整点として使い、実際の発車間隔を路線の目標間隔に近づけます。\n" +
+                    "- 待機時間を制限付きで追加するのはその停留所だけで、他の停留所は vanilla のタイミングを維持します。車両のテレポートや要求された停車のスキップは行いません。\n" +
                     "- 降りる乗客がいない満員バスは、vanilla の通常の停車要求ロジックにより停留所を通過できます。"
                 },
 

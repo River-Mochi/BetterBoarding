@@ -134,8 +134,8 @@ namespace BetterBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.SpacingAssist)), "Aide à l’espacement" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.SpacingAssist)),
                     "**Désembouteillage :** aide à espacer les bus, trams, trains et métros au lieu de les laisser se suivre de près.\n" +
-                    "- Informe l’espacement vanilla de la progression réelle de l’embarquement du véhicule.\n" +
-                    "- Utilise le calcul de dégroupage de vanilla ; ne téléporte pas les véhicules et n’ignore pas les arrêts demandés.\n" +
+                    "- Utilise le premier arrêt valide de chaque ligne comme point de régulation et rapproche les départs réels de l’intervalle cible de la ligne.\n" +
+                    "- Ajoute uniquement une attente limitée à cet endroit ; les autres arrêts conservent les horaires vanilla. Ne téléporte pas les véhicules et n’ignore pas les arrêts demandés.\n" +
                     "- Un bus plein dont personne ne descend peut toujours passer un arrêt grâce à la logique normale de demande d’arrêt de vanilla."
                 },
 

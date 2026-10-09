@@ -134,8 +134,8 @@ namespace BetterBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.SpacingAssist)), "Assistenza distanziamento" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.SpacingAssist)),
                     "**Distanziamento:** aiuta a distribuire autobus, tram, treni e metropolitane invece di lasciarli viaggiare uno dietro l’altro.\n" +
-                    "- Mantiene il distanziamento vanilla aggiornato sull’effettivo avanzamento dell’imbarco del veicolo.\n" +
-                    "- Usa il calcolo di distanziamento di vanilla; non teletrasporta i veicoli e non salta le fermate richieste.\n" +
+                    "- Usa la prima fermata valida di ogni linea come punto di regolazione e avvicina le partenze effettive all’intervallo obiettivo della linea.\n" +
+                    "- Aggiunge solo lì un’attesa limitata; le altre fermate mantengono i tempi vanilla. Non teletrasporta i veicoli e non salta le fermate richieste.\n" +
                     "- Un autobus pieno da cui non scende nessuno può comunque oltrepassare una fermata tramite la normale logica di richiesta fermata di vanilla."
                 },
 

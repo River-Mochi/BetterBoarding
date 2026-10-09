@@ -7,7 +7,7 @@
 // ================= </copyright> ======================
 
 // File: System/TransitSpacingAssistSystem.cs
-// Purpose: Helps vanilla unbunching use current boarding progress instead of a stale scheduled departure.
+// Purpose: Applies a bounded headway hold at one control stop per passenger line.
 
 namespace BetterBoarding
 {
@@ -22,35 +22,52 @@ namespace BetterBoarding
     using Unity.Burst;
     using Unity.Collections;
     using Unity.Entities;
+    using Unity.Mathematics;
 
     /// <summary>
-    /// Keeps each route waypoint's last-departure timing current while a passenger
-    /// vehicle is still boarding. The next vehicle can then use vanilla's own
-    /// unbunching formula with an actual departure reference instead of the earlier
-    /// departure time that was scheduled when boarding began.
+    /// Uses the first valid boarding stop on each passenger line as a control
+    /// point. Consecutive vehicles are released closer to the line's target
+    /// interval there, without changing the shared timing at every stop.
     /// </summary>
     public sealed partial class TransitSpacingAssistSystem : GameSystemBase
     {
         public const int UpdatesPerDay = 8192;
 
-        private const int kRefreshCount = 0;
-        private const int kBusStopCount = 1;
-        private const int kTramStopCount = 2;
-        private const int kTrainStopCount = 3;
-        private const int kSubwayStopCount = 4;
-        private const int kCounterCount = 5;
+        private const uint kMaximumAddedHoldFrames = 512u;
+        private const uint kSameVisitToleranceFrames = 64u;
+        private const uint kMaximumMeasuredGapFrames = 524288u;
+        private const int kLineStateCapacity = 4096;
+
+        private const int kControlVisitCount = 0;
+        private const int kHoldCount = 1;
+        private const int kWriteCount = 2;
+        private const int kTotalAddedHoldFrames = 3;
+        private const int kMaximumAddedHold = 4;
+        private const int kCappedHoldCount = 5;
+        private const int kGapSampleCount = 6;
+        private const int kTotalGapFrames = 7;
+        private const int kTotalTargetGapFrames = 8;
+        private const int kUnderHalfTargetCount = 9;
+        private const int kBusVisitCount = 10;
+        private const int kTramVisitCount = 11;
+        private const int kTrainVisitCount = 12;
+        private const int kSubwayVisitCount = 13;
+        private const int kLineStateCapacityMissCount = 14;
+        private const int kCounterCount = 15;
 
         private EntityQuery m_VehicleQuery;
         private SimulationSystem? m_SimulationSystem;
         private NativeArray<long> m_Counters;
+        private NativeParallelHashMap<Entity, LineSpacingState> m_LineStates;
         private uint m_LastSimulationFrame = uint.MaxValue;
         private DateTime m_CollectionStartedLocalTime;
         private uint m_CollectionStartedSimulationFrame = uint.MaxValue;
 
         public override int GetUpdateInterval(SystemUpdatePhase phase)
         {
-            // Frequent enough to follow the one-second minimum vanilla boarding state,
-            // while the work itself stays off the main thread in one small Burst job.
+            // The shortest vanilla boarding window is 60 frames. A 32-frame
+            // cadence catches it in time without scanning more often than the old
+            // Spacing Assist implementation.
             return 262144 / UpdatesPerDay;
         }
 
@@ -63,9 +80,13 @@ namespace BetterBoarding
                 kCounterCount,
                 Allocator.Persistent,
                 NativeArrayOptions.ClearMemory);
+            m_LineStates = new NativeParallelHashMap<Entity, LineSpacingState>(
+                kLineStateCapacity,
+                Allocator.Persistent);
 
             m_VehicleQuery = SystemAPI.QueryBuilder()
-                .WithAll<Game.Vehicles.PublicTransport, CurrentRoute, Target>()
+                .WithAllRW<Game.Vehicles.PublicTransport>()
+                .WithAll<CurrentRoute, Target>()
                 .WithNone<Deleted, Destroyed, Temp, Overridden>()
                 .Build();
 
@@ -100,35 +121,43 @@ namespace BetterBoarding
             uint frame = m_SimulationSystem.frameIndex;
             if (m_LastSimulationFrame != uint.MaxValue && frame < m_LastSimulationFrame)
             {
-                // Also defend against a city switch while this optional system was disabled.
+                // Defend against a city switch while the optional system was off.
                 RestartStatisticsCollection(frame);
             }
             else if (m_CollectionStartedLocalTime == default)
             {
-                // Covers a system first enabled after loading a city while the option was off.
                 RestartStatisticsCollection(frame);
             }
 
             m_LastSimulationFrame = frame;
 
-            RefreshDepartureTimingJob job = new RefreshDepartureTimingJob
+            PaceControlPointJob job = new PaceControlPointJob
             {
                 m_Frame = frame,
                 m_RoutePrefabRefs = SystemAPI.GetComponentLookup<PrefabRef>(isReadOnly: true),
                 m_TransportLineData = SystemAPI.GetComponentLookup<TransportLineData>(isReadOnly: true),
-                m_VehicleTiming = SystemAPI.GetComponentLookup<VehicleTiming>(isReadOnly: false),
+                m_TransportLines = SystemAPI.GetComponentLookup<TransportLine>(isReadOnly: true),
+                m_Connected = SystemAPI.GetComponentLookup<Connected>(isReadOnly: true),
+                m_BoardingVehicles = SystemAPI.GetComponentLookup<BoardingVehicle>(isReadOnly: true),
+                m_RouteWaypoints = SystemAPI.GetBufferLookup<RouteWaypoint>(isReadOnly: true),
+                m_LineStates = m_LineStates,
                 m_Counters = m_Counters
             };
 
-            // Sequential scheduling is deliberate: a physical stop admits one boarding
-            // vehicle at a time, but a writable random-access lookup should still have a
-            // single writer. The job remains off the main thread and Burst compiled.
+            // The route-state map is shared by vehicles on the same line. A
+            // sequential Burst job avoids write races while keeping the scan off
+            // the main thread; the work per boarding vehicle is very small.
             Dependency = job.Schedule(m_VehicleQuery, Dependency);
         }
 
         protected override void OnDestroy()
         {
             Dependency.Complete();
+
+            if (m_LineStates.IsCreated)
+            {
+                m_LineStates.Dispose();
+            }
 
             if (m_Counters.IsCreated)
             {
@@ -148,11 +177,21 @@ namespace BetterBoarding
             }
 
             return new StatisticsSnapshot(
-                m_Counters[kRefreshCount],
-                m_Counters[kBusStopCount],
-                m_Counters[kTramStopCount],
-                m_Counters[kTrainStopCount],
-                m_Counters[kSubwayStopCount],
+                m_Counters[kControlVisitCount],
+                m_Counters[kHoldCount],
+                m_Counters[kWriteCount],
+                m_Counters[kTotalAddedHoldFrames],
+                m_Counters[kMaximumAddedHold],
+                m_Counters[kCappedHoldCount],
+                m_Counters[kGapSampleCount],
+                m_Counters[kTotalGapFrames],
+                m_Counters[kTotalTargetGapFrames],
+                m_Counters[kUnderHalfTargetCount],
+                m_Counters[kBusVisitCount],
+                m_Counters[kTramVisitCount],
+                m_Counters[kTrainVisitCount],
+                m_Counters[kSubwayVisitCount],
+                m_Counters[kLineStateCapacityMissCount],
                 m_CollectionStartedLocalTime,
                 m_CollectionStartedSimulationFrame);
         }
@@ -163,10 +202,58 @@ namespace BetterBoarding
             RestartStatisticsCollection(frame);
         }
 
+        internal void ReleaseManagedHolds()
+        {
+            Dependency.Complete();
+
+            if (!m_LineStates.IsCreated)
+            {
+                return;
+            }
+
+            NativeArray<LineSpacingState> states =
+                m_LineStates.GetValueArray(Allocator.Temp);
+            try
+            {
+                for (int i = 0; i < states.Length; i++)
+                {
+                    LineSpacingState state = states[i];
+                    if (state.m_HoldApplied == 0 ||
+                        state.m_ActiveVehicle == Entity.Null ||
+                        !EntityManager.Exists(state.m_ActiveVehicle) ||
+                        !EntityManager.HasComponent<Game.Vehicles.PublicTransport>(
+                            state.m_ActiveVehicle))
+                    {
+                        continue;
+                    }
+
+                    Game.Vehicles.PublicTransport publicTransport =
+                        EntityManager.GetComponentData<Game.Vehicles.PublicTransport>(
+                            state.m_ActiveVehicle);
+                    if ((publicTransport.m_State &
+                            Game.Vehicles.PublicTransportFlags.Boarding) != 0 &&
+                        publicTransport.m_DepartureFrame == state.m_PlannedDepartureFrame)
+                    {
+                        publicTransport.m_DepartureFrame = state.m_OriginalDepartureFrame;
+                        EntityManager.SetComponentData(
+                            state.m_ActiveVehicle,
+                            publicTransport);
+                    }
+                }
+            }
+            finally
+            {
+                states.Dispose();
+            }
+
+            m_LineStates.Clear();
+        }
+
         private void RestartStatisticsCollection(uint frame)
         {
             Dependency.Complete();
             ClearCounters();
+            ClearLineStates();
             m_CollectionStartedLocalTime = DateTime.Now;
             m_CollectionStartedSimulationFrame = frame;
             m_LastSimulationFrame = frame;
@@ -176,6 +263,7 @@ namespace BetterBoarding
         {
             Dependency.Complete();
             ClearCounters();
+            ClearLineStates();
             m_CollectionStartedLocalTime = default;
             m_CollectionStartedSimulationFrame = uint.MaxValue;
             m_LastSimulationFrame = uint.MaxValue;
@@ -194,8 +282,16 @@ namespace BetterBoarding
             }
         }
 
+        private void ClearLineStates()
+        {
+            if (m_LineStates.IsCreated)
+            {
+                m_LineStates.Clear();
+            }
+        }
+
         [BurstCompile]
-        private partial struct RefreshDepartureTimingJob : IJobEntity
+        private partial struct PaceControlPointJob : IJobEntity
         {
             public uint m_Frame;
 
@@ -205,19 +301,32 @@ namespace BetterBoarding
             [ReadOnly]
             public ComponentLookup<TransportLineData> m_TransportLineData;
 
-            public ComponentLookup<VehicleTiming> m_VehicleTiming;
+            [ReadOnly]
+            public ComponentLookup<TransportLine> m_TransportLines;
+
+            [ReadOnly]
+            public ComponentLookup<Connected> m_Connected;
+
+            [ReadOnly]
+            public ComponentLookup<BoardingVehicle> m_BoardingVehicles;
+
+            [ReadOnly]
+            public BufferLookup<RouteWaypoint> m_RouteWaypoints;
+
+            public NativeParallelHashMap<Entity, LineSpacingState> m_LineStates;
 
             public NativeArray<long> m_Counters;
 
             private void Execute(
-                in Game.Vehicles.PublicTransport publicTransport,
+                Entity vehicleEntity,
+                ref Game.Vehicles.PublicTransport publicTransport,
                 in CurrentRoute currentRoute,
                 in Target target)
             {
-                Game.Vehicles.PublicTransportFlags state = publicTransport.m_State;
-                if ((state & Game.Vehicles.PublicTransportFlags.Boarding) == 0 ||
-                    (state & Game.Vehicles.PublicTransportFlags.EnRoute) == 0 ||
-                    (state &
+                Game.Vehicles.PublicTransportFlags stateFlags = publicTransport.m_State;
+                if ((stateFlags & Game.Vehicles.PublicTransportFlags.Boarding) == 0 ||
+                    (stateFlags & Game.Vehicles.PublicTransportFlags.EnRoute) == 0 ||
+                    (stateFlags &
                         (Game.Vehicles.PublicTransportFlags.Evacuating |
                          Game.Vehicles.PublicTransportFlags.PrisonerTransport)) != 0)
                 {
@@ -228,7 +337,8 @@ namespace BetterBoarding
                 Entity waypoint = target.m_Target;
                 if (route == Entity.Null || waypoint == Entity.Null ||
                     !m_RoutePrefabRefs.HasComponent(route) ||
-                    !m_VehicleTiming.HasComponent(waypoint))
+                    !m_TransportLines.HasComponent(route) ||
+                    !m_RouteWaypoints.HasBuffer(route))
                 {
                     return;
                 }
@@ -248,50 +358,261 @@ namespace BetterBoarding
                     return;
                 }
 
-                VehicleTiming timing = m_VehicleTiming[waypoint];
-
-                uint previousTiming = timing.m_LastDepartureFrame;
-                if (previousTiming == m_Frame)
+                Entity controlWaypoint = FindControlWaypoint(route);
+                if (controlWaypoint == Entity.Null || waypoint != controlWaypoint ||
+                    !OwnsBoardingSlot(vehicleEntity, waypoint))
                 {
                     return;
                 }
 
-                // BeginBoarding writes a scheduled departure into VehicleTiming. Once the
-                // scheduled frame is still ahead of this first observation, count one newly
-                // observed stop. Later refreshes hold the previous observation frame and do
-                // not increment this stop counter again.
-                if (unchecked((int)(previousTiming - m_Frame)) > 0)
+                bool hadLineState = m_LineStates.TryGetValue(
+                    route,
+                    out LineSpacingState lineState);
+                if (!hadLineState)
                 {
-                    IncrementStopCounter(lineData.m_TransportType);
+                    lineState = LineSpacingState.Create(controlWaypoint);
+                    if (!m_LineStates.TryAdd(route, lineState))
+                    {
+                        IncrementCounter(kLineStateCapacityMissCount);
+                        return;
+                    }
+                }
+                else if (lineState.m_ControlWaypoint != controlWaypoint)
+                {
+                    // A route edit can change the first valid stop. Do not carry a
+                    // departure anchor from the old control point into the new one.
+                    lineState = LineSpacingState.Create(controlWaypoint);
                 }
 
-                timing.m_LastDepartureFrame = m_Frame;
-                m_VehicleTiming[waypoint] = timing;
-                m_Counters[kRefreshCount] = m_Counters[kRefreshCount] + 1;
+                uint observationGap =
+                    m_Frame - lineState.m_LastObservedFrame;
+                bool sameVisit =
+                    lineState.m_ActiveVehicle == vehicleEntity &&
+                    lineState.m_LastObservedFrame != uint.MaxValue &&
+                    observationGap <= kSameVisitToleranceFrames;
+
+                if (sameVisit)
+                {
+                    lineState.m_LastObservedFrame = m_Frame;
+                    ReassertActiveHold(ref publicTransport, ref lineState);
+                    m_LineStates[route] = lineState;
+                    return;
+                }
+
+                uint targetHeadwayFrames = GetTargetHeadwayFrames(
+                    m_TransportLines[route]);
+                RecordCompletedDeparture(ref lineState, targetHeadwayFrames);
+
+                lineState.m_ActiveVehicle = vehicleEntity;
+                lineState.m_LastObservedFrame = m_Frame;
+                lineState.m_OriginalDepartureFrame =
+                    publicTransport.m_DepartureFrame;
+                lineState.m_PlannedDepartureFrame =
+                    publicTransport.m_DepartureFrame;
+                lineState.m_HoldApplied = 0;
+
+                IncrementCounter(kControlVisitCount);
+                IncrementModeCounter(lineData.m_TransportType);
+
+                if (lineState.m_HasLastDeparture != 0)
+                {
+                    ApplyBoundedHold(
+                        ref publicTransport,
+                        ref lineState,
+                        targetHeadwayFrames);
+                }
+
+                m_LineStates[route] = lineState;
             }
 
-            private void IncrementStopCounter(TransportType transportType)
+            private Entity FindControlWaypoint(Entity route)
+            {
+                DynamicBuffer<RouteWaypoint> waypoints = m_RouteWaypoints[route];
+                for (int i = 0; i < waypoints.Length; i++)
+                {
+                    Entity candidate = waypoints[i].m_Waypoint;
+                    if (candidate == Entity.Null ||
+                        !m_Connected.HasComponent(candidate))
+                    {
+                        continue;
+                    }
+
+                    Entity stop = m_Connected[candidate].m_Connected;
+                    if (stop != Entity.Null &&
+                        m_BoardingVehicles.HasComponent(stop))
+                    {
+                        return candidate;
+                    }
+                }
+
+                return Entity.Null;
+            }
+
+            private bool OwnsBoardingSlot(Entity vehicleEntity, Entity waypoint)
+            {
+                if (!m_Connected.HasComponent(waypoint))
+                {
+                    return false;
+                }
+
+                Entity stop = m_Connected[waypoint].m_Connected;
+                return stop != Entity.Null &&
+                    m_BoardingVehicles.HasComponent(stop) &&
+                    m_BoardingVehicles[stop].m_Vehicle == vehicleEntity;
+            }
+
+            private void RecordCompletedDeparture(
+                ref LineSpacingState lineState,
+                uint targetHeadwayFrames)
+            {
+                if (lineState.m_ActiveVehicle == Entity.Null ||
+                    lineState.m_LastObservedFrame == uint.MaxValue)
+                {
+                    return;
+                }
+
+                uint completedDepartureFrame = lineState.m_LastObservedFrame;
+                if (lineState.m_HasLastDeparture != 0)
+                {
+                    uint gap =
+                        completedDepartureFrame - lineState.m_LastDepartureFrame;
+                    if (gap > 0u && gap <= kMaximumMeasuredGapFrames)
+                    {
+                        IncrementCounter(kGapSampleCount);
+                        AddCounter(kTotalGapFrames, gap);
+                        AddCounter(kTotalTargetGapFrames, targetHeadwayFrames);
+                        if (((ulong)gap * 2ul) < targetHeadwayFrames)
+                        {
+                            IncrementCounter(kUnderHalfTargetCount);
+                        }
+                    }
+                }
+
+                lineState.m_LastDepartureFrame = completedDepartureFrame;
+                lineState.m_HasLastDeparture = 1;
+            }
+
+            private void ApplyBoundedHold(
+                ref Game.Vehicles.PublicTransport publicTransport,
+                ref LineSpacingState lineState,
+                uint targetHeadwayFrames)
+            {
+                uint desiredDeparture =
+                    lineState.m_LastDepartureFrame + targetHeadwayFrames;
+                int framesUntilDesired =
+                    unchecked((int)(desiredDeparture - m_Frame));
+                if (framesUntilDesired <= 0)
+                {
+                    return;
+                }
+
+                uint boundedHold = math.min(
+                    (uint)framesUntilDesired,
+                    kMaximumAddedHoldFrames);
+                uint plannedDeparture = m_Frame + boundedHold;
+                if (!IsFrameAfter(
+                        plannedDeparture,
+                        publicTransport.m_DepartureFrame))
+                {
+                    return;
+                }
+
+                uint comparisonFrame = IsFrameAfter(
+                    publicTransport.m_DepartureFrame,
+                    m_Frame)
+                    ? publicTransport.m_DepartureFrame
+                    : m_Frame;
+                uint addedHold = plannedDeparture - comparisonFrame;
+
+                publicTransport.m_DepartureFrame = plannedDeparture;
+                lineState.m_PlannedDepartureFrame = plannedDeparture;
+                lineState.m_HoldApplied = 1;
+
+                IncrementCounter(kHoldCount);
+                IncrementCounter(kWriteCount);
+                AddCounter(kTotalAddedHoldFrames, addedHold);
+                SetMaximumCounter(kMaximumAddedHold, addedHold);
+                if ((uint)framesUntilDesired > kMaximumAddedHoldFrames)
+                {
+                    IncrementCounter(kCappedHoldCount);
+                }
+            }
+
+            private void ReassertActiveHold(
+                ref Game.Vehicles.PublicTransport publicTransport,
+                ref LineSpacingState lineState)
+            {
+                if (lineState.m_HoldApplied == 0 ||
+                    !IsFrameAfter(lineState.m_PlannedDepartureFrame, m_Frame) ||
+                    !IsFrameAfter(
+                        lineState.m_PlannedDepartureFrame,
+                        publicTransport.m_DepartureFrame))
+                {
+                    return;
+                }
+
+                publicTransport.m_DepartureFrame =
+                    lineState.m_PlannedDepartureFrame;
+                IncrementCounter(kWriteCount);
+            }
+
+            private void IncrementModeCounter(TransportType transportType)
             {
                 int index;
                 switch (transportType)
                 {
                     case TransportType.Bus:
-                        index = kBusStopCount;
+                        index = kBusVisitCount;
                         break;
                     case TransportType.Tram:
-                        index = kTramStopCount;
+                        index = kTramVisitCount;
                         break;
                     case TransportType.Train:
-                        index = kTrainStopCount;
+                        index = kTrainVisitCount;
                         break;
                     case TransportType.Subway:
-                        index = kSubwayStopCount;
+                        index = kSubwayVisitCount;
                         break;
                     default:
                         return;
                 }
 
+                IncrementCounter(index);
+            }
+
+            private void IncrementCounter(int index)
+            {
                 m_Counters[index] = m_Counters[index] + 1;
+            }
+
+            private void AddCounter(int index, uint value)
+            {
+                m_Counters[index] = m_Counters[index] + value;
+            }
+
+            private void SetMaximumCounter(int index, uint value)
+            {
+                if (value > m_Counters[index])
+                {
+                    m_Counters[index] = value;
+                }
+            }
+
+            private static uint GetTargetHeadwayFrames(TransportLine line)
+            {
+                float interval = line.m_VehicleInterval;
+                if (!(interval >= 1f))
+                {
+                    interval = 1f;
+                }
+
+                interval = math.min(interval, 4369f);
+                return (uint)math.round(interval * 60f);
+            }
+
+            private static bool IsFrameAfter(uint candidate, uint reference)
+            {
+                return unchecked((int)(candidate - reference)) > 0;
             }
 
             private static bool IsSupportedTransportType(TransportType transportType)
@@ -303,41 +624,110 @@ namespace BetterBoarding
             }
         }
 
+        private struct LineSpacingState
+        {
+            public Entity m_ControlWaypoint;
+            public Entity m_ActiveVehicle;
+            public uint m_LastObservedFrame;
+            public uint m_LastDepartureFrame;
+            public uint m_OriginalDepartureFrame;
+            public uint m_PlannedDepartureFrame;
+            public byte m_HasLastDeparture;
+            public byte m_HoldApplied;
+
+            public static LineSpacingState Create(Entity controlWaypoint)
+            {
+                return new LineSpacingState
+                {
+                    m_ControlWaypoint = controlWaypoint,
+                    m_ActiveVehicle = Entity.Null,
+                    m_LastObservedFrame = uint.MaxValue
+                };
+            }
+        }
+
         internal readonly struct StatisticsSnapshot
         {
             public StatisticsSnapshot(
-                long refreshes,
-                long busStops,
-                long tramStops,
-                long trainStops,
-                long subwayStops,
+                long controlVisits,
+                long holds,
+                long writes,
+                long totalAddedHoldFrames,
+                long maximumAddedHoldFrames,
+                long cappedHolds,
+                long gapSamples,
+                long totalGapFrames,
+                long totalTargetGapFrames,
+                long underHalfTargetGaps,
+                long busVisits,
+                long tramVisits,
+                long trainVisits,
+                long subwayVisits,
+                long lineStateCapacityMisses,
                 DateTime collectionStartedLocalTime,
                 uint collectionStartedSimulationFrame)
             {
-                Refreshes = refreshes;
-                BusStops = busStops;
-                TramStops = tramStops;
-                TrainStops = trainStops;
-                SubwayStops = subwayStops;
+                ControlVisits = controlVisits;
+                Holds = holds;
+                Writes = writes;
+                TotalAddedHoldFrames = totalAddedHoldFrames;
+                MaximumAddedHoldFrames = maximumAddedHoldFrames;
+                CappedHolds = cappedHolds;
+                GapSamples = gapSamples;
+                TotalGapFrames = totalGapFrames;
+                TotalTargetGapFrames = totalTargetGapFrames;
+                UnderHalfTargetGaps = underHalfTargetGaps;
+                BusVisits = busVisits;
+                TramVisits = tramVisits;
+                TrainVisits = trainVisits;
+                SubwayVisits = subwayVisits;
+                LineStateCapacityMisses = lineStateCapacityMisses;
                 CollectionStartedLocalTime = collectionStartedLocalTime;
                 CollectionStartedSimulationFrame = collectionStartedSimulationFrame;
             }
 
-            public long Refreshes { get; }
+            public long ControlVisits { get; }
 
-            public long BusStops { get; }
+            public long Holds { get; }
 
-            public long TramStops { get; }
+            public long Writes { get; }
 
-            public long TrainStops { get; }
+            public long TotalAddedHoldFrames { get; }
 
-            public long SubwayStops { get; }
+            public long MaximumAddedHoldFrames { get; }
+
+            public long CappedHolds { get; }
+
+            public long GapSamples { get; }
+
+            public long TotalGapFrames { get; }
+
+            public long TotalTargetGapFrames { get; }
+
+            public long UnderHalfTargetGaps { get; }
+
+            public long BusVisits { get; }
+
+            public long TramVisits { get; }
+
+            public long TrainVisits { get; }
+
+            public long SubwayVisits { get; }
+
+            public long LineStateCapacityMisses { get; }
 
             public DateTime CollectionStartedLocalTime { get; }
 
             public uint CollectionStartedSimulationFrame { get; }
 
-            public long TotalStops => BusStops + TramStops + TrainStops + SubwayStops;
+            public double AverageAddedHoldFrames =>
+                Holds > 0 ? (double)TotalAddedHoldFrames / Holds : 0d;
+
+            public double AverageGapFrames =>
+                GapSamples > 0 ? (double)TotalGapFrames / GapSamples : 0d;
+
+            public double AverageTargetGapFrames =>
+                GapSamples > 0 ? (double)TotalTargetGapFrames / GapSamples : 0d;
         }
     }
 }

@@ -134,8 +134,8 @@ namespace BetterBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.SpacingAssist)), "Hỗ trợ giãn cách" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.SpacingAssist)),
                     "**Giảm dồn chuyến:** giúp giãn cách xe buýt, tàu điện, tàu hỏa và metro thay vì để chúng chạy nối đuôi nhau.\n" +
-                    "- Cập nhật tiến độ đón khách thực tế cho cơ chế giãn cách vanilla.\n" +
-                    "- Dùng phép tính chống dồn chuyến của vanilla; không dịch chuyển phương tiện hay bỏ qua điểm dừng được yêu cầu.\n" +
+                    "- Dùng điểm dừng hợp lệ đầu tiên của mỗi tuyến làm điểm điều tiết và đưa các lần khởi hành thực tế gần với khoảng cách mục tiêu của tuyến.\n" +
+                    "- Chỉ thêm thời gian chờ có giới hạn tại đó; các điểm dừng khác giữ thời gian vanilla. Không dịch chuyển phương tiện hay bỏ qua điểm dừng được yêu cầu.\n" +
                     "- Xe buýt đầy mà không có ai xuống vẫn có thể đi qua điểm dừng nhờ cơ chế yêu cầu dừng bình thường của vanilla."
                 },
 

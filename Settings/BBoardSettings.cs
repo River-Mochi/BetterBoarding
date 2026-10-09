@@ -496,6 +496,12 @@ namespace BetterBoarding
                     // every off-to-on test a clean and clearly timestamped window.
                     system.RestartStatisticsCollection();
                 }
+                else
+                {
+                    // Restore a still-active control-point hold before stopping the
+                    // system so the option remains a clean A/B testing switch.
+                    system.ReleaseManagedHolds();
+                }
 
                 system.Enabled = enabled;
             }

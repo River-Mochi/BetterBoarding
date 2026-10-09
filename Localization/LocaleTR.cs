@@ -134,8 +134,8 @@ namespace BetterBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.SpacingAssist)), "Aralık Desteği" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.SpacingAssist)),
                     "**Kümelenmeyi azaltma:** otobüs, tramvay, tren ve metroların arka arkaya gitmesi yerine daha eşit aralıklarla dağılmasına yardım eder.\n" +
-                    "- Vanilla aralık sistemini aracın gerçek biniş ilerlemesiyle güncel tutar.\n" +
-                    "- Vanilla’nın kendi kümelenme önleme hesabını kullanır; araçları ışınlamaz veya durması istenen durakları atlamaz.\n" +
+                    "- Her hattın ilk geçerli durağını kontrol noktası olarak kullanır ve gerçek kalkışları hattın hedef aralığına yaklaştırır.\n" +
+                    "- Yalnızca bu noktada sınırlı bir bekleme ekler; diğer duraklar vanilla zamanlamasını korur. Araçları ışınlamaz veya durması istenen durakları atlamaz.\n" +
                     "- Kimsenin inmeyeceği dolu bir otobüs, vanilla’nın normal durma isteği mantığıyla durağı geçmeye devam edebilir."
                 },
 
