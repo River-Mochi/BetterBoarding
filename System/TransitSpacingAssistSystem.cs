@@ -53,7 +53,11 @@ namespace BetterBoarding
         private const int kTrainVisitCount = 12;
         private const int kSubwayVisitCount = 13;
         private const int kLineStateCapacityMissCount = 14;
-        private const int kCounterCount = 15;
+        private const int kCloseFollowerHoldSuppressionCount = 15;
+        private const int kCloseFollowerHoldReleaseCount = 16;
+        private const int kUnderThreeQuarterTargetCount = 17;
+        private const int kOverOneAndHalfTargetCount = 18;
+        private const int kCounterCount = 19;
 
         private EntityQuery m_VehicleQuery;
         private SimulationSystem? m_SimulationSystem;
@@ -146,6 +150,11 @@ namespace BetterBoarding
                 m_TransportLines = SystemAPI.GetComponentLookup<TransportLine>(isReadOnly: true),
                 m_Connected = SystemAPI.GetComponentLookup<Connected>(isReadOnly: true),
                 m_BoardingVehicles = SystemAPI.GetComponentLookup<BoardingVehicle>(isReadOnly: true),
+                m_CurrentRoutes = SystemAPI.GetComponentLookup<CurrentRoute>(isReadOnly: true),
+                m_Targets = SystemAPI.GetComponentLookup<Target>(isReadOnly: true),
+                m_Deleted = SystemAPI.GetComponentLookup<Deleted>(isReadOnly: true),
+                m_Destroyed = SystemAPI.GetComponentLookup<Destroyed>(isReadOnly: true),
+                m_EntityLookup = SystemAPI.GetEntityStorageInfoLookup(),
                 m_RouteWaypoints = SystemAPI.GetBufferLookup<RouteWaypoint>(isReadOnly: true),
                 m_LineStates = m_LineStates,
                 m_Counters = m_Counters
@@ -185,6 +194,8 @@ namespace BetterBoarding
                 return default;
             }
 
+            LineStatisticsSnapshot[] lineStatistics = GetLineStatisticsSnapshots();
+
             return new StatisticsSnapshot(
                 m_Counters[kControlVisitCount],
                 m_Counters[kHoldCount],
@@ -201,8 +212,57 @@ namespace BetterBoarding
                 m_Counters[kTrainVisitCount],
                 m_Counters[kSubwayVisitCount],
                 m_Counters[kLineStateCapacityMissCount],
+                m_Counters[kCloseFollowerHoldSuppressionCount],
+                m_Counters[kCloseFollowerHoldReleaseCount],
+                m_Counters[kUnderThreeQuarterTargetCount],
+                m_Counters[kOverOneAndHalfTargetCount],
                 m_CollectionStartedLocalTime,
-                m_CollectionStartedSimulationFrame);
+                m_CollectionStartedSimulationFrame,
+                lineStatistics);
+        }
+
+        private LineStatisticsSnapshot[] GetLineStatisticsSnapshots()
+        {
+            if (!m_LineStates.IsCreated || m_LineStates.Count() == 0)
+            {
+                return Array.Empty<LineStatisticsSnapshot>();
+            }
+
+            NativeKeyValueArrays<Entity, LineSpacingState> entries =
+                m_LineStates.GetKeyValueArrays(Allocator.Temp);
+            try
+            {
+                LineStatisticsSnapshot[] result =
+                    new LineStatisticsSnapshot[entries.Keys.Length];
+                for (int i = 0; i < entries.Keys.Length; i++)
+                {
+                    LineSpacingState state = entries.Values[i];
+                    result[i] = new LineStatisticsSnapshot(
+                        entries.Keys[i],
+                        state.m_ControlWaypoint,
+                        state.m_TransportType,
+                        state.m_ControlVisits,
+                        state.m_Holds,
+                        state.m_CappedHolds,
+                        state.m_TotalAddedHoldFrames,
+                        state.m_GapSamples,
+                        state.m_TotalGapFrames,
+                        state.m_TotalTargetGapFrames,
+                        state.m_MinimumGapFrames,
+                        state.m_MaximumGapFrames,
+                        state.m_UnderThreeQuarterTargetGaps,
+                        state.m_UnderHalfTargetGaps,
+                        state.m_OverOneAndHalfTargetGaps,
+                        state.m_CloseFollowerHoldSuppressions,
+                        state.m_CloseFollowerHoldReleases);
+                }
+
+                return result;
+            }
+            finally
+            {
+                entries.Dispose();
+            }
         }
 
         internal void RestartStatisticsCollection()
@@ -320,6 +380,21 @@ namespace BetterBoarding
             public ComponentLookup<BoardingVehicle> m_BoardingVehicles;
 
             [ReadOnly]
+            public ComponentLookup<CurrentRoute> m_CurrentRoutes;
+
+            [ReadOnly]
+            public ComponentLookup<Target> m_Targets;
+
+            [ReadOnly]
+            public ComponentLookup<Deleted> m_Deleted;
+
+            [ReadOnly]
+            public ComponentLookup<Destroyed> m_Destroyed;
+
+            [ReadOnly]
+            public EntityStorageInfoLookup m_EntityLookup;
+
+            [ReadOnly]
             public BufferLookup<RouteWaypoint> m_RouteWaypoints;
 
             public NativeParallelHashMap<Entity, LineSpacingState> m_LineStates;
@@ -395,21 +470,30 @@ namespace BetterBoarding
                 {
                     lineState = LineSpacingState.Create(
                         controlWaypoint,
-                        controlWaypointIndex);
+                        controlWaypointIndex,
+                        lineData.m_TransportType);
                     if (!m_LineStates.TryAdd(route, lineState))
                     {
                         IncrementCounter(kLineStateCapacityMissCount);
                         return;
                     }
                 }
-                else if (lineState.m_ControlWaypoint != controlWaypoint ||
-                    lineState.m_ControlWaypointIndex != controlWaypointIndex)
+                else if (lineState.m_ControlWaypoint != controlWaypoint)
                 {
                     // A route edit can change the first valid stop. Do not carry a
-                    // departure anchor from the old control point into the new one.
-                    lineState = LineSpacingState.Create(
+                    // departure anchor from the old control point into the new one,
+                    // but keep this collection window's per-line counters.
+                    lineState.Reanchor(
                         controlWaypoint,
-                        controlWaypointIndex);
+                        controlWaypointIndex,
+                        lineData.m_TransportType);
+                }
+                else if (lineState.m_ControlWaypointIndex != controlWaypointIndex)
+                {
+                    // The same control waypoint can move within the route buffer.
+                    // Refresh its cache without dropping a live managed hold.
+                    lineState.m_ControlWaypointIndex = controlWaypointIndex;
+                    lineState.m_TransportType = lineData.m_TransportType;
                 }
 
                 uint observationGap =
@@ -422,7 +506,19 @@ namespace BetterBoarding
                 if (sameVisit)
                 {
                     lineState.m_LastObservedFrame = m_Frame;
-                    ReassertActiveHold(ref publicTransport, ref lineState);
+                    if (lineState.m_HoldApplied != 0 &&
+                        IsFrameAfter(lineState.m_PlannedDepartureFrame, m_Frame) &&
+                        HasCloseFollower(vehicleEntity, route, waypoint))
+                    {
+                        ReleaseActiveHoldForCloseFollower(
+                            ref publicTransport,
+                            ref lineState);
+                    }
+                    else
+                    {
+                        ReassertActiveHold(ref publicTransport, ref lineState);
+                    }
+
                     m_LineStates[route] = lineState;
                     return;
                 }
@@ -441,10 +537,14 @@ namespace BetterBoarding
 
                 IncrementCounter(kControlVisitCount);
                 IncrementModeCounter(lineData.m_TransportType);
+                lineState.m_ControlVisits++;
 
                 if (lineState.m_HasLastDeparture != 0)
                 {
                     ApplyBoundedHold(
+                        vehicleEntity,
+                        route,
+                        waypoint,
                         ref publicTransport,
                         ref lineState,
                         targetHeadwayFrames);
@@ -509,6 +609,41 @@ namespace BetterBoarding
                     m_BoardingVehicles[stop].m_Vehicle == vehicleEntity;
             }
 
+            private bool HasCloseFollower(
+                Entity vehicleEntity,
+                Entity route,
+                Entity waypoint)
+            {
+                if (!m_Connected.HasComponent(waypoint))
+                {
+                    return false;
+                }
+
+                Entity stop = m_Connected[waypoint].m_Connected;
+                if (stop == Entity.Null || !m_BoardingVehicles.HasComponent(stop))
+                {
+                    return false;
+                }
+
+                // Vanilla owns this slot. m_Testing is set only after another
+                // vehicle reaches the stop-testing phase, so it is a much safer
+                // proximity signal than straight-line distance on a looping line.
+                Entity testingVehicle = m_BoardingVehicles[stop].m_Testing;
+                if (testingVehicle == Entity.Null ||
+                    testingVehicle == vehicleEntity ||
+                    !m_EntityLookup.Exists(testingVehicle) ||
+                    m_Deleted.HasComponent(testingVehicle) ||
+                    m_Destroyed.HasComponent(testingVehicle) ||
+                    !m_CurrentRoutes.HasComponent(testingVehicle) ||
+                    !m_Targets.HasComponent(testingVehicle))
+                {
+                    return false;
+                }
+
+                return m_CurrentRoutes[testingVehicle].m_Route == route &&
+                    m_Targets[testingVehicle].m_Target == waypoint;
+            }
+
             private void RecordCompletedDeparture(
                 ref LineSpacingState lineState,
                 uint targetHeadwayFrames)
@@ -526,12 +661,35 @@ namespace BetterBoarding
                         completedDepartureFrame - lineState.m_LastDepartureFrame;
                     if (gap > 0u && gap <= kMaximumMeasuredGapFrames)
                     {
+                        bool firstLineGap = lineState.m_GapSamples == 0;
                         IncrementCounter(kGapSampleCount);
                         AddCounter(kTotalGapFrames, gap);
                         AddCounter(kTotalTargetGapFrames, targetHeadwayFrames);
+                        lineState.m_GapSamples++;
+                        lineState.m_TotalGapFrames += gap;
+                        lineState.m_TotalTargetGapFrames += targetHeadwayFrames;
+                        lineState.m_MinimumGapFrames = firstLineGap
+                            ? gap
+                            : math.min(lineState.m_MinimumGapFrames, gap);
+                        lineState.m_MaximumGapFrames = math.max(
+                            lineState.m_MaximumGapFrames,
+                            gap);
+                        if (((ulong)gap * 4ul) < ((ulong)targetHeadwayFrames * 3ul))
+                        {
+                            IncrementCounter(kUnderThreeQuarterTargetCount);
+                            lineState.m_UnderThreeQuarterTargetGaps++;
+                        }
+
                         if (((ulong)gap * 2ul) < targetHeadwayFrames)
                         {
                             IncrementCounter(kUnderHalfTargetCount);
+                            lineState.m_UnderHalfTargetGaps++;
+                        }
+
+                        if (((ulong)gap * 2ul) > ((ulong)targetHeadwayFrames * 3ul))
+                        {
+                            IncrementCounter(kOverOneAndHalfTargetCount);
+                            lineState.m_OverOneAndHalfTargetGaps++;
                         }
                     }
                 }
@@ -541,6 +699,9 @@ namespace BetterBoarding
             }
 
             private void ApplyBoundedHold(
+                Entity vehicleEntity,
+                Entity route,
+                Entity waypoint,
                 ref Game.Vehicles.PublicTransport publicTransport,
                 ref LineSpacingState lineState,
                 uint targetHeadwayFrames)
@@ -559,6 +720,13 @@ namespace BetterBoarding
                     return;
                 }
 
+                if (HasCloseFollower(vehicleEntity, route, waypoint))
+                {
+                    IncrementCounter(kCloseFollowerHoldSuppressionCount);
+                    lineState.m_CloseFollowerHoldSuppressions++;
+                    return;
+                }
+
                 uint addedHold = math.min(
                     (uint)additionalFramesNeeded,
                     kMaximumAddedHoldFrames);
@@ -572,10 +740,33 @@ namespace BetterBoarding
                 IncrementCounter(kWriteCount);
                 AddCounter(kTotalAddedHoldFrames, addedHold);
                 SetMaximumCounter(kMaximumAddedHold, addedHold);
+                lineState.m_Holds++;
+                lineState.m_TotalAddedHoldFrames += addedHold;
                 if ((uint)additionalFramesNeeded > kMaximumAddedHoldFrames)
                 {
                     IncrementCounter(kCappedHoldCount);
+                    lineState.m_CappedHolds++;
                 }
+            }
+
+            private void ReleaseActiveHoldForCloseFollower(
+                ref Game.Vehicles.PublicTransport publicTransport,
+                ref LineSpacingState lineState)
+            {
+                // Remove only the exact departure value written by this system.
+                // If vanilla or another mod changed it, stop managing the hold
+                // without overwriting that newer value.
+                if (publicTransport.m_DepartureFrame ==
+                    lineState.m_PlannedDepartureFrame)
+                {
+                    publicTransport.m_DepartureFrame =
+                        lineState.m_OriginalDepartureFrame;
+                    IncrementCounter(kWriteCount);
+                    IncrementCounter(kCloseFollowerHoldReleaseCount);
+                    lineState.m_CloseFollowerHoldReleases++;
+                }
+
+                lineState.m_HoldApplied = 0;
             }
 
             private void ReassertActiveHold(
@@ -694,21 +885,139 @@ namespace BetterBoarding
             public uint m_LastDepartureFrame;
             public uint m_OriginalDepartureFrame;
             public uint m_PlannedDepartureFrame;
+            public TransportType m_TransportType;
             public byte m_HasLastDeparture;
             public byte m_HoldApplied;
+            public long m_ControlVisits;
+            public long m_Holds;
+            public long m_CappedHolds;
+            public long m_TotalAddedHoldFrames;
+            public long m_GapSamples;
+            public long m_TotalGapFrames;
+            public long m_TotalTargetGapFrames;
+            public uint m_MinimumGapFrames;
+            public uint m_MaximumGapFrames;
+            public long m_UnderThreeQuarterTargetGaps;
+            public long m_UnderHalfTargetGaps;
+            public long m_OverOneAndHalfTargetGaps;
+            public long m_CloseFollowerHoldSuppressions;
+            public long m_CloseFollowerHoldReleases;
 
             public static LineSpacingState Create(
                 Entity controlWaypoint,
-                int controlWaypointIndex)
+                int controlWaypointIndex,
+                TransportType transportType)
             {
                 return new LineSpacingState
                 {
                     m_ControlWaypoint = controlWaypoint,
                     m_ActiveVehicle = Entity.Null,
                     m_ControlWaypointIndex = controlWaypointIndex,
-                    m_LastObservedFrame = uint.MaxValue
+                    m_LastObservedFrame = uint.MaxValue,
+                    m_TransportType = transportType
                 };
             }
+
+            public void Reanchor(
+                Entity controlWaypoint,
+                int controlWaypointIndex,
+                TransportType transportType)
+            {
+                m_ControlWaypoint = controlWaypoint;
+                m_ActiveVehicle = Entity.Null;
+                m_ControlWaypointIndex = controlWaypointIndex;
+                m_LastObservedFrame = uint.MaxValue;
+                m_LastDepartureFrame = 0u;
+                m_OriginalDepartureFrame = 0u;
+                m_PlannedDepartureFrame = 0u;
+                m_TransportType = transportType;
+                m_HasLastDeparture = 0;
+                m_HoldApplied = 0;
+            }
+        }
+
+        internal readonly struct LineStatisticsSnapshot
+        {
+            public LineStatisticsSnapshot(
+                Entity route,
+                Entity controlWaypoint,
+                TransportType transportType,
+                long controlVisits,
+                long holds,
+                long cappedHolds,
+                long totalAddedHoldFrames,
+                long gapSamples,
+                long totalGapFrames,
+                long totalTargetGapFrames,
+                uint minimumGapFrames,
+                uint maximumGapFrames,
+                long underThreeQuarterTargetGaps,
+                long underHalfTargetGaps,
+                long overOneAndHalfTargetGaps,
+                long closeFollowerHoldSuppressions,
+                long closeFollowerHoldReleases)
+            {
+                Route = route;
+                ControlWaypoint = controlWaypoint;
+                TransportType = transportType;
+                ControlVisits = controlVisits;
+                Holds = holds;
+                CappedHolds = cappedHolds;
+                TotalAddedHoldFrames = totalAddedHoldFrames;
+                GapSamples = gapSamples;
+                TotalGapFrames = totalGapFrames;
+                TotalTargetGapFrames = totalTargetGapFrames;
+                MinimumGapFrames = minimumGapFrames;
+                MaximumGapFrames = maximumGapFrames;
+                UnderThreeQuarterTargetGaps = underThreeQuarterTargetGaps;
+                UnderHalfTargetGaps = underHalfTargetGaps;
+                OverOneAndHalfTargetGaps = overOneAndHalfTargetGaps;
+                CloseFollowerHoldSuppressions = closeFollowerHoldSuppressions;
+                CloseFollowerHoldReleases = closeFollowerHoldReleases;
+            }
+
+            public Entity Route { get; }
+
+            public Entity ControlWaypoint { get; }
+
+            public TransportType TransportType { get; }
+
+            public long ControlVisits { get; }
+
+            public long Holds { get; }
+
+            public long CappedHolds { get; }
+
+            public long TotalAddedHoldFrames { get; }
+
+            public long GapSamples { get; }
+
+            public long TotalGapFrames { get; }
+
+            public long TotalTargetGapFrames { get; }
+
+            public uint MinimumGapFrames { get; }
+
+            public uint MaximumGapFrames { get; }
+
+            public long UnderThreeQuarterTargetGaps { get; }
+
+            public long UnderHalfTargetGaps { get; }
+
+            public long OverOneAndHalfTargetGaps { get; }
+
+            public long CloseFollowerHoldSuppressions { get; }
+
+            public long CloseFollowerHoldReleases { get; }
+
+            public double AverageAddedHoldFrames =>
+                Holds > 0 ? (double)TotalAddedHoldFrames / Holds : 0d;
+
+            public double AverageGapFrames =>
+                GapSamples > 0 ? (double)TotalGapFrames / GapSamples : 0d;
+
+            public double AverageTargetGapFrames =>
+                GapSamples > 0 ? (double)TotalTargetGapFrames / GapSamples : 0d;
         }
 
         internal readonly struct StatisticsSnapshot
@@ -729,8 +1038,13 @@ namespace BetterBoarding
                 long trainVisits,
                 long subwayVisits,
                 long lineStateCapacityMisses,
+                long closeFollowerHoldSuppressions,
+                long closeFollowerHoldReleases,
+                long underThreeQuarterTargetGaps,
+                long overOneAndHalfTargetGaps,
                 DateTime collectionStartedLocalTime,
-                uint collectionStartedSimulationFrame)
+                uint collectionStartedSimulationFrame,
+                LineStatisticsSnapshot[] lines)
             {
                 ControlVisits = controlVisits;
                 Holds = holds;
@@ -747,8 +1061,13 @@ namespace BetterBoarding
                 TrainVisits = trainVisits;
                 SubwayVisits = subwayVisits;
                 LineStateCapacityMisses = lineStateCapacityMisses;
+                CloseFollowerHoldSuppressions = closeFollowerHoldSuppressions;
+                CloseFollowerHoldReleases = closeFollowerHoldReleases;
+                UnderThreeQuarterTargetGaps = underThreeQuarterTargetGaps;
+                OverOneAndHalfTargetGaps = overOneAndHalfTargetGaps;
                 CollectionStartedLocalTime = collectionStartedLocalTime;
                 CollectionStartedSimulationFrame = collectionStartedSimulationFrame;
+                Lines = lines ?? Array.Empty<LineStatisticsSnapshot>();
             }
 
             public long ControlVisits { get; }
@@ -781,9 +1100,19 @@ namespace BetterBoarding
 
             public long LineStateCapacityMisses { get; }
 
+            public long CloseFollowerHoldSuppressions { get; }
+
+            public long CloseFollowerHoldReleases { get; }
+
+            public long UnderThreeQuarterTargetGaps { get; }
+
+            public long OverOneAndHalfTargetGaps { get; }
+
             public DateTime CollectionStartedLocalTime { get; }
 
             public uint CollectionStartedSimulationFrame { get; }
+
+            public LineStatisticsSnapshot[] Lines { get; }
 
             public double AverageAddedHoldFrames =>
                 Holds > 0 ? (double)TotalAddedHoldFrames / Holds : 0d;

@@ -20,8 +20,10 @@ namespace BetterBoarding
     using Game.Creatures;
    // using Game.Pathfind;
     using Game.Prefabs;
+    using Game.Routes;
     using Game.SceneFlow;
     using Game.Simulation;
+    using Game.UI;
     using Unity.Entities;
     using UnityEngine;
 
@@ -557,9 +559,23 @@ namespace BetterBoarding
                 : snapshot.CollectionStartedSimulationFrame.ToString(
                     "N0",
                     CultureInfo.InvariantCulture);
+            uint snapshotSimulationFrame =
+                world.GetExistingSystemManaged<SimulationSystem>()?.frameIndex ?? uint.MaxValue;
+            string snapshotFrame = snapshotSimulationFrame == uint.MaxValue
+                ? "not available"
+                : snapshotSimulationFrame.ToString("N0", CultureInfo.InvariantCulture);
+            string elapsedSimulationFrames =
+                snapshot.CollectionStartedSimulationFrame == uint.MaxValue ||
+                snapshotSimulationFrame == uint.MaxValue ||
+                snapshotSimulationFrame < snapshot.CollectionStartedSimulationFrame
+                    ? "not available"
+                    : FormatSpacingFrames(
+                        snapshotSimulationFrame - snapshot.CollectionStartedSimulationFrame);
 
             AppendField(sb, "Collection started", collectionStarted);
             AppendField(sb, "Start simulation frame", collectionStartFrame);
+            AppendField(sb, "Snapshot simulation frame", snapshotFrame);
+            AppendField(sb, "Elapsed simulation time", elapsedSimulationFrames);
             AppendField(
                 sb,
                 "Counter scope",
@@ -577,23 +593,31 @@ namespace BetterBoarding
                 $"Subway {LocaleUtils.FormatN0(snapshot.SubwayVisits)}");
             AppendField(
                 sb,
-                "Spacing holds",
+                "Spacing holds planned",
                 snapshot.ControlVisits > 0
                     ? $"{LocaleUtils.FormatN0(snapshot.Holds)} " +
                       $"({((double)snapshot.Holds * 100d / snapshot.ControlVisits).ToString("0.0", CultureInfo.InvariantCulture)}% of visits)"
                     : "0");
             AppendField(
                 sb,
-                "Average added hold",
+                "Average planned hold",
                 FormatSpacingFrames(snapshot.AverageAddedHoldFrames));
             AppendField(
                 sb,
-                "Maximum added hold",
+                "Maximum planned hold",
                 FormatSpacingFrames(snapshot.MaximumAddedHoldFrames));
             AppendField(
                 sb,
-                "Holds limited by safety cap",
+                "Plans limited by safety cap",
                 LocaleUtils.FormatN0(snapshot.CappedHolds));
+            AppendField(
+                sb,
+                "Bus/tram holds avoided for follower",
+                LocaleUtils.FormatN0(snapshot.CloseFollowerHoldSuppressions));
+            AppendField(
+                sb,
+                "Bus/tram holds released early",
+                LocaleUtils.FormatN0(snapshot.CloseFollowerHoldReleases));
             AppendField(
                 sb,
                 "Estimated control-point departure gaps",
@@ -607,9 +631,23 @@ namespace BetterBoarding
                     : "not enough departures yet");
             AppendField(
                 sb,
+                "Gaps below 75% of target",
+                snapshot.GapSamples > 0
+                    ? $"{LocaleUtils.FormatN0(snapshot.UnderThreeQuarterTargetGaps)} of " +
+                      LocaleUtils.FormatN0(snapshot.GapSamples)
+                    : "not enough departures yet");
+            AppendField(
+                sb,
                 "Gaps below half target",
                 snapshot.GapSamples > 0
                     ? $"{LocaleUtils.FormatN0(snapshot.UnderHalfTargetGaps)} of " +
+                      LocaleUtils.FormatN0(snapshot.GapSamples)
+                    : "not enough departures yet");
+            AppendField(
+                sb,
+                "Gaps above 150% of target",
+                snapshot.GapSamples > 0
+                    ? $"{LocaleUtils.FormatN0(snapshot.OverOneAndHalfTargetGaps)} of " +
                       LocaleUtils.FormatN0(snapshot.GapSamples)
                     : "not enough departures yet");
             AppendField(
@@ -624,13 +662,107 @@ namespace BetterBoarding
                 sb,
                 "Method",
                 "paces actual departures at the first valid boarding stop on each line; " +
+                "for bus/tram, avoids or releases its own hold when vanilla exposes a same-line vehicle " +
+                "already testing that stop; " +
                 "gap estimates use the last observed boarding frame; other stops keep vanilla timing " +
                 "and no shared waypoint timing is rewritten");
             AppendField(
                 sb,
                 "Collection cost",
-                "departure gaps and counters are updated inside the same Burst pacing job; " +
-                "Stats to Log only reads them on demand");
+                "departure gaps and per-line counters are updated inside the same Burst pacing job; " +
+                "line names and vehicle counts are read only when Stats to Log is clicked");
+
+            AppendSpacingAssistLineReports(sb, world, snapshot.Lines);
+        }
+
+        private static void AppendSpacingAssistLineReports(
+            StringBuilder sb,
+            World world,
+            TransitSpacingAssistSystem.LineStatisticsSnapshot[] lines)
+        {
+            sb.AppendLine();
+            AppendSubHeader(sb, "Per-line control-point results");
+            if (lines == null || lines.Length == 0)
+            {
+                sb.AppendLine("none observed yet");
+                return;
+            }
+
+            Array.Sort(lines, CompareSpacingLineStatistics);
+            NameSystem nameSystem = world.GetOrCreateSystemManaged<NameSystem>();
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                TransitSpacingAssistSystem.LineStatisticsSnapshot line = lines[i];
+                string lineName = ResolveSpacingLineName(world, nameSystem, line.Route);
+                int vehicleCount = 0;
+                if (world.EntityManager.Exists(line.Route) &&
+                    world.EntityManager.HasBuffer<RouteVehicle>(line.Route))
+                {
+                    vehicleCount = world.EntityManager
+                        .GetBuffer<RouteVehicle>(line.Route, isReadOnly: true)
+                        .Length;
+                }
+
+                string gapSummary = line.GapSamples > 0
+                    ? $"gap min/avg/max {FormatSpacingFrames(line.MinimumGapFrames)} / " +
+                      $"{FormatSpacingFrames(line.AverageGapFrames)} / " +
+                      $"{FormatSpacingFrames(line.MaximumGapFrames)} | " +
+                      $"target {FormatSpacingFrames(line.AverageTargetGapFrames)} | " +
+                      $"under 75%/50% {LocaleUtils.FormatN0(line.UnderThreeQuarterTargetGaps)}/" +
+                      $"{LocaleUtils.FormatN0(line.UnderHalfTargetGaps)} of {LocaleUtils.FormatN0(line.GapSamples)} | " +
+                      $"over 150% {LocaleUtils.FormatN0(line.OverOneAndHalfTargetGaps)}"
+                    : "gap min/avg/max not enough departures";
+
+                sb.Append(LocaleUtils.FormatN0(i + 1)).Append(". ")
+                    .Append(line.TransportType).Append(" | ")
+                    .Append(lineName).Append(" | route ").Append(line.Route)
+                    .Append(" | control waypoint ").Append(line.ControlWaypoint)
+                    .Append(" | vehicles ").Append(LocaleUtils.FormatN0(vehicleCount))
+                    .Append(" | visits ").Append(LocaleUtils.FormatN0(line.ControlVisits))
+                    .Append(" | holds planned ").Append(LocaleUtils.FormatN0(line.Holds))
+                    .Append(" (avg planned ").Append(FormatSpacingFrames(line.AverageAddedHoldFrames))
+                    .Append("; cap ").Append(LocaleUtils.FormatN0(line.CappedHolds)).Append(')')
+                    .Append(" | close vehicle avoided/released ")
+                    .Append(LocaleUtils.FormatN0(line.CloseFollowerHoldSuppressions)).Append('/')
+                    .Append(LocaleUtils.FormatN0(line.CloseFollowerHoldReleases))
+                    .Append(" | ").AppendLine(gapSummary);
+            }
+        }
+
+        private static int CompareSpacingLineStatistics(
+            TransitSpacingAssistSystem.LineStatisticsSnapshot left,
+            TransitSpacingAssistSystem.LineStatisticsSnapshot right)
+        {
+            int typeComparison = left.TransportType.CompareTo(right.TransportType);
+            if (typeComparison != 0)
+            {
+                return typeComparison;
+            }
+
+            int visitComparison = right.ControlVisits.CompareTo(left.ControlVisits);
+            return visitComparison != 0
+                ? visitComparison
+                : left.Route.Index.CompareTo(right.Route.Index);
+        }
+
+        private static string ResolveSpacingLineName(
+            World world,
+            NameSystem nameSystem,
+            Entity route)
+        {
+            if (!world.EntityManager.Exists(route))
+            {
+                return "(deleted line)";
+            }
+
+            string name = nameSystem.GetRenderedLabelName(route);
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                name = nameSystem.GetDebugName(route);
+            }
+
+            return string.IsNullOrWhiteSpace(name) ? "(unnamed line)" : name.Trim();
         }
 
         private static string FormatSpacingFrames(double frames)
