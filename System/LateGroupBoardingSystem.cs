@@ -80,7 +80,9 @@ namespace BetterBoarding
 
             EntityCommandBuffer ecb = default;
             bool hasCommandBuffer = false;
+#if DEBUG
             bool playedCommandBuffer = false;
+#endif
             int controllersScanned = 0;
             int candidateCount = 0;
             int groupsReleased = 0;
@@ -193,7 +195,9 @@ namespace BetterBoarding
                     // Apply structural and buffer changes only after every live source buffer
                     // used by this pass has finished being read.
                     ecb.Playback(EntityManager);
+#if DEBUG
                     playedCommandBuffer = true;
+#endif
                 }
 
                 if (BoardingRuntimeSettings.EnableVerboseLogging &&

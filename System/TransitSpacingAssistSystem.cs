@@ -33,8 +33,9 @@ namespace BetterBoarding
     {
         public const int UpdatesPerDay = 16384;
 
-        private const uint kMaximumBusTramAddedHoldFrames = 1024u;
+        private const uint kMaximumBusTramAddedHoldFrames = 1792u;
         private const uint kMaximumRailAddedHoldFrames = 512u;
+        private const uint kVanillaMaximumLateBoardingFrames = 1800u;
         private const uint kSameVisitToleranceFrames = 512u;
         private const uint kMaximumMeasuredGapFrames = 524288u;
         private const float kNearbyBusTramDistanceMetres = 512f;
@@ -811,6 +812,22 @@ namespace BetterBoarding
 
                 uint maximumAddedHold = GetMaximumAddedHoldFrames(
                     lineState.m_TransportType);
+                uint vanillaLateBoardingDeadline =
+                    lineState.m_OriginalDepartureFrame +
+                    kVanillaMaximumLateBoardingFrames;
+                int framesBeforeVanillaDeadline = unchecked(
+                    (int)(vanillaLateBoardingDeadline - baselineDeparture));
+                if (framesBeforeVanillaDeadline <= 0)
+                {
+                    return;
+                }
+
+                // Do not let spacing extend a stop beyond vanilla's original
+                // forced-departure window. The 1792-frame road cap is one
+                // 16-frame transport update below that deadline.
+                maximumAddedHold = math.min(
+                    maximumAddedHold,
+                    (uint)framesBeforeVanillaDeadline);
                 uint addedHold = math.min(
                     (uint)additionalFramesNeeded,
                     maximumAddedHold);
