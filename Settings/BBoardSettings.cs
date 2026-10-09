@@ -92,6 +92,10 @@ namespace BetterBoarding
         [SettingsUISetter(typeof(BBoardSettings), nameof(SetSpacingAssistLive))]
         public bool SpacingAssist { get; set; }
 
+        [SettingsUISection(ActionsTab, BehaviorGroup)]
+        [SettingsUISetter(typeof(BBoardSettings), nameof(SetAllowSecondBusBoardingLive))]
+        public bool AllowSecondBusBoarding { get; set; }
+
         [SettingsUISection(ActionsTab, StatusGroup)]
         public string StatusOverview
         {
@@ -357,6 +361,21 @@ namespace BetterBoarding
             }
         }
 
+        private void SetAllowSecondBusBoardingLive(bool value)
+        {
+            if (BoardingRuntimeSettings.SetAllowSecondBusBoarding(value))
+            {
+                LogUtils.Info(
+                    Mod.s_Log,
+                    () =>
+                        $"Options Settings: allowSecondBusBoarding={value}, " +
+                        $"effective={SecondBusBoardingCompatibility.EffectiveEnabled}");
+
+                TrySetSecondBusBoardingAdmissionEnabled();
+                WaitStatus.MarkDirty();
+            }
+        }
+
         private void SetEnableVerboseLoggingLive(bool value)
         {
             if (BoardingRuntimeSettings.SetEnableVerboseLogging(value))
@@ -516,6 +535,28 @@ namespace BetterBoarding
             }
         }
 
+        private static void TrySetSecondBusBoardingAdmissionEnabled()
+        {
+            if (!TryGetLoadedWorld(out World? world))
+            {
+                return;
+            }
+
+            try
+            {
+                SecondBusBoardingCompatibility.RefreshAdmissionSystem(world);
+            }
+            catch (Exception ex)
+            {
+                LogUtils.Warn(
+                    Mod.s_Log,
+                    () =>
+                        "Failed updating second-bus boarding state: " +
+                        $"{ex.GetType().Name}: {ex.Message}",
+                    ex);
+            }
+        }
+
         private static bool TryGetLoadedWorld(out World world)
         {
             world = World.DefaultGameObjectInjectionWorld;
@@ -537,6 +578,8 @@ namespace BetterBoarding
             CancelLateBoarders = true;
             CimsRunSoonerToCatchBuses = true;
             SpacingAssist = true;
+            // New vehicle-state behavior stays opt-in until city testing confirms it.
+            AllowSecondBusBoarding = false;
             EnableVerboseLogging = false;
         }
     }

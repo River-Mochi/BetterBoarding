@@ -484,6 +484,7 @@ namespace BetterBoarding
                 AppendTesterHints(sb);
                 AppendSummaryReport(sb, snapshot);
                 AppendSpacingAssistReport(sb, world);
+                AppendSecondBusBoardingReport(sb, world);
 #if DEBUG
                 AppendPerformanceReport(sb);
 #endif
@@ -678,6 +679,115 @@ namespace BetterBoarding
                 "line names and vehicle counts are read only when Stats to Log is clicked");
 
             AppendSpacingAssistLineReports(sb, world, snapshot.Lines);
+        }
+
+        private static void AppendSecondBusBoardingReport(StringBuilder sb, World world)
+        {
+            AppendSectionHeader(sb, "Allow Second Bus Boarding");
+            AppendField(
+                sb,
+                "Option",
+                BoardingRuntimeSettings.AllowSecondBusBoarding ? "enabled" : "disabled");
+            AppendField(sb, "Scope", "Bus only; one lead plus one following bus");
+            AppendField(
+                sb,
+                "Admission range",
+                $"up to {SecondBusBoardingPolicy.MaximumPairDistance:F0} m and " +
+                $"{SecondBusBoardingPolicy.MaximumFollowerSpeed:F0} m/s");
+            AppendField(
+                sb,
+                "Separate mod conflict",
+                SecondBusBoardingCompatibility.ConcurrentBusBoardingDetected
+                    ? "Concurrent Bus Boarding detected; this feature is inactive"
+                    : "none detected");
+            AppendField(
+                sb,
+                "Effective state",
+                SecondBusBoardingCompatibility.EffectiveEnabled
+                    ? "active"
+                    : "inactive");
+            AppendField(
+                sb,
+                "Counter scope",
+                "reset when the feature is enabled or a city begins loading");
+            AppendField(
+                sb,
+                "Vehicle-AI ordering",
+                SecondBusBoardingCompatibility.OrderingAvailable
+                    ? "available"
+                    : "unavailable; feature failed closed");
+
+            SecondBusBoardingAdmissionSystem? admission =
+                world.GetExistingSystemManaged<SecondBusBoardingAdmissionSystem>();
+            SecondBusBoardingDistributionSystem? distribution =
+                world.GetExistingSystemManaged<SecondBusBoardingDistributionSystem>();
+            if (admission == null || distribution == null)
+            {
+                AppendField(sb, "Session statistics", "systems not registered yet");
+                return;
+            }
+
+            SecondBusBoardingAdmissionSystem.StatisticsSnapshot admitted =
+                admission.GetStatisticsSnapshot();
+            SecondBusBoardingDistributionSystem.StatisticsSnapshot completed =
+                distribution.GetStatisticsSnapshot();
+
+            AppendField(
+                sb,
+                "Exact lead/follower pairs",
+                LocaleUtils.FormatN0(admitted.PairCandidates));
+            AppendField(
+                sb,
+                "Concurrent sessions started",
+                LocaleUtils.FormatN0(admitted.SessionsStarted));
+            if (admitted.LastRoute != Entity.Null)
+            {
+                NameSystem nameSystem = world.GetOrCreateSystemManaged<NameSystem>();
+                AppendField(
+                    sb,
+                    "Last session line",
+                    $"{ResolveSpacingLineName(world, nameSystem, admitted.LastRoute)} " +
+                    $"[{admitted.LastRoute}]");
+                AppendField(sb, "Last session stop", admitted.LastStop.ToString());
+                AppendField(
+                    sb,
+                    "Last session buses",
+                    $"lead {admitted.LastLeadBus} | second {admitted.LastFollowerBus}");
+            }
+            AppendField(
+                sb,
+                "Active sessions now",
+                LocaleUtils.FormatN0(completed.ActiveSessions));
+            AppendField(
+                sb,
+                "Admission rejected",
+                $"moving {LocaleUtils.FormatN0(admitted.RejectedMoving)} | " +
+                $"too far {LocaleUtils.FormatN0(admitted.RejectedDistance)} | " +
+                $"route/state {LocaleUtils.FormatN0(admitted.RejectedContext)}");
+            AppendField(
+                sb,
+                "Sessions with passenger changes",
+                LocaleUtils.FormatN0(completed.SessionsWithPassengerChanges));
+            AppendField(
+                sb,
+                "Observed passenger buffer changes",
+                $"+{LocaleUtils.FormatN0(completed.BoardedNet)} / " +
+                $"-{LocaleUtils.FormatN0(completed.AlightedNet)} (net observations)");
+            AppendField(
+                sb,
+                "Returned to vanilla",
+                $"lead departed {LocaleUtils.FormatN0(completed.LeadDepartedReleases)} | " +
+                $"window ended {LocaleUtils.FormatN0(completed.WindowReleases)} | " +
+                $"invalid {LocaleUtils.FormatN0(completed.InvalidReleases)} | " +
+                $"option/conflict {LocaleUtils.FormatN0(completed.DisabledReleases)}");
+            AppendField(
+                sb,
+                "Hard safety releases",
+                LocaleUtils.FormatN0(completed.HardReleases));
+            AppendField(
+                sb,
+                "Collection cost",
+                "counters are updated inside the feature's existing jobs; log formatting occurs only when Stats to Log is clicked");
         }
 
         private static void AppendSpacingAssistLineReports(

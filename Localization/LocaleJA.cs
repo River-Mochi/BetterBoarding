@@ -139,6 +139,15 @@ namespace BetterBoarding
                     "- 降りる乗客がいない満員バスは、vanilla の通常の停車要求ロジックにより停留所を通過できます。"
                 },
 
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AllowSecondBusBoarding)), "Allow Second Bus Boarding" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AllowSecondBusBoarding)),
+                    "When two buses are stopped close together for the same stop, lets the second bus exchange passengers too.\n" +
+                    "- Bus only; trains, trams, and subways are never included.\n" +
+                    "- Maximum two buses, using a fixed safe range with no extra slider or city panel.\n" +
+                    "- The lead bus keeps its normal vanilla boarding lifecycle; the second bus returns to vanilla when the lead departs.\n" +
+                    "- Automatically stays inactive if the separate Concurrent Bus Boarding mod is detected."
+                },
+
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusOverview)), "総利用状況" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusOverview)),

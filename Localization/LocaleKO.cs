@@ -139,6 +139,15 @@ namespace BetterBoarding
                     "- 내릴 승객이 없는 만원 버스는 vanilla의 일반 정차 요청 로직에 따라 정류장을 통과할 수 있습니다."
                 },
 
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AllowSecondBusBoarding)), "Allow Second Bus Boarding" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AllowSecondBusBoarding)),
+                    "When two buses are stopped close together for the same stop, lets the second bus exchange passengers too.\n" +
+                    "- Bus only; trains, trams, and subways are never included.\n" +
+                    "- Maximum two buses, using a fixed safe range with no extra slider or city panel.\n" +
+                    "- The lead bus keeps its normal vanilla boarding lifecycle; the second bus returns to vanilla when the lead departs.\n" +
+                    "- Automatically stays inactive if the separate Concurrent Bus Boarding mod is detected."
+                },
+
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusOverview)), "전체 이용량" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusOverview)),

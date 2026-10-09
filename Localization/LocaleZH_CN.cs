@@ -139,6 +139,15 @@ namespace BetterBoarding
                     "- 如果满载公交没有乘客要下车，仍可通过 vanilla 的正常停车请求逻辑直接驶过站点。"
                 },
 
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AllowSecondBusBoarding)), "Allow Second Bus Boarding" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AllowSecondBusBoarding)),
+                    "When two buses are stopped close together for the same stop, lets the second bus exchange passengers too.\n" +
+                    "- Bus only; trains, trams, and subways are never included.\n" +
+                    "- Maximum two buses, using a fixed safe range with no extra slider or city panel.\n" +
+                    "- The lead bus keeps its normal vanilla boarding lifecycle; the second bus returns to vanilla when the lead departs.\n" +
+                    "- Automatically stays inactive if the separate Concurrent Bus Boarding mod is detected."
+                },
+
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusOverview)), "总使用量" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusOverview)),

@@ -138,6 +138,17 @@ namespace BetterBoarding
                 updateSystem.UpdateBefore<TransitSpacingAssistSystem, HumanMoveSystem>(
                     SystemUpdatePhase.GameSimulation);
 
+                // Concurrent boarding needs one pass immediately before bus AI and one
+                // immediately after it. Registration is deferred until every mod has loaded so
+                // we can safely order around All Aboard and yield to Concurrent Bus Boarding.
+                SecondBusBoardingCompatibilitySystem.Configure(updateSystem);
+                updateSystem.UpdateAt<SecondBusBoardingCompatibilitySystem>(
+                    SystemUpdatePhase.Modification1);
+                updateSystem.UpdateAt<SecondBusBoardingProvisionSystem>(
+                    SystemUpdatePhase.Modification1);
+                updateSystem.UpdateAfter<SecondBusBoardingHoldSystem, CarNavigationSystem>(
+                    SystemUpdatePhase.GameSimulation);
+
                 // Group assistance runs after navigation but before pet/resident AI. This lets
                 // vanilla consume adjusted approach/timeout state in the normal boarding path
                 // and avoids conflicting with commands those systems defer to EndFrameBarrier.
@@ -176,6 +187,7 @@ namespace BetterBoarding
         {
             Settings?.UnregisterInOptionsUI();
             Settings = null;
+            SecondBusBoardingCompatibility.Reset();
         }
     }
 }
