@@ -115,8 +115,7 @@ tags: faster boarding, boarding time, bus stop issues, slow stuck transit, debun
 <Dependency Id=""/>
 <!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
 <ChangeLog>
-- Improved boarding performance.
-- Removed verbose logging from Release builds.
+- Added an optional bus-only feature that lets a second nearby bus board and unload passengers at the same stop
 </ChangeLog>
 <!--External link. supported types are discord, github, youtube, twitch, x, paypal, patreon, buymeacoffee, kofi, crowdin, gitlab-->
 <ExternalLink Type="github" Url="https://github.com/River-Mochi/BetterBoarding"/>

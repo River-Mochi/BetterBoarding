@@ -17,6 +17,7 @@ namespace BetterBoarding
     using Game.Objects;
     using Game.Prefabs;
     using Game.Routes;
+    using Game.Simulation;
     using Game.Tools;
     using Game.Vehicles;
     using Unity.Burst;
