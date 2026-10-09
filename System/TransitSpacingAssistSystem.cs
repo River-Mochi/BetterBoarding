@@ -33,9 +33,13 @@ namespace BetterBoarding
     {
         public const int UpdatesPerDay = 16384;
 
-        private const uint kMaximumAddedHoldFrames = 512u;
+        private const uint kMaximumBusTramAddedHoldFrames = 1024u;
+        private const uint kMaximumRailAddedHoldFrames = 512u;
         private const uint kSameVisitToleranceFrames = 512u;
         private const uint kMaximumMeasuredGapFrames = 524288u;
+        private const float kNearbyBusTramDistanceMetres = 512f;
+        private const float kNearbyBusTramDistanceSquared =
+            kNearbyBusTramDistanceMetres * kNearbyBusTramDistanceMetres;
         private const int kLineStateCapacity = 4096;
 
         private const int kControlVisitCount = 0;
@@ -97,7 +101,7 @@ namespace BetterBoarding
 
             m_VehicleQuery = SystemAPI.QueryBuilder()
                 .WithAllRW<Game.Vehicles.PublicTransport>()
-                .WithAll<CurrentRoute, Target>()
+                .WithAll<CurrentRoute, Target, Game.Objects.Transform>()
                 .WithNone<Deleted, Destroyed, Temp, Overridden>()
                 .Build();
 
@@ -160,8 +164,10 @@ namespace BetterBoarding
                 m_Targets = SystemAPI.GetComponentLookup<Target>(isReadOnly: true),
                 m_Deleted = SystemAPI.GetComponentLookup<Deleted>(isReadOnly: true),
                 m_Destroyed = SystemAPI.GetComponentLookup<Destroyed>(isReadOnly: true),
+                m_Transforms = SystemAPI.GetComponentLookup<Game.Objects.Transform>(isReadOnly: true),
                 m_EntityLookup = SystemAPI.GetEntityStorageInfoLookup(),
                 m_RouteWaypoints = SystemAPI.GetBufferLookup<RouteWaypoint>(isReadOnly: true),
+                m_RouteVehicles = SystemAPI.GetBufferLookup<RouteVehicle>(isReadOnly: true),
                 m_LineStates = m_LineStates,
                 m_Counters = m_Counters
             };
@@ -398,10 +404,16 @@ namespace BetterBoarding
             public ComponentLookup<Destroyed> m_Destroyed;
 
             [ReadOnly]
+            public ComponentLookup<Game.Objects.Transform> m_Transforms;
+
+            [ReadOnly]
             public EntityStorageInfoLookup m_EntityLookup;
 
             [ReadOnly]
             public BufferLookup<RouteWaypoint> m_RouteWaypoints;
+
+            [ReadOnly]
+            public BufferLookup<RouteVehicle> m_RouteVehicles;
 
             public NativeParallelHashMap<Entity, LineSpacingState> m_LineStates;
 
@@ -411,7 +423,8 @@ namespace BetterBoarding
                 Entity vehicleEntity,
                 ref Game.Vehicles.PublicTransport publicTransport,
                 in CurrentRoute currentRoute,
-                in Target target)
+                in Target target,
+                in Game.Objects.Transform transform)
             {
                 Game.Vehicles.PublicTransportFlags stateFlags = publicTransport.m_State;
                 if ((stateFlags & Game.Vehicles.PublicTransportFlags.Boarding) == 0 ||
@@ -514,7 +527,12 @@ namespace BetterBoarding
                     lineState.m_LastObservedFrame = m_Frame;
                     if (lineState.m_HoldApplied != 0 &&
                         IsFrameAfter(lineState.m_PlannedDepartureFrame, m_Frame) &&
-                        HasCloseFollower(vehicleEntity, route, waypoint))
+                        HasCloseFollower(
+                            vehicleEntity,
+                            route,
+                            waypoint,
+                            lineState.m_TransportType,
+                            transform.m_Position))
                     {
                         ReleaseActiveHoldForCloseFollower(
                             ref publicTransport,
@@ -551,6 +569,7 @@ namespace BetterBoarding
                         vehicleEntity,
                         route,
                         waypoint,
+                        transform.m_Position,
                         ref publicTransport,
                         ref lineState,
                         targetHeadwayFrames);
@@ -618,7 +637,9 @@ namespace BetterBoarding
             private bool HasCloseFollower(
                 Entity vehicleEntity,
                 Entity route,
-                Entity waypoint)
+                Entity waypoint,
+                TransportType transportType,
+                float3 vehiclePosition)
             {
                 if (!m_Connected.HasComponent(waypoint))
                 {
@@ -635,19 +656,68 @@ namespace BetterBoarding
                 // vehicle reaches the stop-testing phase, so it is a much safer
                 // proximity signal than straight-line distance on a looping line.
                 Entity testingVehicle = m_BoardingVehicles[stop].m_Testing;
-                if (testingVehicle == Entity.Null ||
-                    testingVehicle == vehicleEntity ||
-                    !m_EntityLookup.Exists(testingVehicle) ||
-                    m_Deleted.HasComponent(testingVehicle) ||
-                    m_Destroyed.HasComponent(testingVehicle) ||
-                    !m_CurrentRoutes.HasComponent(testingVehicle) ||
-                    !m_Targets.HasComponent(testingVehicle))
+                if (IsSameLineVehicleTargetingWaypoint(
+                    testingVehicle,
+                    vehicleEntity,
+                    route,
+                    waypoint))
+                {
+                    return true;
+                }
+
+                // m_Testing is intentionally very late: a road vehicle claims it
+                // only after reaching the end-of-path stop test. Also recognize a
+                // same-line bus or tram still approaching this exact waypoint, but
+                // only while it is physically nearby. This avoids holding the lead
+                // vehicle longer when a visible follower is already closing in.
+                if ((transportType != TransportType.Bus &&
+                        transportType != TransportType.Tram) ||
+                    !m_RouteVehicles.HasBuffer(route))
                 {
                     return false;
                 }
 
-                return m_CurrentRoutes[testingVehicle].m_Route == route &&
-                    m_Targets[testingVehicle].m_Target == waypoint;
+                DynamicBuffer<RouteVehicle> vehicles = m_RouteVehicles[route];
+                for (int i = 0; i < vehicles.Length; i++)
+                {
+                    Entity candidate = vehicles[i].m_Vehicle;
+                    if (!IsSameLineVehicleTargetingWaypoint(
+                            candidate,
+                            vehicleEntity,
+                            route,
+                            waypoint) ||
+                        !m_Transforms.HasComponent(candidate))
+                    {
+                        continue;
+                    }
+
+                    float3 candidatePosition = m_Transforms[candidate].m_Position;
+                    if (math.lengthsq(
+                            candidatePosition.xz - vehiclePosition.xz) <=
+                        kNearbyBusTramDistanceSquared)
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            private bool IsSameLineVehicleTargetingWaypoint(
+                Entity candidate,
+                Entity vehicleEntity,
+                Entity route,
+                Entity waypoint)
+            {
+                return candidate != Entity.Null &&
+                    candidate != vehicleEntity &&
+                    m_EntityLookup.Exists(candidate) &&
+                    !m_Deleted.HasComponent(candidate) &&
+                    !m_Destroyed.HasComponent(candidate) &&
+                    m_CurrentRoutes.HasComponent(candidate) &&
+                    m_Targets.HasComponent(candidate) &&
+                    m_CurrentRoutes[candidate].m_Route == route &&
+                    m_Targets[candidate].m_Target == waypoint;
             }
 
             private void RecordCompletedDeparture(
@@ -708,6 +778,7 @@ namespace BetterBoarding
                 Entity vehicleEntity,
                 Entity route,
                 Entity waypoint,
+                float3 vehiclePosition,
                 ref Game.Vehicles.PublicTransport publicTransport,
                 ref LineSpacingState lineState,
                 uint targetHeadwayFrames)
@@ -726,16 +797,23 @@ namespace BetterBoarding
                     return;
                 }
 
-                if (HasCloseFollower(vehicleEntity, route, waypoint))
+                if (HasCloseFollower(
+                    vehicleEntity,
+                    route,
+                    waypoint,
+                    lineState.m_TransportType,
+                    vehiclePosition))
                 {
                     IncrementCounter(kCloseFollowerHoldSuppressionCount);
                     lineState.m_CloseFollowerHoldSuppressions++;
                     return;
                 }
 
+                uint maximumAddedHold = GetMaximumAddedHoldFrames(
+                    lineState.m_TransportType);
                 uint addedHold = math.min(
                     (uint)additionalFramesNeeded,
-                    kMaximumAddedHoldFrames);
+                    maximumAddedHold);
                 uint plannedDeparture = baselineDeparture + addedHold;
 
                 publicTransport.m_DepartureFrame = plannedDeparture;
@@ -748,7 +826,7 @@ namespace BetterBoarding
                 SetMaximumCounter(kMaximumAddedHold, addedHold);
                 lineState.m_Holds++;
                 lineState.m_TotalAddedHoldFrames += addedHold;
-                if ((uint)additionalFramesNeeded > kMaximumAddedHoldFrames)
+                if ((uint)additionalFramesNeeded > maximumAddedHold)
                 {
                     IncrementCounter(kCappedHoldCount);
                     lineState.m_CappedHolds++;
@@ -866,6 +944,15 @@ namespace BetterBoarding
 
                 interval = math.min(interval, 4369f);
                 return (uint)math.round(interval * 60f);
+            }
+
+            private static uint GetMaximumAddedHoldFrames(
+                TransportType transportType)
+            {
+                return transportType == TransportType.Bus ||
+                    transportType == TransportType.Tram
+                    ? kMaximumBusTramAddedHoldFrames
+                    : kMaximumRailAddedHoldFrames;
             }
 
             private static bool IsFrameAfter(uint candidate, uint reference)
