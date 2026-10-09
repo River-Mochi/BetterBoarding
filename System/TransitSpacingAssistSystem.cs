@@ -31,10 +31,10 @@ namespace BetterBoarding
     /// </summary>
     public sealed partial class TransitSpacingAssistSystem : GameSystemBase
     {
-        public const int UpdatesPerDay = 8192;
+        public const int UpdatesPerDay = 16384;
 
         private const uint kMaximumAddedHoldFrames = 512u;
-        private const uint kSameVisitToleranceFrames = 64u;
+        private const uint kSameVisitToleranceFrames = 512u;
         private const uint kMaximumMeasuredGapFrames = 524288u;
         private const int kLineStateCapacity = 4096;
 
@@ -65,10 +65,17 @@ namespace BetterBoarding
 
         public override int GetUpdateInterval(SystemUpdatePhase phase)
         {
-            // The shortest vanilla boarding window is 60 frames. A 32-frame
-            // cadence catches it in time without scanning more often than the old
-            // Spacing Assist implementation.
+            // A bunched follower can receive no vanilla dwell and leave at the
+            // next 16-frame transport-AI pass. Matching that cadence ensures the
+            // control point sees those short visits before release.
             return 262144 / UpdatesPerDay;
+        }
+
+        public override int GetUpdateOffset(SystemUpdatePhase phase)
+        {
+            // Cars update at offset 1 and trains at offset 3. Offset 0 observes
+            // their new boarding state before either AI's next 16-frame pass.
+            return 0;
         }
 
         protected override void OnCreate()
@@ -152,7 +159,9 @@ namespace BetterBoarding
 
         protected override void OnDestroy()
         {
-            Dependency.Complete();
+            // Undo a live control-point hold on hot unload when the entity still
+            // carries the exact value written by this system.
+            ReleaseManagedHolds();
 
             if (m_LineStates.IsCreated)
             {
@@ -328,7 +337,8 @@ namespace BetterBoarding
                     (stateFlags & Game.Vehicles.PublicTransportFlags.EnRoute) == 0 ||
                     (stateFlags &
                         (Game.Vehicles.PublicTransportFlags.Evacuating |
-                         Game.Vehicles.PublicTransportFlags.PrisonerTransport)) != 0)
+                         Game.Vehicles.PublicTransportFlags.PrisonerTransport |
+                         Game.Vehicles.PublicTransportFlags.Refueling)) != 0)
                 {
                     return;
                 }
@@ -358,30 +368,48 @@ namespace BetterBoarding
                     return;
                 }
 
-                Entity controlWaypoint = FindControlWaypoint(route);
+                bool hadLineState = m_LineStates.TryGetValue(
+                    route,
+                    out LineSpacingState lineState);
+                int controlWaypointIndex;
+                Entity controlWaypoint;
+                if (hadLineState && IsCachedControlWaypointValid(route, lineState))
+                {
+                    controlWaypoint = lineState.m_ControlWaypoint;
+                    controlWaypointIndex = lineState.m_ControlWaypointIndex;
+                }
+                else
+                {
+                    controlWaypoint = FindControlWaypoint(
+                        route,
+                        out controlWaypointIndex);
+                }
+
                 if (controlWaypoint == Entity.Null || waypoint != controlWaypoint ||
                     !OwnsBoardingSlot(vehicleEntity, waypoint))
                 {
                     return;
                 }
 
-                bool hadLineState = m_LineStates.TryGetValue(
-                    route,
-                    out LineSpacingState lineState);
                 if (!hadLineState)
                 {
-                    lineState = LineSpacingState.Create(controlWaypoint);
+                    lineState = LineSpacingState.Create(
+                        controlWaypoint,
+                        controlWaypointIndex);
                     if (!m_LineStates.TryAdd(route, lineState))
                     {
                         IncrementCounter(kLineStateCapacityMissCount);
                         return;
                     }
                 }
-                else if (lineState.m_ControlWaypoint != controlWaypoint)
+                else if (lineState.m_ControlWaypoint != controlWaypoint ||
+                    lineState.m_ControlWaypointIndex != controlWaypointIndex)
                 {
                     // A route edit can change the first valid stop. Do not carry a
                     // departure anchor from the old control point into the new one.
-                    lineState = LineSpacingState.Create(controlWaypoint);
+                    lineState = LineSpacingState.Create(
+                        controlWaypoint,
+                        controlWaypointIndex);
                 }
 
                 uint observationGap =
@@ -425,7 +453,7 @@ namespace BetterBoarding
                 m_LineStates[route] = lineState;
             }
 
-            private Entity FindControlWaypoint(Entity route)
+            private Entity FindControlWaypoint(Entity route, out int waypointIndex)
             {
                 DynamicBuffer<RouteWaypoint> waypoints = m_RouteWaypoints[route];
                 for (int i = 0; i < waypoints.Length; i++)
@@ -441,11 +469,31 @@ namespace BetterBoarding
                     if (stop != Entity.Null &&
                         m_BoardingVehicles.HasComponent(stop))
                     {
+                        waypointIndex = i;
                         return candidate;
                     }
                 }
 
+                waypointIndex = -1;
                 return Entity.Null;
+            }
+
+            private bool IsCachedControlWaypointValid(
+                Entity route,
+                LineSpacingState lineState)
+            {
+                DynamicBuffer<RouteWaypoint> waypoints = m_RouteWaypoints[route];
+                int index = lineState.m_ControlWaypointIndex;
+                if (index < 0 || index >= waypoints.Length ||
+                    waypoints[index].m_Waypoint != lineState.m_ControlWaypoint ||
+                    !m_Connected.HasComponent(lineState.m_ControlWaypoint))
+                {
+                    return false;
+                }
+
+                Entity stop = m_Connected[lineState.m_ControlWaypoint].m_Connected;
+                return stop != Entity.Null &&
+                    m_BoardingVehicles.HasComponent(stop);
             }
 
             private bool OwnsBoardingSlot(Entity vehicleEntity, Entity waypoint)
@@ -499,30 +547,22 @@ namespace BetterBoarding
             {
                 uint desiredDeparture =
                     lineState.m_LastDepartureFrame + targetHeadwayFrames;
-                int framesUntilDesired =
-                    unchecked((int)(desiredDeparture - m_Frame));
-                if (framesUntilDesired <= 0)
-                {
-                    return;
-                }
-
-                uint boundedHold = math.min(
-                    (uint)framesUntilDesired,
-                    kMaximumAddedHoldFrames);
-                uint plannedDeparture = m_Frame + boundedHold;
-                if (!IsFrameAfter(
-                        plannedDeparture,
-                        publicTransport.m_DepartureFrame))
-                {
-                    return;
-                }
-
-                uint comparisonFrame = IsFrameAfter(
+                uint baselineDeparture = IsFrameAfter(
                     publicTransport.m_DepartureFrame,
                     m_Frame)
                     ? publicTransport.m_DepartureFrame
                     : m_Frame;
-                uint addedHold = plannedDeparture - comparisonFrame;
+                int additionalFramesNeeded =
+                    unchecked((int)(desiredDeparture - baselineDeparture));
+                if (additionalFramesNeeded <= 0)
+                {
+                    return;
+                }
+
+                uint addedHold = math.min(
+                    (uint)additionalFramesNeeded,
+                    kMaximumAddedHoldFrames);
+                uint plannedDeparture = baselineDeparture + addedHold;
 
                 publicTransport.m_DepartureFrame = plannedDeparture;
                 lineState.m_PlannedDepartureFrame = plannedDeparture;
@@ -532,7 +572,7 @@ namespace BetterBoarding
                 IncrementCounter(kWriteCount);
                 AddCounter(kTotalAddedHoldFrames, addedHold);
                 SetMaximumCounter(kMaximumAddedHold, addedHold);
-                if ((uint)framesUntilDesired > kMaximumAddedHoldFrames)
+                if ((uint)additionalFramesNeeded > kMaximumAddedHoldFrames)
                 {
                     IncrementCounter(kCappedHoldCount);
                 }
@@ -542,18 +582,39 @@ namespace BetterBoarding
                 ref Game.Vehicles.PublicTransport publicTransport,
                 ref LineSpacingState lineState)
             {
-                if (lineState.m_HoldApplied == 0 ||
-                    !IsFrameAfter(lineState.m_PlannedDepartureFrame, m_Frame) ||
-                    !IsFrameAfter(
-                        lineState.m_PlannedDepartureFrame,
-                        publicTransport.m_DepartureFrame))
+                if (lineState.m_HoldApplied == 0)
                 {
                     return;
                 }
 
-                publicTransport.m_DepartureFrame =
-                    lineState.m_PlannedDepartureFrame;
-                IncrementCounter(kWriteCount);
+                if (IsFrameAfter(lineState.m_PlannedDepartureFrame, m_Frame))
+                {
+                    if (IsFrameAfter(
+                            lineState.m_PlannedDepartureFrame,
+                            publicTransport.m_DepartureFrame))
+                    {
+                        publicTransport.m_DepartureFrame =
+                            lineState.m_PlannedDepartureFrame;
+                        IncrementCounter(kWriteCount);
+                    }
+
+                    return;
+                }
+
+                // Once the intentional spacing hold has elapsed, restore the
+                // original vanilla departure anchor if nobody else changed it.
+                // Better Boarding's late-passenger grace and vanilla's failsafe
+                // then count lateness from the original boarding schedule rather
+                // than adding the spacing hold a second time.
+                if (publicTransport.m_DepartureFrame ==
+                    lineState.m_PlannedDepartureFrame)
+                {
+                    publicTransport.m_DepartureFrame =
+                        lineState.m_OriginalDepartureFrame;
+                    IncrementCounter(kWriteCount);
+                }
+
+                lineState.m_HoldApplied = 0;
             }
 
             private void IncrementModeCounter(TransportType transportType)
@@ -628,6 +689,7 @@ namespace BetterBoarding
         {
             public Entity m_ControlWaypoint;
             public Entity m_ActiveVehicle;
+            public int m_ControlWaypointIndex;
             public uint m_LastObservedFrame;
             public uint m_LastDepartureFrame;
             public uint m_OriginalDepartureFrame;
@@ -635,12 +697,15 @@ namespace BetterBoarding
             public byte m_HasLastDeparture;
             public byte m_HoldApplied;
 
-            public static LineSpacingState Create(Entity controlWaypoint)
+            public static LineSpacingState Create(
+                Entity controlWaypoint,
+                int controlWaypointIndex)
             {
                 return new LineSpacingState
                 {
                     m_ControlWaypoint = controlWaypoint,
                     m_ActiveVehicle = Entity.Null,
+                    m_ControlWaypointIndex = controlWaypointIndex,
                     m_LastObservedFrame = uint.MaxValue
                 };
             }

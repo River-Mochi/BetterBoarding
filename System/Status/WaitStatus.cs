@@ -540,7 +540,7 @@ namespace BetterBoarding
                 world.GetExistingSystemManaged<TransitSpacingAssistSystem>();
             if (system == null)
             {
-                AppendField(sb, "Observed boarding stops", "system unavailable");
+                AppendField(sb, "Control-point visits", "system unavailable");
                 return;
             }
 
@@ -596,7 +596,7 @@ namespace BetterBoarding
                 LocaleUtils.FormatN0(snapshot.CappedHolds));
             AppendField(
                 sb,
-                "Control-point departure gaps",
+                "Estimated control-point departure gaps",
                 LocaleUtils.FormatN0(snapshot.GapSamples));
             AppendField(
                 sb,
@@ -624,7 +624,8 @@ namespace BetterBoarding
                 sb,
                 "Method",
                 "paces actual departures at the first valid boarding stop on each line; " +
-                "other stops keep vanilla timing and no shared waypoint timing is rewritten");
+                "gap estimates use the last observed boarding frame; other stops keep vanilla timing " +
+                "and no shared waypoint timing is rewritten");
             AppendField(
                 sb,
                 "Collection cost",
