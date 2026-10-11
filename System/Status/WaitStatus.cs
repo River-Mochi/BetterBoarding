@@ -734,12 +734,16 @@ namespace BetterBoarding
 
             AppendField(
                 sb,
-                "Exact lead/follower pairs",
+                "Initial testing pairs",
                 LocaleUtils.FormatN0(admitted.PairCandidates));
             AppendField(
                 sb,
                 "Concurrent sessions started",
                 LocaleUtils.FormatN0(admitted.SessionsStarted));
+            AppendField(
+                sb,
+                "Recovered after slowing",
+                LocaleUtils.FormatN0(admitted.ArrivingSessionsStarted));
             if (admitted.LastRoute != Entity.Null)
             {
                 NameSystem nameSystem = world.GetOrCreateSystemManaged<NameSystem>();
@@ -760,7 +764,7 @@ namespace BetterBoarding
                 LocaleUtils.FormatN0(completed.ActiveSessions));
             AppendField(
                 sb,
-                "Admission rejected",
+                "Initial pair deferrals",
                 $"moving {LocaleUtils.FormatN0(admitted.RejectedMoving)} | " +
                 $"too far {LocaleUtils.FormatN0(admitted.RejectedDistance)} | " +
                 $"route/state {LocaleUtils.FormatN0(admitted.RejectedContext)}");

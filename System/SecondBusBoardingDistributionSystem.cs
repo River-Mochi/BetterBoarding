@@ -314,6 +314,7 @@ namespace BetterBoarding
                 VehiclePublicTransport followerTransport =
                     Lookups.PublicTransport[follower];
                 followerTransport.m_State &= ~(
+                    PublicTransportFlags.Arriving |
                     PublicTransportFlags.Testing |
                     PublicTransportFlags.RequireStop);
                 followerTransport.m_State |=

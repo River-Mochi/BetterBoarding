@@ -35,7 +35,8 @@ namespace BetterBoarding
         private const int kRejectedMoving = 2;
         private const int kRejectedDistance = 3;
         private const int kRejectedContext = 4;
-        private const int kCounterCount = 5;
+        private const int kArrivingSessionsStarted = 5;
+        private const int kCounterCount = 6;
 
         private EntityQuery m_Buses;
 
@@ -141,6 +142,7 @@ namespace BetterBoarding
                 m_Counters[kRejectedMoving],
                 m_Counters[kRejectedDistance],
                 m_Counters[kRejectedContext],
+                m_Counters[kArrivingSessionsStarted],
                 m_LastSession[0],
                 m_LastSession[1],
                 m_LastSession[2],
@@ -179,6 +181,7 @@ namespace BetterBoarding
                 int rejectedMoving,
                 int rejectedDistance,
                 int rejectedContext,
+                int arrivingSessionsStarted,
                 Entity lastRoute,
                 Entity lastStop,
                 Entity lastLeadBus,
@@ -189,6 +192,7 @@ namespace BetterBoarding
                 RejectedMoving = rejectedMoving;
                 RejectedDistance = rejectedDistance;
                 RejectedContext = rejectedContext;
+                ArrivingSessionsStarted = arrivingSessionsStarted;
                 LastRoute = lastRoute;
                 LastStop = lastStop;
                 LastLeadBus = lastLeadBus;
@@ -204,6 +208,8 @@ namespace BetterBoarding
             public int RejectedDistance { get; }
 
             public int RejectedContext { get; }
+
+            public int ArrivingSessionsStarted { get; }
 
             public Entity LastRoute { get; }
 
@@ -283,6 +289,7 @@ namespace BetterBoarding
                         // vehicle AI. If it did, the AI would force-complete it short of the stop.
                         followerTransport.m_State &= ~(
                             PublicTransportFlags.Boarding |
+                            PublicTransportFlags.Arriving |
                             PublicTransportFlags.Testing |
                             PublicTransportFlags.RequireStop);
                         followerTransport.m_State |= PublicTransportFlags.EnRoute;
@@ -318,18 +325,43 @@ namespace BetterBoarding
                     }
 
                     BoardingVehicle slot = Lookups.BoardingVehicle[stop];
-                    if (slot.m_Testing != follower ||
-                        slot.m_Vehicle == Entity.Null ||
+                    if (slot.m_Vehicle == Entity.Null ||
                         slot.m_Vehicle == follower)
                     {
                         continue;
                     }
 
-                    Counters[kPairCandidates]++;
+                    VehiclePublicTransport transport = Lookups.PublicTransport[follower];
+                    bool exactTestingPair = slot.m_Testing == follower;
+                    // Vanilla clears the one-frame testing slot and leaves a blocked bus in
+                    // Arriving while the lead owns the stop. Recover that same follower once it
+                    // has safely slowed instead of raising the 1 m/s synthetic-admission limit.
+                    bool arrivingRetry = slot.m_Testing == Entity.Null &&
+                        (transport.m_State &
+                            (PublicTransportFlags.EnRoute |
+                             PublicTransportFlags.Arriving |
+                             PublicTransportFlags.RequireStop)) ==
+                            (PublicTransportFlags.EnRoute |
+                             PublicTransportFlags.Arriving |
+                             PublicTransportFlags.RequireStop);
+                    if (!exactTestingPair && !arrivingRetry)
+                    {
+                        continue;
+                    }
+
+                    if (exactTestingPair)
+                    {
+                        Counters[kPairCandidates]++;
+                    }
+
                     Entity lead = slot.m_Vehicle;
                     if (!CanShareStop(follower, lead, stop, out Entity route))
                     {
-                        Counters[kRejectedContext]++;
+                        if (exactTestingPair)
+                        {
+                            Counters[kRejectedContext]++;
+                        }
+
                         continue;
                     }
 
@@ -337,7 +369,11 @@ namespace BetterBoarding
                     if (!SecondBusBoardingPolicy.IsFollowerSlow(
                         followerMoving.m_Velocity))
                     {
-                        Counters[kRejectedMoving]++;
+                        if (exactTestingPair)
+                        {
+                            Counters[kRejectedMoving]++;
+                        }
+
                         continue;
                     }
 
@@ -347,13 +383,17 @@ namespace BetterBoarding
                         leadTransform.m_Position,
                         followerTransform.m_Position))
                     {
-                        Counters[kRejectedDistance]++;
+                        if (exactTestingPair)
+                        {
+                            Counters[kRejectedDistance]++;
+                        }
+
                         continue;
                     }
 
-                    VehiclePublicTransport transport = Lookups.PublicTransport[follower];
                     transport.m_State &= ~(
                         PublicTransportFlags.Boarding |
+                        PublicTransportFlags.Arriving |
                         PublicTransportFlags.Testing |
                         PublicTransportFlags.RequireStop);
                     transport.m_State |= PublicTransportFlags.EnRoute;
@@ -378,6 +418,11 @@ namespace BetterBoarding
                     Sessions.SetComponentEnabled(follower, true);
                     activeStops.TryAdd(stop, 1);
                     Counters[kSessionsStarted]++;
+                    if (arrivingRetry)
+                    {
+                        Counters[kArrivingSessionsStarted]++;
+                    }
+
                     LastSession[0] = route;
                     LastSession[1] = stop;
                     LastSession[2] = lead;
