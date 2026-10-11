@@ -42,9 +42,21 @@ namespace BetterBoarding
 
         public int LastPassengerCount;
 
+        public int ConcurrentBoarded;
+
+        public int ConcurrentAlighted;
+
+        public int LeadActiveUpdates;
+
+        public int FollowerSlotPresentations;
+
+        public float ClosestWaitingDistance;
+
         public byte HasPresentedBoardingWindow;
 
         public byte SawPassengerCountChange;
+
+        public byte SawWaitingPassenger;
 
         public byte ReleaseRequested;
     }

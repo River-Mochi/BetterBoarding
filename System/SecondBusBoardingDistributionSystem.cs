@@ -22,6 +22,7 @@ namespace BetterBoarding
     using Unity.Collections;
     using Unity.Entities;
     using Unity.Jobs;
+    using Unity.Mathematics;
     using UnityEngine.Scripting;
     using VehiclePublicTransport = Game.Vehicles.PublicTransport;
 
@@ -36,6 +37,9 @@ namespace BetterBoarding
         private const int kBoardedNet = 6;
         private const int kAlightedNet = 7;
         private const int kCounterCount = 8;
+        private const int kRecentOutcomeCapacity = 8;
+        private const int kOutcomeWriteIndex = 0;
+        private const int kOutcomeCount = 1;
 
         private EntityQuery m_ActiveSessions;
 
@@ -46,6 +50,10 @@ namespace BetterBoarding
         private ComponentLookup<SecondBusBoardingSession> m_Sessions;
 
         private NativeArray<int> m_Counters;
+
+        private NativeArray<SessionOutcome> m_RecentOutcomes;
+
+        private NativeArray<int> m_OutcomeState;
 
         private JobHandle m_PreviousJob;
 
@@ -74,6 +82,9 @@ namespace BetterBoarding
             m_Lookups = SecondBusBoardingLookups.Create(this);
             m_Sessions = GetComponentLookup<SecondBusBoardingSession>(false);
             m_Counters = new NativeArray<int>(kCounterCount, Allocator.Persistent);
+            m_RecentOutcomes =
+                new NativeArray<SessionOutcome>(kRecentOutcomeCapacity, Allocator.Persistent);
+            m_OutcomeState = new NativeArray<int>(2, Allocator.Persistent);
             RequireForUpdate(m_ActiveSessions);
         }
 
@@ -84,6 +95,16 @@ namespace BetterBoarding
             if (m_Counters.IsCreated)
             {
                 m_Counters.Dispose();
+            }
+
+            if (m_RecentOutcomes.IsCreated)
+            {
+                m_RecentOutcomes.Dispose();
+            }
+
+            if (m_OutcomeState.IsCreated)
+            {
+                m_OutcomeState.Dispose();
             }
 
             base.OnDestroy();
@@ -112,6 +133,8 @@ namespace BetterBoarding
                 Lookups = m_Lookups,
                 Sessions = m_Sessions,
                 Counters = m_Counters,
+                RecentOutcomes = m_RecentOutcomes,
+                OutcomeState = m_OutcomeState,
                 Frame = m_SimulationSystem?.frameIndex ?? 0u,
                 FeatureEnabled = SecondBusBoardingCompatibility.EffectiveEnabled,
             }.Schedule(JobHandle.CombineDependencies(Dependency, listed));
@@ -126,6 +149,33 @@ namespace BetterBoarding
             m_PreviousJob.Complete();
             using NativeArray<Entity> active =
                 m_ActiveSessions.ToEntityArray(Allocator.Temp);
+            int outcomeCount = m_OutcomeState[kOutcomeCount];
+            SessionOutcomeSnapshot[] recent = new SessionOutcomeSnapshot[outcomeCount];
+            int writeIndex = m_OutcomeState[kOutcomeWriteIndex];
+            for (int i = 0; i < outcomeCount; i++)
+            {
+                int index = writeIndex - 1 - i;
+                if (index < 0)
+                {
+                    index += kRecentOutcomeCapacity;
+                }
+
+                SessionOutcome outcome = m_RecentOutcomes[index];
+                recent[i] = new SessionOutcomeSnapshot(
+                    outcome.Route,
+                    outcome.Stop,
+                    outcome.LeadBus,
+                    outcome.FollowerBus,
+                    outcome.DurationFrames,
+                    outcome.LeadActiveUpdates,
+                    outcome.FollowerSlotPresentations,
+                    outcome.SawWaitingPassenger != 0,
+                    outcome.ClosestWaitingDistance,
+                    outcome.ConcurrentBoarded,
+                    outcome.ConcurrentAlighted,
+                    outcome.Reason);
+            }
+
             return new StatisticsSnapshot(
                 active.Length,
                 m_Counters[kLeadDepartedReleases],
@@ -135,7 +185,8 @@ namespace BetterBoarding
                 m_Counters[kDisabledReleases],
                 m_Counters[kSessionsWithPassengerChanges],
                 m_Counters[kBoardedNet],
-                m_Counters[kAlightedNet]);
+                m_Counters[kAlightedNet],
+                recent);
         }
 
         public void RestartStatisticsCollection()
@@ -217,6 +268,107 @@ namespace BetterBoarding
             {
                 m_Counters[i] = 0;
             }
+
+            for (int i = 0; i < m_RecentOutcomes.Length; i++)
+            {
+                m_RecentOutcomes[i] = default;
+            }
+
+            for (int i = 0; i < m_OutcomeState.Length; i++)
+            {
+                m_OutcomeState[i] = 0;
+            }
+        }
+
+        public enum SessionReleaseReason : byte
+        {
+            LeadDeparted,
+            WindowEnded,
+            HardSafety,
+            Invalid,
+            OptionOrConflict,
+        }
+
+        public readonly struct SessionOutcomeSnapshot
+        {
+            public SessionOutcomeSnapshot(
+                Entity route,
+                Entity stop,
+                Entity leadBus,
+                Entity followerBus,
+                uint durationFrames,
+                int leadActiveUpdates,
+                int followerSlotPresentations,
+                bool sawWaitingPassenger,
+                float closestWaitingDistance,
+                int concurrentBoarded,
+                int concurrentAlighted,
+                SessionReleaseReason reason)
+            {
+                Route = route;
+                Stop = stop;
+                LeadBus = leadBus;
+                FollowerBus = followerBus;
+                DurationFrames = durationFrames;
+                LeadActiveUpdates = leadActiveUpdates;
+                FollowerSlotPresentations = followerSlotPresentations;
+                SawWaitingPassenger = sawWaitingPassenger;
+                ClosestWaitingDistance = closestWaitingDistance;
+                ConcurrentBoarded = concurrentBoarded;
+                ConcurrentAlighted = concurrentAlighted;
+                Reason = reason;
+            }
+
+            public Entity Route { get; }
+
+            public Entity Stop { get; }
+
+            public Entity LeadBus { get; }
+
+            public Entity FollowerBus { get; }
+
+            public uint DurationFrames { get; }
+
+            public int LeadActiveUpdates { get; }
+
+            public int FollowerSlotPresentations { get; }
+
+            public bool SawWaitingPassenger { get; }
+
+            public float ClosestWaitingDistance { get; }
+
+            public int ConcurrentBoarded { get; }
+
+            public int ConcurrentAlighted { get; }
+
+            public SessionReleaseReason Reason { get; }
+        }
+
+        private struct SessionOutcome
+        {
+            public Entity Route;
+
+            public Entity Stop;
+
+            public Entity LeadBus;
+
+            public Entity FollowerBus;
+
+            public uint DurationFrames;
+
+            public int LeadActiveUpdates;
+
+            public int FollowerSlotPresentations;
+
+            public float ClosestWaitingDistance;
+
+            public int ConcurrentBoarded;
+
+            public int ConcurrentAlighted;
+
+            public byte SawWaitingPassenger;
+
+            public SessionReleaseReason Reason;
         }
 
         public readonly struct StatisticsSnapshot
@@ -230,7 +382,8 @@ namespace BetterBoarding
                 int disabledReleases,
                 int sessionsWithPassengerChanges,
                 int boardedNet,
-                int alightedNet)
+                int alightedNet,
+                SessionOutcomeSnapshot[] recentOutcomes)
             {
                 ActiveSessions = activeSessions;
                 LeadDepartedReleases = leadDepartedReleases;
@@ -241,6 +394,7 @@ namespace BetterBoarding
                 SessionsWithPassengerChanges = sessionsWithPassengerChanges;
                 BoardedNet = boardedNet;
                 AlightedNet = alightedNet;
+                RecentOutcomes = recentOutcomes;
             }
 
             public int ActiveSessions { get; }
@@ -260,6 +414,8 @@ namespace BetterBoarding
             public int BoardedNet { get; }
 
             public int AlightedNet { get; }
+
+            public SessionOutcomeSnapshot[] RecentOutcomes { get; }
         }
 
         [BurstCompile]
@@ -273,6 +429,10 @@ namespace BetterBoarding
             public ComponentLookup<SecondBusBoardingSession> Sessions;
 
             public NativeArray<int> Counters;
+
+            public NativeArray<SessionOutcome> RecentOutcomes;
+
+            public NativeArray<int> OutcomeState;
 
             public uint Frame;
 
@@ -291,20 +451,21 @@ namespace BetterBoarding
                 SecondBusBoardingSession session = Sessions[follower];
                 if (!FeatureEnabled)
                 {
-                    Release(follower, session, kDisabledReleases);
+                    Release(follower, session, SessionReleaseReason.OptionOrConflict);
                     return;
                 }
 
                 if (session.ReleaseRequested != 0 ||
                     !IsFollowerContextValid(follower, session))
                 {
-                    Release(follower, session, kInvalidReleases);
+                    Release(follower, session, SessionReleaseReason.Invalid);
                     return;
                 }
 
                 bool leadActive = IsLeadStillBoarding(follower, session);
                 if (leadActive)
                 {
+                    session.LeadActiveUpdates++;
                     // A delta first observed after the lead leaves may be ordinary
                     // single-bus service, so it is not proof of concurrent exchange.
                     TrackPassengerChanges(follower, ref session);
@@ -319,11 +480,11 @@ namespace BetterBoarding
 
                 if ((!leadActive || windowEnded) && (followerReady || hardDeadline))
                 {
-                    int reason = hardDeadline && !followerReady
-                        ? kHardReleases
+                    SessionReleaseReason reason = hardDeadline && !followerReady
+                        ? SessionReleaseReason.HardSafety
                         : leadActive
-                            ? kWindowReleases
-                            : kLeadDepartedReleases;
+                            ? SessionReleaseReason.WindowEnded
+                            : SessionReleaseReason.LeadDeparted;
                     Release(follower, session, reason);
                     return;
                 }
@@ -341,13 +502,20 @@ namespace BetterBoarding
                 if (Frame - session.LastRatchetFrame >=
                     SecondBusBoardingPolicy.BoardingRatchetFrames)
                 {
+                    float observedMinimum = followerTransport.m_MinWaitingDistance;
+                    if (observedMinimum != float.MaxValue && observedMinimum > 0f)
+                    {
+                        session.SawWaitingPassenger = 1;
+                        session.ClosestWaitingDistance =
+                            math.min(session.ClosestWaitingDistance, observedMinimum);
+                    }
+
                     if (session.HasPresentedBoardingWindow != 0)
                     {
-                        float minimum = followerTransport.m_MinWaitingDistance;
                         followerTransport.m_MaxBoardingDistance =
-                            minimum == float.MaxValue || minimum == 0f
+                            observedMinimum == float.MaxValue || observedMinimum == 0f
                                 ? float.MaxValue
-                                : minimum + 1f;
+                                : observedMinimum + 1f;
                     }
                     else
                     {
@@ -365,7 +533,7 @@ namespace BetterBoarding
                     slot.m_Vehicle != follower &&
                     slot.m_Vehicle != session.LeadBus)
                 {
-                    Release(follower, session, kInvalidReleases);
+                    Release(follower, session, SessionReleaseReason.Invalid);
                     return;
                 }
 
@@ -388,6 +556,10 @@ namespace BetterBoarding
                     }
 
                     Lookups.BoardingVehicle[session.Stop] = slot;
+                    if (selected == follower)
+                    {
+                        session.FollowerSlotPresentations++;
+                    }
                 }
 
                 Sessions[follower] = session;
@@ -413,10 +585,12 @@ namespace BetterBoarding
                 if (delta > 0)
                 {
                     Counters[kBoardedNet] += delta;
+                    session.ConcurrentBoarded += delta;
                 }
                 else
                 {
                     Counters[kAlightedNet] -= delta;
+                    session.ConcurrentAlighted -= delta;
                 }
 
                 session.LastPassengerCount = passengerCount;
@@ -460,8 +634,10 @@ namespace BetterBoarding
             private void Release(
                 Entity follower,
                 SecondBusBoardingSession session,
-                int reasonCounter)
+                SessionReleaseReason reason)
             {
+                RecordOutcome(follower, session, reason);
+
                 if (Lookups.PublicTransport.TryGetComponent(
                     follower,
                     out VehiclePublicTransport transport))
@@ -497,7 +673,55 @@ namespace BetterBoarding
                 }
 
                 Sessions.SetComponentEnabled(follower, false);
-                Counters[reasonCounter]++;
+                switch (reason)
+                {
+                    case SessionReleaseReason.LeadDeparted:
+                        Counters[kLeadDepartedReleases]++;
+                        break;
+                    case SessionReleaseReason.WindowEnded:
+                        Counters[kWindowReleases]++;
+                        break;
+                    case SessionReleaseReason.HardSafety:
+                        Counters[kHardReleases]++;
+                        break;
+                    case SessionReleaseReason.Invalid:
+                        Counters[kInvalidReleases]++;
+                        break;
+                    case SessionReleaseReason.OptionOrConflict:
+                        Counters[kDisabledReleases]++;
+                        break;
+                }
+            }
+
+            private void RecordOutcome(
+                Entity follower,
+                SecondBusBoardingSession session,
+                SessionReleaseReason reason)
+            {
+                int writeIndex = OutcomeState[kOutcomeWriteIndex];
+                uint duration = Frame >= session.AdmittedFrame
+                    ? Frame - session.AdmittedFrame
+                    : 0u;
+                RecentOutcomes[writeIndex] = new SessionOutcome
+                {
+                    Route = session.Route,
+                    Stop = session.Stop,
+                    LeadBus = session.LeadBus,
+                    FollowerBus = follower,
+                    DurationFrames = duration,
+                    LeadActiveUpdates = session.LeadActiveUpdates,
+                    FollowerSlotPresentations = session.FollowerSlotPresentations,
+                    ClosestWaitingDistance = session.ClosestWaitingDistance,
+                    ConcurrentBoarded = session.ConcurrentBoarded,
+                    ConcurrentAlighted = session.ConcurrentAlighted,
+                    SawWaitingPassenger = session.SawWaitingPassenger,
+                    Reason = reason,
+                };
+
+                OutcomeState[kOutcomeWriteIndex] =
+                    (writeIndex + 1) % kRecentOutcomeCapacity;
+                OutcomeState[kOutcomeCount] =
+                    math.min(kRecentOutcomeCapacity, OutcomeState[kOutcomeCount] + 1);
             }
         }
     }

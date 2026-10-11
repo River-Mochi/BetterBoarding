@@ -731,6 +731,7 @@ namespace BetterBoarding
                 admission.GetStatisticsSnapshot();
             SecondBusBoardingDistributionSystem.StatisticsSnapshot completed =
                 distribution.GetStatisticsSnapshot();
+            NameSystem nameSystem = world.GetOrCreateSystemManaged<NameSystem>();
 
             AppendField(
                 sb,
@@ -746,7 +747,6 @@ namespace BetterBoarding
                 LocaleUtils.FormatN0(admitted.ArrivingSessionsStarted));
             if (admitted.LastRoute != Entity.Null)
             {
-                NameSystem nameSystem = world.GetOrCreateSystemManaged<NameSystem>();
                 AppendField(
                     sb,
                     "Last session line",
@@ -788,10 +788,102 @@ namespace BetterBoarding
                 sb,
                 "Hard safety releases",
                 LocaleUtils.FormatN0(completed.HardReleases));
+            AppendSecondBusSessionOutcomes(
+                sb,
+                world,
+                nameSystem,
+                completed.RecentOutcomes);
             AppendField(
                 sb,
                 "Collection cost",
                 "counters are updated inside the feature's existing jobs; log formatting occurs only when Stats to Log is clicked");
+        }
+
+        private static void AppendSecondBusSessionOutcomes(
+            StringBuilder sb,
+            World world,
+            NameSystem nameSystem,
+            SecondBusBoardingDistributionSystem.SessionOutcomeSnapshot[] outcomes)
+        {
+            sb.AppendLine();
+            AppendSubHeader(sb, "Recent completed sessions (newest first)");
+            if (outcomes == null || outcomes.Length == 0)
+            {
+                sb.AppendLine("none completed yet");
+                return;
+            }
+
+            for (int i = 0; i < outcomes.Length; i++)
+            {
+                SecondBusBoardingDistributionSystem.SessionOutcomeSnapshot outcome =
+                    outcomes[i];
+                string lineName = ResolveSpacingLineName(world, nameSystem, outcome.Route);
+                string stopName = ResolveSecondBusStopName(world, nameSystem, outcome.Stop);
+                int vehicleCount =
+                    world.EntityManager.Exists(outcome.Route) &&
+                    world.EntityManager.HasBuffer<RouteVehicle>(outcome.Route)
+                        ? world.EntityManager
+                            .GetBuffer<RouteVehicle>(outcome.Route, isReadOnly: true)
+                            .Length
+                        : 0;
+                string closestWaiting = outcome.SawWaitingPassenger
+                    ? $"{outcome.ClosestWaitingDistance.ToString("0.0", CultureInfo.InvariantCulture)} m"
+                    : "none observed";
+
+                sb.AppendLine(
+                    $"{LocaleUtils.FormatN0(i + 1)}. {lineName} [{outcome.Route}] | " +
+                    $"vehicles {LocaleUtils.FormatN0(vehicleCount)} | " +
+                    $"stop {stopName} [{outcome.Stop}] | " +
+                    $"release {FormatSecondBusReleaseReason(outcome.Reason)} | " +
+                    $"duration {FormatSpacingFrames(outcome.DurationFrames)} | " +
+                    $"lead-active passes {LocaleUtils.FormatN0(outcome.LeadActiveUpdates)} | " +
+                    $"follower-slot passes {LocaleUtils.FormatN0(outcome.FollowerSlotPresentations)} | " +
+                    $"waiting-cim distance {closestWaiting} | " +
+                    $"exchange +{LocaleUtils.FormatN0(outcome.ConcurrentBoarded)} / " +
+                    $"-{LocaleUtils.FormatN0(outcome.ConcurrentAlighted)} | " +
+                    $"buses lead {outcome.LeadBus}, second {outcome.FollowerBus}");
+            }
+
+            sb.AppendLine(
+                "Entity IDs are valid only for the currently loaded city session; use the line and stop names after a reload.");
+        }
+
+        private static string ResolveSecondBusStopName(
+            World world,
+            NameSystem nameSystem,
+            Entity stop)
+        {
+            if (!world.EntityManager.Exists(stop))
+            {
+                return "(deleted stop)";
+            }
+
+            string name = nameSystem.GetRenderedLabelName(stop);
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                name = nameSystem.GetDebugName(stop);
+            }
+
+            return string.IsNullOrWhiteSpace(name) ? "(unnamed stop)" : name.Trim();
+        }
+
+        private static string FormatSecondBusReleaseReason(
+            SecondBusBoardingDistributionSystem.SessionReleaseReason reason)
+        {
+            return reason switch
+            {
+                SecondBusBoardingDistributionSystem.SessionReleaseReason.LeadDeparted =>
+                    "lead departed",
+                SecondBusBoardingDistributionSystem.SessionReleaseReason.WindowEnded =>
+                    "window ended",
+                SecondBusBoardingDistributionSystem.SessionReleaseReason.HardSafety =>
+                    "hard safety",
+                SecondBusBoardingDistributionSystem.SessionReleaseReason.Invalid =>
+                    "invalid context",
+                SecondBusBoardingDistributionSystem.SessionReleaseReason.OptionOrConflict =>
+                    "option/conflict",
+                _ => "unknown",
+            };
         }
 
         private static void AppendSpacingAssistLineReports(

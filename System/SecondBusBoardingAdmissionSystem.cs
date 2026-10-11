@@ -422,6 +422,7 @@ namespace BetterBoarding
                         AdmittedFrame = Frame,
                         LastRatchetFrame = Frame,
                         LastPassengerCount = Lookups.GetPassengerCount(follower),
+                        ClosestWaitingDistance = float.MaxValue,
                     };
                     Sessions.SetComponentEnabled(follower, true);
                     activeStops.TryAdd(stop, 1);
