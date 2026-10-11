@@ -465,6 +465,11 @@ namespace BetterBoarding
                     followerSelected = ((turn + (uint)session.Stop.Index) & 1u) != 0u;
                 }
 
+                // Distribution runs immediately after bus AI, before the resident sweep that
+                // observes this selection. Preserve the preceding selection so its waiting-
+                // passenger result is only consumed for a sweep that actually belonged to the
+                // follower.
+                session.PreviousFollowerSelected = session.FollowerSelected;
                 session.FollowerSelected = followerSelected ? (byte)1 : (byte)0;
                 slot.m_Vehicle = followerSelected ? follower : session.LeadBus;
                 if (slot.m_Testing == follower)

@@ -62,6 +62,8 @@ namespace BetterBoarding
 
         public byte FollowerSelected;
 
+        public byte PreviousFollowerSelected;
+
         public byte DoorsClosing;
 
         public byte ReleaseRequested;

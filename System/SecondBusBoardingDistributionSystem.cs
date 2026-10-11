@@ -543,7 +543,8 @@ namespace BetterBoarding
                     PublicTransportFlags.EnRoute |
                     PublicTransportFlags.Boarding;
 
-                if (Frame - session.LastRatchetFrame >=
+                if (session.PreviousFollowerSelected != 0 &&
+                    Frame - session.LastRatchetFrame >=
                     SecondBusBoardingPolicy.BoardingRatchetFrames)
                 {
                     float observedMinimum = followerTransport.m_MinWaitingDistance;
@@ -580,10 +581,14 @@ namespace BetterBoarding
 
                 bool followerReady = Lookups.ArePassengersReady(follower);
                 bool normalCompletion = session.DoorsClosing == 0 &&
+                    session.HasPresentedBoardingWindow != 0 &&
+                    session.FollowerSlotPresentations > 0 &&
                     Frame >= followerTransport.m_DepartureFrame &&
                     followerTransport.m_MaxBoardingDistance == float.MaxValue &&
                     followerReady;
-                bool closedCompletion = session.DoorsClosing != 0 && followerReady;
+                bool closedCompletion = session.DoorsClosing != 0 &&
+                    session.HasPresentedBoardingWindow != 0 &&
+                    followerReady;
                 if ((normalCompletion || closedCompletion) &&
                     TryAdvanceToNextWaypoint(follower, session))
                 {
