@@ -14,6 +14,7 @@ namespace BetterBoarding
     using Colossal.Serialization.Entities;
     using Game;
     using Game.Common;
+    using Game.Creatures;
     using Game.Pathfind;
     using Game.Routes;
     using Game.Simulation;
@@ -194,6 +195,8 @@ namespace BetterBoarding
                     outcome.ClosestWaitingDistance,
                     outcome.ConcurrentBoarded,
                     outcome.ConcurrentAlighted,
+                    outcome.ConcurrentEnteringPeak,
+                    outcome.ConcurrentExitingPeak,
                     outcome.Reason);
             }
 
@@ -347,6 +350,8 @@ namespace BetterBoarding
                 float closestWaitingDistance,
                 int concurrentBoarded,
                 int concurrentAlighted,
+                int concurrentEnteringPeak,
+                int concurrentExitingPeak,
                 SessionReleaseReason reason)
             {
                 Route = route;
@@ -360,6 +365,8 @@ namespace BetterBoarding
                 ClosestWaitingDistance = closestWaitingDistance;
                 ConcurrentBoarded = concurrentBoarded;
                 ConcurrentAlighted = concurrentAlighted;
+                ConcurrentEnteringPeak = concurrentEnteringPeak;
+                ConcurrentExitingPeak = concurrentExitingPeak;
                 Reason = reason;
             }
 
@@ -385,6 +392,10 @@ namespace BetterBoarding
 
             public int ConcurrentAlighted { get; }
 
+            public int ConcurrentEnteringPeak { get; }
+
+            public int ConcurrentExitingPeak { get; }
+
             public SessionReleaseReason Reason { get; }
         }
 
@@ -409,6 +420,10 @@ namespace BetterBoarding
             public int ConcurrentBoarded;
 
             public int ConcurrentAlighted;
+
+            public int ConcurrentEnteringPeak;
+
+            public int ConcurrentExitingPeak;
 
             public byte SawWaitingPassenger;
 
@@ -526,6 +541,7 @@ namespace BetterBoarding
                 // Otherwise vanilla makes it pull forward and repeat this same stop before it can
                 // exchange passengers, which defeats concurrent boarding.
                 TrackPassengerChanges(follower, ref session);
+                TrackConcurrentPassengerAnimations(follower, ref session);
 
                 uint age = Frame >= session.AdmittedFrame
                     ? Frame - session.AdmittedFrame
@@ -715,6 +731,48 @@ namespace BetterBoarding
                 session.LastPassengerCount = passengerCount;
             }
 
+            private void TrackConcurrentPassengerAnimations(
+                Entity follower,
+                ref SecondBusBoardingSession session)
+            {
+                if (session.PassengerWindowLeadActive == 0 ||
+                    !Lookups.Passengers.TryGetBuffer(
+                        follower,
+                        out DynamicBuffer<Passenger> passengers))
+                {
+                    return;
+                }
+
+                int entering = 0;
+                int exiting = 0;
+                for (int i = 0; i < passengers.Length; i++)
+                {
+                    Entity passenger = passengers[i].m_Passenger;
+                    if (!Lookups.CurrentVehicle.TryGetComponent(
+                            passenger,
+                            out CurrentVehicle currentVehicle) ||
+                        currentVehicle.m_Vehicle != follower)
+                    {
+                        continue;
+                    }
+
+                    if ((currentVehicle.m_Flags & CreatureVehicleFlags.Entering) != 0)
+                    {
+                        entering++;
+                    }
+
+                    if ((currentVehicle.m_Flags & CreatureVehicleFlags.Exiting) != 0)
+                    {
+                        exiting++;
+                    }
+                }
+
+                session.ConcurrentEnteringPeak =
+                    math.max(session.ConcurrentEnteringPeak, entering);
+                session.ConcurrentExitingPeak =
+                    math.max(session.ConcurrentExitingPeak, exiting);
+            }
+
             private bool IsFollowerContextValid(
                 Entity follower,
                 SecondBusBoardingSession session)
@@ -900,6 +958,8 @@ namespace BetterBoarding
                     ClosestWaitingDistance = session.ClosestWaitingDistance,
                     ConcurrentBoarded = session.ConcurrentBoarded,
                     ConcurrentAlighted = session.ConcurrentAlighted,
+                    ConcurrentEnteringPeak = session.ConcurrentEnteringPeak,
+                    ConcurrentExitingPeak = session.ConcurrentExitingPeak,
                     SawWaitingPassenger = session.SawWaitingPassenger,
                     Reason = reason,
                 };

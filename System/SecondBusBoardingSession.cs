@@ -48,6 +48,10 @@ namespace BetterBoarding
 
         public int ConcurrentAlighted;
 
+        public int ConcurrentEnteringPeak;
+
+        public int ConcurrentExitingPeak;
+
         public int LeadActiveUpdates;
 
         public int FollowerSlotPresentations;
