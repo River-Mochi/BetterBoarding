@@ -36,6 +36,8 @@ namespace BetterBoarding
 
         public Entity Route;
 
+        public Entity Waypoint;
+
         public uint AdmittedFrame;
 
         public uint LastRatchetFrame;
@@ -58,6 +60,10 @@ namespace BetterBoarding
 
         public byte SawWaitingPassenger;
 
+        public byte FollowerSelected;
+
+        public byte DoorsClosing;
+
         public byte ReleaseRequested;
     }
 
@@ -71,8 +77,10 @@ namespace BetterBoarding
 
         public const uint BoardingRatchetFrames = 16u;
 
-        // The feature hands the follower back to vanilla after a bounded concurrent window.
-        // A short finishing grace lets any cim already climbing aboard become Ready first.
+        public const uint ManagedDepartureFrames = 64u;
+
+        // Stop admitting new passengers after a bounded managed window. A finishing grace lets
+        // any cim already climbing aboard become Ready before the fallback returns control to vanilla.
         public const uint SessionWindowFrames = 512u;
 
         public const uint HardReleaseFrames = 768u;

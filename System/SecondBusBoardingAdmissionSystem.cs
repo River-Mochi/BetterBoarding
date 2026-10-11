@@ -287,8 +287,6 @@ namespace BetterBoarding
                         session.ReleaseRequested = 1;
                     }
 
-                    Sessions[follower] = session;
-
                     if (Lookups.PublicTransport.TryGetComponent(
                         follower,
                         out VehiclePublicTransport followerTransport))
@@ -304,17 +302,15 @@ namespace BetterBoarding
                         Lookups.PublicTransport[follower] = followerTransport;
                     }
 
-                    if (valid && IsLeadStillBoarding(follower, session))
+                    if (valid)
                     {
-                        BoardingVehicle slot = Lookups.BoardingVehicle[session.Stop];
-                        slot.m_Vehicle = session.LeadBus;
-                        if (slot.m_Testing == follower)
-                        {
-                            slot.m_Testing = Entity.Null;
-                        }
-
-                        Lookups.BoardingVehicle[session.Stop] = slot;
+                        SelectPassengerBus(
+                            follower,
+                            ref session,
+                            IsLeadStillBoarding(follower, session));
                     }
+
+                    Sessions[follower] = session;
                 }
             }
 
@@ -405,25 +401,25 @@ namespace BetterBoarding
                         PublicTransportFlags.Testing |
                         PublicTransportFlags.RequireStop);
                     transport.m_State |= PublicTransportFlags.EnRoute;
-                    transport.m_DepartureFrame = Frame + 64u;
+                    transport.m_DepartureFrame =
+                        Frame + SecondBusBoardingPolicy.ManagedDepartureFrames;
                     transport.m_MaxBoardingDistance = 0f;
                     transport.m_MinWaitingDistance = float.MaxValue;
                     Lookups.PublicTransport[follower] = transport;
 
-                    slot.m_Testing = Entity.Null;
-                    slot.m_Vehicle = lead;
-                    Lookups.BoardingVehicle[stop] = slot;
-
-                    Sessions[follower] = new SecondBusBoardingSession
+                    SecondBusBoardingSession session = new SecondBusBoardingSession
                     {
                         Stop = stop,
                         LeadBus = lead,
                         Route = route,
+                        Waypoint = Lookups.Target[follower].m_Target,
                         AdmittedFrame = Frame,
                         LastRatchetFrame = Frame,
                         LastPassengerCount = Lookups.GetPassengerCount(follower),
                         ClosestWaitingDistance = float.MaxValue,
                     };
+                    SelectPassengerBus(follower, ref session, leadActive: true);
+                    Sessions[follower] = session;
                     Sessions.SetComponentEnabled(follower, true);
                     activeStops.TryAdd(stop, 1);
                     Counters[kSessionsStarted]++;
@@ -437,6 +433,46 @@ namespace BetterBoarding
                     LastSession[2] = lead;
                     LastSession[3] = follower;
                 }
+            }
+
+            private void SelectPassengerBus(
+                Entity follower,
+                ref SecondBusBoardingSession session,
+                bool leadActive)
+            {
+                BoardingVehicle slot = Lookups.BoardingVehicle[session.Stop];
+                bool followerSelected;
+
+                // Do not strand a cim that is already climbing into either bus. Otherwise,
+                // alternate the stop's one passenger-facing slot for a complete resident sweep.
+                if (slot.m_Vehicle == follower && !Lookups.ArePassengersReady(follower))
+                {
+                    followerSelected = true;
+                }
+                else if (leadActive &&
+                    slot.m_Vehicle == session.LeadBus &&
+                    !Lookups.ArePassengersReady(session.LeadBus))
+                {
+                    followerSelected = false;
+                }
+                else if (!leadActive)
+                {
+                    followerSelected = true;
+                }
+                else
+                {
+                    uint turn = Frame / SecondBusBoardingPolicy.BoardingRatchetFrames;
+                    followerSelected = ((turn + (uint)session.Stop.Index) & 1u) != 0u;
+                }
+
+                session.FollowerSelected = followerSelected ? (byte)1 : (byte)0;
+                slot.m_Vehicle = followerSelected ? follower : session.LeadBus;
+                if (slot.m_Testing == follower)
+                {
+                    slot.m_Testing = Entity.Null;
+                }
+
+                Lookups.BoardingVehicle[session.Stop] = slot;
             }
 
             private bool CanShareStop(

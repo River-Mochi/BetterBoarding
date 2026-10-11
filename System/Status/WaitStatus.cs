@@ -770,18 +770,18 @@ namespace BetterBoarding
                 $"route/state {LocaleUtils.FormatN0(admitted.RejectedContext)}");
             AppendField(
                 sb,
-                "Sessions exchanging beside lead",
+                "Sessions with passenger exchange",
                 LocaleUtils.FormatN0(completed.SessionsWithPassengerChanges));
             AppendField(
                 sb,
-                "Changes while lead present",
+                "Managed passenger changes",
                 $"+{LocaleUtils.FormatN0(completed.BoardedNet)} / " +
                 $"-{LocaleUtils.FormatN0(completed.AlightedNet)} (net observations)");
             AppendField(
                 sb,
-                "Returned to vanilla",
-                $"lead departed {LocaleUtils.FormatN0(completed.LeadDepartedReleases)} | " +
-                $"window ended {LocaleUtils.FormatN0(completed.WindowReleases)} | " +
+                "Session outcomes",
+                $"service complete {LocaleUtils.FormatN0(completed.ManagedCompletions)} | " +
+                $"window complete {LocaleUtils.FormatN0(completed.WindowCompletions)} | " +
                 $"invalid {LocaleUtils.FormatN0(completed.InvalidReleases)} | " +
                 $"option/conflict {LocaleUtils.FormatN0(completed.DisabledReleases)}");
             AppendField(
@@ -872,8 +872,8 @@ namespace BetterBoarding
         {
             return reason switch
             {
-                SecondBusBoardingDistributionSystem.SessionReleaseReason.LeadDeparted =>
-                    "lead departed",
+                SecondBusBoardingDistributionSystem.SessionReleaseReason.ServiceCompleted =>
+                    "service completed",
                 SecondBusBoardingDistributionSystem.SessionReleaseReason.WindowEnded =>
                     "window ended",
                 SecondBusBoardingDistributionSystem.SessionReleaseReason.HardSafety =>

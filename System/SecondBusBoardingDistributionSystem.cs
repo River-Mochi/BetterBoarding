@@ -7,13 +7,14 @@
 // ================= </copyright> ======================
 
 // File: System/SecondBusBoardingDistributionSystem.cs
-// Purpose: Presents one safe passenger-facing stop slot and returns followers to vanilla.
+// Purpose: Presents one safe passenger-facing stop slot and completes managed follower service.
 
 namespace BetterBoarding
 {
     using Colossal.Serialization.Entities;
     using Game;
     using Game.Common;
+    using Game.Pathfind;
     using Game.Routes;
     using Game.Simulation;
     using Game.Tools;
@@ -28,8 +29,8 @@ namespace BetterBoarding
 
     public sealed partial class SecondBusBoardingDistributionSystem : GameSystemBase
     {
-        private const int kLeadDepartedReleases = 0;
-        private const int kWindowReleases = 1;
+        private const int kManagedCompletions = 0;
+        private const int kWindowCompletions = 1;
         private const int kHardReleases = 2;
         private const int kInvalidReleases = 3;
         private const int kDisabledReleases = 4;
@@ -48,6 +49,14 @@ namespace BetterBoarding
         private SecondBusBoardingLookups m_Lookups;
 
         private ComponentLookup<SecondBusBoardingSession> m_Sessions;
+
+        private ComponentLookup<PathOwner> m_PathOwners;
+
+        private ComponentLookup<Waypoint> m_Waypoints;
+
+        private BufferLookup<RouteWaypoint> m_RouteWaypoints;
+
+        private ComponentLookup<VehicleTiming> m_VehicleTimings;
 
         private NativeArray<int> m_Counters;
 
@@ -81,6 +90,10 @@ namespace BetterBoarding
             m_SimulationSystem = World.GetOrCreateSystemManaged<SimulationSystem>();
             m_Lookups = SecondBusBoardingLookups.Create(this);
             m_Sessions = GetComponentLookup<SecondBusBoardingSession>(false);
+            m_PathOwners = GetComponentLookup<PathOwner>(false);
+            m_Waypoints = GetComponentLookup<Waypoint>(true);
+            m_RouteWaypoints = GetBufferLookup<RouteWaypoint>(true);
+            m_VehicleTimings = GetComponentLookup<VehicleTiming>(false);
             m_Counters = new NativeArray<int>(kCounterCount, Allocator.Persistent);
             m_RecentOutcomes =
                 new NativeArray<SessionOutcome>(kRecentOutcomeCapacity, Allocator.Persistent);
@@ -122,6 +135,10 @@ namespace BetterBoarding
         {
             m_Lookups.Update(this);
             m_Sessions.Update(this);
+            m_PathOwners.Update(this);
+            m_Waypoints.Update(this);
+            m_RouteWaypoints.Update(this);
+            m_VehicleTimings.Update(this);
             NativeList<Entity> followers =
                 m_ActiveSessions.ToEntityListAsync(
                     Allocator.TempJob,
@@ -132,6 +149,10 @@ namespace BetterBoarding
                 Followers = followers,
                 Lookups = m_Lookups,
                 Sessions = m_Sessions,
+                PathOwners = m_PathOwners,
+                Waypoints = m_Waypoints,
+                RouteWaypoints = m_RouteWaypoints,
+                VehicleTimings = m_VehicleTimings,
                 Counters = m_Counters,
                 RecentOutcomes = m_RecentOutcomes,
                 OutcomeState = m_OutcomeState,
@@ -178,8 +199,8 @@ namespace BetterBoarding
 
             return new StatisticsSnapshot(
                 active.Length,
-                m_Counters[kLeadDepartedReleases],
-                m_Counters[kWindowReleases],
+                m_Counters[kManagedCompletions],
+                m_Counters[kWindowCompletions],
                 m_Counters[kHardReleases],
                 m_Counters[kInvalidReleases],
                 m_Counters[kDisabledReleases],
@@ -211,6 +232,7 @@ namespace BetterBoarding
 
                 SecondBusBoardingSession session =
                     EntityManager.GetComponentData<SecondBusBoardingSession>(follower);
+                RepayExtraDwellMainThread(session);
                 RestoreFollowerToVanilla(follower, session);
                 EntityManager.SetComponentEnabled<SecondBusBoardingSession>(follower, false);
             }
@@ -257,6 +279,28 @@ namespace BetterBoarding
             }
         }
 
+        private void RepayExtraDwellMainThread(SecondBusBoardingSession session)
+        {
+            uint frame = m_SimulationSystem?.frameIndex ?? 0u;
+            uint age = frame >= session.AdmittedFrame
+                ? frame - session.AdmittedFrame
+                : 0u;
+            if (age <= SecondBusBoardingPolicy.ManagedDepartureFrames ||
+                session.Waypoint == Entity.Null ||
+                !EntityManager.Exists(session.Waypoint) ||
+                !EntityManager.HasComponent<VehicleTiming>(session.Waypoint))
+            {
+                return;
+            }
+
+            VehicleTiming timing =
+                EntityManager.GetComponentData<VehicleTiming>(session.Waypoint);
+            float repayment = age - SecondBusBoardingPolicy.ManagedDepartureFrames;
+            timing.m_AverageTravelTime =
+                math.max(0f, timing.m_AverageTravelTime - repayment);
+            EntityManager.SetComponentData(session.Waypoint, timing);
+        }
+
         private void ResetCounters()
         {
             if (!m_Counters.IsCreated)
@@ -282,7 +326,7 @@ namespace BetterBoarding
 
         public enum SessionReleaseReason : byte
         {
-            LeadDeparted,
+            ServiceCompleted,
             WindowEnded,
             HardSafety,
             Invalid,
@@ -375,8 +419,8 @@ namespace BetterBoarding
         {
             public StatisticsSnapshot(
                 int activeSessions,
-                int leadDepartedReleases,
-                int windowReleases,
+                int managedCompletions,
+                int windowCompletions,
                 int hardReleases,
                 int invalidReleases,
                 int disabledReleases,
@@ -386,8 +430,8 @@ namespace BetterBoarding
                 SessionOutcomeSnapshot[] recentOutcomes)
             {
                 ActiveSessions = activeSessions;
-                LeadDepartedReleases = leadDepartedReleases;
-                WindowReleases = windowReleases;
+                ManagedCompletions = managedCompletions;
+                WindowCompletions = windowCompletions;
                 HardReleases = hardReleases;
                 InvalidReleases = invalidReleases;
                 DisabledReleases = disabledReleases;
@@ -399,9 +443,9 @@ namespace BetterBoarding
 
             public int ActiveSessions { get; }
 
-            public int LeadDepartedReleases { get; }
+            public int ManagedCompletions { get; }
 
-            public int WindowReleases { get; }
+            public int WindowCompletions { get; }
 
             public int HardReleases { get; }
 
@@ -427,6 +471,16 @@ namespace BetterBoarding
             public SecondBusBoardingLookups Lookups;
 
             public ComponentLookup<SecondBusBoardingSession> Sessions;
+
+            public ComponentLookup<PathOwner> PathOwners;
+
+            [ReadOnly]
+            public ComponentLookup<Waypoint> Waypoints;
+
+            [ReadOnly]
+            public BufferLookup<RouteWaypoint> RouteWaypoints;
+
+            public ComponentLookup<VehicleTiming> VehicleTimings;
 
             public NativeArray<int> Counters;
 
@@ -466,28 +520,18 @@ namespace BetterBoarding
                 if (leadActive)
                 {
                     session.LeadActiveUpdates++;
-                    // A delta first observed after the lead leaves may be ordinary
-                    // single-bus service, so it is not proof of concurrent exchange.
-                    TrackPassengerChanges(follower, ref session);
                 }
+
+                // The follower remains a managed stop session after the native lead departs.
+                // Otherwise vanilla makes it pull forward and repeat this same stop before it can
+                // exchange passengers, which defeats concurrent boarding.
+                TrackPassengerChanges(follower, ref session);
 
                 uint age = Frame >= session.AdmittedFrame
                     ? Frame - session.AdmittedFrame
                     : 0u;
                 bool windowEnded = age >= SecondBusBoardingPolicy.SessionWindowFrames;
                 bool hardDeadline = age >= SecondBusBoardingPolicy.HardReleaseFrames;
-                bool followerReady = Lookups.ArePassengersReady(follower);
-
-                if ((!leadActive || windowEnded) && (followerReady || hardDeadline))
-                {
-                    SessionReleaseReason reason = hardDeadline && !followerReady
-                        ? SessionReleaseReason.HardSafety
-                        : leadActive
-                            ? SessionReleaseReason.WindowEnded
-                            : SessionReleaseReason.LeadDeparted;
-                    Release(follower, session, reason);
-                    return;
-                }
 
                 VehiclePublicTransport followerTransport =
                     Lookups.PublicTransport[follower];
@@ -526,6 +570,45 @@ namespace BetterBoarding
                     session.LastRatchetFrame = Frame;
                 }
 
+                if (windowEnded)
+                {
+                    // Close the doors before departure so no new cim starts boarding while an
+                    // in-flight passenger is finishing the animation.
+                    session.DoorsClosing = 1;
+                    followerTransport.m_MaxBoardingDistance = 0f;
+                }
+
+                bool followerReady = Lookups.ArePassengersReady(follower);
+                bool normalCompletion = session.DoorsClosing == 0 &&
+                    Frame >= followerTransport.m_DepartureFrame &&
+                    followerTransport.m_MaxBoardingDistance == float.MaxValue &&
+                    followerReady;
+                bool closedCompletion = session.DoorsClosing != 0 && followerReady;
+                if ((normalCompletion || closedCompletion) &&
+                    TryAdvanceToNextWaypoint(follower, session))
+                {
+                    Release(
+                        follower,
+                        session,
+                        normalCompletion
+                            ? SessionReleaseReason.ServiceCompleted
+                            : SessionReleaseReason.WindowEnded,
+                        completedStop: true);
+                    return;
+                }
+
+                if (hardDeadline)
+                {
+                    // If managed completion cannot safely advance the route, give the vehicle back
+                    // to vanilla at this stop instead of risking a stranded bus or passenger.
+                    Release(
+                        follower,
+                        session,
+                        SessionReleaseReason.HardSafety,
+                        completedStop: false);
+                    return;
+                }
+
                 Lookups.PublicTransport[follower] = followerTransport;
 
                 BoardingVehicle slot = Lookups.BoardingVehicle[session.Stop];
@@ -537,13 +620,9 @@ namespace BetterBoarding
                     return;
                 }
 
-                Entity selected = follower;
-                if (leadActive && !Lookups.ArePassengersReady(session.LeadBus))
-                {
-                    // A cim already climbing into the lead can finish only while the single
-                    // passenger-facing slot still names that lead bus.
-                    selected = session.LeadBus;
-                }
+                Entity selected = !leadActive || session.FollowerSelected != 0
+                    ? follower
+                    : session.LeadBus;
 
                 if (slot.m_Vehicle == Entity.Null ||
                     slot.m_Vehicle == follower ||
@@ -631,11 +710,47 @@ namespace BetterBoarding
                 return (leadTransport.m_State & PublicTransportFlags.Boarding) != 0;
             }
 
+            private bool TryAdvanceToNextWaypoint(
+                Entity follower,
+                SecondBusBoardingSession session)
+            {
+                if (!PathOwners.TryGetComponent(follower, out var pathOwner) ||
+                    !Lookups.Target.TryGetComponent(follower, out Target target) ||
+                    !Waypoints.TryGetComponent(target.m_Target, out Waypoint waypoint) ||
+                    !RouteWaypoints.TryGetBuffer(
+                        session.Route,
+                        out DynamicBuffer<RouteWaypoint> routeWaypoints) ||
+                    routeWaypoints.Length == 0 ||
+                    waypoint.m_Index < 0 ||
+                    waypoint.m_Index >= routeWaypoints.Length ||
+                    routeWaypoints[waypoint.m_Index].m_Waypoint != target.m_Target)
+                {
+                    return false;
+                }
+
+                Entity nextWaypoint =
+                    routeWaypoints[(waypoint.m_Index + 1) % routeWaypoints.Length].m_Waypoint;
+                if (nextWaypoint == Entity.Null ||
+                    nextWaypoint == target.m_Target ||
+                    !Lookups.IsUsable(nextWaypoint) ||
+                    !Waypoints.HasComponent(nextWaypoint))
+                {
+                    return false;
+                }
+
+                VehicleUtils.SetTarget(ref pathOwner, ref target, nextWaypoint);
+                PathOwners[follower] = pathOwner;
+                Lookups.Target[follower] = target;
+                return true;
+            }
+
             private void Release(
                 Entity follower,
                 SecondBusBoardingSession session,
-                SessionReleaseReason reason)
+                SessionReleaseReason reason,
+                bool completedStop = false)
             {
+                RepayExtraDwell(session);
                 RecordOutcome(follower, session, reason);
 
                 if (Lookups.PublicTransport.TryGetComponent(
@@ -644,11 +759,17 @@ namespace BetterBoarding
                 {
                     transport.m_State &= ~(
                         PublicTransportFlags.Boarding |
-                        PublicTransportFlags.Arriving);
-                    transport.m_State |=
-                        PublicTransportFlags.EnRoute |
+                        PublicTransportFlags.Arriving |
                         PublicTransportFlags.Testing |
-                        PublicTransportFlags.RequireStop;
+                        PublicTransportFlags.RequireStop);
+                    transport.m_State |= PublicTransportFlags.EnRoute;
+                    if (!completedStop)
+                    {
+                        transport.m_State |=
+                            PublicTransportFlags.Testing |
+                            PublicTransportFlags.RequireStop;
+                    }
+
                     transport.m_DepartureFrame = 0u;
                     transport.m_MaxBoardingDistance = float.MaxValue;
                     transport.m_MinWaitingDistance = float.MaxValue;
@@ -664,9 +785,14 @@ namespace BetterBoarding
                         slot.m_Vehicle = Entity.Null;
                     }
 
-                    if (slot.m_Testing == Entity.Null || slot.m_Testing == follower)
+                    if (!completedStop &&
+                        (slot.m_Testing == Entity.Null || slot.m_Testing == follower))
                     {
                         slot.m_Testing = follower;
+                    }
+                    else if (completedStop && slot.m_Testing == follower)
+                    {
+                        slot.m_Testing = Entity.Null;
                     }
 
                     Lookups.BoardingVehicle[session.Stop] = slot;
@@ -675,11 +801,11 @@ namespace BetterBoarding
                 Sessions.SetComponentEnabled(follower, false);
                 switch (reason)
                 {
-                    case SessionReleaseReason.LeadDeparted:
-                        Counters[kLeadDepartedReleases]++;
+                    case SessionReleaseReason.ServiceCompleted:
+                        Counters[kManagedCompletions]++;
                         break;
                     case SessionReleaseReason.WindowEnded:
-                        Counters[kWindowReleases]++;
+                        Counters[kWindowCompletions]++;
                         break;
                     case SessionReleaseReason.HardSafety:
                         Counters[kHardReleases]++;
@@ -691,6 +817,26 @@ namespace BetterBoarding
                         Counters[kDisabledReleases]++;
                         break;
                 }
+            }
+
+            private void RepayExtraDwell(SecondBusBoardingSession session)
+            {
+                uint age = Frame >= session.AdmittedFrame
+                    ? Frame - session.AdmittedFrame
+                    : 0u;
+                if (age <= SecondBusBoardingPolicy.ManagedDepartureFrames ||
+                    session.Waypoint == Entity.Null ||
+                    !VehicleTimings.TryGetComponent(
+                        session.Waypoint,
+                        out VehicleTiming timing))
+                {
+                    return;
+                }
+
+                float repayment = age - SecondBusBoardingPolicy.ManagedDepartureFrames;
+                timing.m_AverageTravelTime =
+                    math.max(0f, timing.m_AverageTravelTime - repayment);
+                VehicleTimings[session.Waypoint] = timing;
             }
 
             private void RecordOutcome(
