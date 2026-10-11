@@ -839,7 +839,7 @@ namespace BetterBoarding
                     $"lead-active passes {LocaleUtils.FormatN0(outcome.LeadActiveUpdates)} | " +
                     $"follower-slot passes {LocaleUtils.FormatN0(outcome.FollowerSlotPresentations)} | " +
                     $"waiting-cim distance {closestWaiting} | " +
-                    $"exchange +{LocaleUtils.FormatN0(outcome.ConcurrentBoarded)} / " +
+                    $"exchange while lead present +{LocaleUtils.FormatN0(outcome.ConcurrentBoarded)} / " +
                     $"-{LocaleUtils.FormatN0(outcome.ConcurrentAlighted)} | " +
                     $"buses lead {outcome.LeadBus}, second {outcome.FollowerBus}");
             }

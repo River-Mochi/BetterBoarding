@@ -304,7 +304,7 @@ namespace BetterBoarding
 
                     if (valid)
                     {
-                        SelectPassengerBus(
+                        PrepareVehicleAiSlot(
                             follower,
                             ref session,
                             IsLeadStillBoarding(follower, session));
@@ -418,7 +418,6 @@ namespace BetterBoarding
                         LastPassengerCount = Lookups.GetPassengerCount(follower),
                         ClosestWaitingDistance = float.MaxValue,
                     };
-                    SelectPassengerBus(follower, ref session, leadActive: true);
                     Sessions[follower] = session;
                     Sessions.SetComponentEnabled(follower, true);
                     activeStops.TryAdd(stop, 1);
@@ -435,43 +434,19 @@ namespace BetterBoarding
                 }
             }
 
-            private void SelectPassengerBus(
+            private void PrepareVehicleAiSlot(
                 Entity follower,
                 ref SecondBusBoardingSession session,
                 bool leadActive)
             {
                 BoardingVehicle slot = Lookups.BoardingVehicle[session.Stop];
-                bool followerSelected;
-
-                // Do not strand a cim that is already climbing into either bus. Otherwise,
-                // alternate the stop's one passenger-facing slot for a complete resident sweep.
-                if (slot.m_Vehicle == follower && !Lookups.ArePassengersReady(follower))
-                {
-                    followerSelected = true;
-                }
-                else if (leadActive &&
-                    slot.m_Vehicle == session.LeadBus &&
-                    !Lookups.ArePassengersReady(session.LeadBus))
-                {
-                    followerSelected = false;
-                }
-                else if (!leadActive)
-                {
-                    followerSelected = true;
-                }
-                else
-                {
-                    uint turn = Frame / SecondBusBoardingPolicy.BoardingRatchetFrames;
-                    followerSelected = ((turn + (uint)session.Stop.Index) & 1u) != 0u;
-                }
-
-                // Distribution runs immediately after bus AI, before the resident sweep that
-                // observes this selection. Preserve the preceding selection so its waiting-
-                // passenger result is only consumed for a sweep that actually belonged to the
-                // follower.
+                // The slot selected after the preceding vehicle-AI tick remained visible for the
+                // complete resident sweep. Preserve it for Distribution to consume, then restore
+                // the native lead before TransportCarAISystem checks boarding completion. Giving
+                // the follower this slot before bus AI made the lead look finished and let it leave
+                // before concurrent passenger exchange could become visible.
                 session.PreviousFollowerSelected = session.FollowerSelected;
-                session.FollowerSelected = followerSelected ? (byte)1 : (byte)0;
-                slot.m_Vehicle = followerSelected ? follower : session.LeadBus;
+                slot.m_Vehicle = leadActive ? session.LeadBus : follower;
                 if (slot.m_Testing == follower)
                 {
                     slot.m_Testing = Entity.Null;

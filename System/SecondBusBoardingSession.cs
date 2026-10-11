@@ -64,6 +64,8 @@ namespace BetterBoarding
 
         public byte PreviousFollowerSelected;
 
+        public byte PassengerWindowLeadActive;
+
         public byte DoorsClosing;
 
         public byte ReleaseRequested;

@@ -625,9 +625,32 @@ namespace BetterBoarding
                     return;
                 }
 
-                Entity selected = !leadActive || session.FollowerSelected != 0
-                    ? follower
-                    : session.LeadBus;
+                bool followerSelected;
+                if (session.FollowerSelected != 0 && !followerReady)
+                {
+                    // A cim already climbing into the follower must finish before the slot moves.
+                    followerSelected = true;
+                }
+                else if (session.FollowerSelected == 0 &&
+                    leadActive &&
+                    !Lookups.ArePassengersReady(session.LeadBus))
+                {
+                    // Apply the same safety rule to the native lead.
+                    followerSelected = false;
+                }
+                else if (!leadActive)
+                {
+                    followerSelected = true;
+                }
+                else
+                {
+                    // Passenger processing happens after vehicle AI. Alternate from the previous
+                    // resident sweep so a newly admitted follower gets the first safe opportunity.
+                    followerSelected = session.FollowerSelected == 0;
+                }
+
+                session.FollowerSelected = followerSelected ? (byte)1 : (byte)0;
+                Entity selected = followerSelected ? follower : session.LeadBus;
 
                 if (slot.m_Vehicle == Entity.Null ||
                     slot.m_Vehicle == follower ||
@@ -644,6 +667,12 @@ namespace BetterBoarding
                     {
                         session.FollowerSlotPresentations++;
                     }
+
+                    // Passenger-count changes are observed on the following system tick. Remember
+                    // whether this follower-facing resident sweep was genuinely concurrent so the
+                    // report does not credit exchange that happened after the lead had departed.
+                    session.PassengerWindowLeadActive =
+                        selected == follower && leadActive ? (byte)1 : (byte)0;
                 }
 
                 Sessions[follower] = session;
@@ -669,12 +698,18 @@ namespace BetterBoarding
                 if (delta > 0)
                 {
                     Counters[kBoardedNet] += delta;
-                    session.ConcurrentBoarded += delta;
+                    if (session.PassengerWindowLeadActive != 0)
+                    {
+                        session.ConcurrentBoarded += delta;
+                    }
                 }
                 else
                 {
                     Counters[kAlightedNet] -= delta;
-                    session.ConcurrentAlighted -= delta;
+                    if (session.PassengerWindowLeadActive != 0)
+                    {
+                        session.ConcurrentAlighted -= delta;
+                    }
                 }
 
                 session.LastPassengerCount = passengerCount;
