@@ -770,11 +770,11 @@ namespace BetterBoarding
                 $"route/state {LocaleUtils.FormatN0(admitted.RejectedContext)}");
             AppendField(
                 sb,
-                "Sessions with passenger changes",
+                "Sessions exchanging beside lead",
                 LocaleUtils.FormatN0(completed.SessionsWithPassengerChanges));
             AppendField(
                 sb,
-                "Observed passenger buffer changes",
+                "Changes while lead present",
                 $"+{LocaleUtils.FormatN0(completed.BoardedNet)} / " +
                 $"-{LocaleUtils.FormatN0(completed.AlightedNet)} (net observations)");
             AppendField(

@@ -57,6 +57,14 @@ namespace BetterBoarding
             return 16;
         }
 
+        public override int GetUpdateOffset(SystemUpdatePhase phase)
+        {
+            // TransportCarAISystem (and All Aboard's replacement) updates every 16
+            // simulation frames at offset 1. Relative ordering controls list order
+            // only; it does not make this system run on the anchor's frame.
+            return 1;
+        }
+
         [Preserve]
         protected override void OnCreate()
         {

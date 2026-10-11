@@ -40,7 +40,8 @@ Reduce boarding delays, traffic backups, and vehicles bunching up — especially
 * Works nicely with [All Transit + Trucks](https://mods.paradoxplaza.com/mods/138390/Windows).
 * Safe to remove anytime. No Harmony patches and no replacement of the game's transport systems.
 * This doesn't fix severe traffic or poor road design that causes transit vehicle backups. This is a helper, not a miracle :)
-* New Spacing Assist should improve the stale unbunching timing, but it cannot fully overcome insufficient line capacity or traffic congestion that has to be player fixed.
+* New Spacing Assist should improve some spacing, but it cannot fully overcome insufficient line capacity or traffic congestion that has to be player fixed.
+* Better Boarding includes its own second-bus boarding feature. Remove Concurrent Bus Boarding and restart the game before enabling it. If Concurrent is nevertheless detected, Better Boarding automatically disables its overlapping feature to prevent conflicts.
 
 ### Support and feedback
 

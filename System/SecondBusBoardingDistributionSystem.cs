@@ -49,6 +49,18 @@ namespace BetterBoarding
 
         private JobHandle m_PreviousJob;
 
+        public override int GetUpdateInterval(SystemUpdatePhase phase)
+        {
+            return 16;
+        }
+
+        public override int GetUpdateOffset(SystemUpdatePhase phase)
+        {
+            // Run on the exact TransportCarAISystem tick. UpdateAfter places this
+            // system after the bus AI but does not inherit its interval or offset.
+            return 1;
+        }
+
         [Preserve]
         protected override void OnCreate()
         {
@@ -290,9 +302,14 @@ namespace BetterBoarding
                     return;
                 }
 
-                TrackPassengerChanges(follower, ref session);
-
                 bool leadActive = IsLeadStillBoarding(follower, session);
+                if (leadActive)
+                {
+                    // A delta first observed after the lead leaves may be ordinary
+                    // single-bus service, so it is not proof of concurrent exchange.
+                    TrackPassengerChanges(follower, ref session);
+                }
+
                 uint age = Frame >= session.AdmittedFrame
                     ? Frame - session.AdmittedFrame
                     : 0u;
