@@ -69,14 +69,15 @@ namespace BetterBoarding
 
         public override int GetUpdateInterval(SystemUpdatePhase phase)
         {
-            return 16;
+            // ResidentAISystem advances one of sixteen resident partitions every frame.
+            // Reassert the selected passenger-facing stop slot on every frame so no
+            // intervening system can leave a partition looking at the wrong bus.
+            return 1;
         }
 
         public override int GetUpdateOffset(SystemUpdatePhase phase)
         {
-            // Run on the exact TransportCarAISystem tick. UpdateAfter places this
-            // system after the bus AI but does not inherit its interval or offset.
-            return 1;
+            return 0;
         }
 
         [Preserve]
@@ -641,6 +642,7 @@ namespace BetterBoarding
                     return;
                 }
 
+                bool wasFollowerSelected = session.FollowerSelected != 0;
                 bool followerSelected;
                 if (session.FollowerSelected != 0 && !followerReady)
                 {
@@ -660,9 +662,12 @@ namespace BetterBoarding
                 }
                 else
                 {
-                    // Passenger processing happens after vehicle AI. Alternate from the previous
-                    // resident sweep so a newly admitted follower gets the first safe opportunity.
-                    followerSelected = session.FollowerSelected == 0;
+                    // ResidentAISystem processes sixteen fixed partitions. Hold one bus in the
+                    // passenger-facing slot for a complete sixteen-frame sweep, then rotate. A
+                    // newly admitted follower receives the first sweep. Alternating every frame
+                    // can permanently pair one resident partition with the other bus.
+                    uint passengerSweep = age / SecondBusBoardingPolicy.ResidentUpdateFrames;
+                    followerSelected = (passengerSweep & 1u) == 0u;
                 }
 
                 session.FollowerSelected = followerSelected ? (byte)1 : (byte)0;
@@ -679,9 +684,16 @@ namespace BetterBoarding
                     }
 
                     Lookups.BoardingVehicle[session.Stop] = slot;
-                    if (selected == follower)
+                    if (selected == follower &&
+                        (!wasFollowerSelected ||
+                         session.FollowerSlotLastFrame + 1u != Frame))
                     {
                         session.FollowerSlotPresentations++;
+                    }
+
+                    if (selected == follower)
+                    {
+                        session.FollowerSlotLastFrame = Frame;
                     }
 
                     // Passenger-count changes are observed on the following system tick. Remember

@@ -56,6 +56,8 @@ namespace BetterBoarding
 
         public int FollowerSlotPresentations;
 
+        public uint FollowerSlotLastFrame;
+
         public float ClosestWaitingDistance;
 
         public byte HasPresentedBoardingWindow;
@@ -77,6 +79,8 @@ namespace BetterBoarding
 
     internal static class SecondBusBoardingPolicy
     {
+        public const uint ResidentUpdateFrames = 16u;
+
         // Fixed first-version policy: enough room for two ordinary buses plus a small gap,
         // without turning an entire street or station into one boarding area.
         public const float MaximumPairDistance = 32f;
