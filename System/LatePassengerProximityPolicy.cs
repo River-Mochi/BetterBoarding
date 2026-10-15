@@ -11,6 +11,7 @@
 
 namespace BetterBoarding
 {
+    using System.Collections.Generic;
     using Game.Common;
     using Game.Creatures;
     using Game.Prefabs;
@@ -27,6 +28,181 @@ namespace BetterBoarding
         private const float kBusTramClearlyFarMeters = 200f;
         private const int kMaxOwnerHops = 16;
 
+        // Valid only for one boarding controller during one assist pass. Vehicles and
+        // stop ownership can change, so callers must not keep this across updates.
+        internal readonly struct StopContext
+        {
+            public StopContext(Entity waypoint, Entity stop, Entity station, float3 position)
+            {
+                Waypoint = waypoint;
+                Stop = stop;
+                Station = station;
+                Position = position;
+            }
+
+            public Entity Waypoint { get; }
+
+            public Entity Stop { get; }
+
+            public Entity Station { get; }
+
+            public float3 Position { get; }
+        }
+
+        public static bool TryCreateStopContext(
+            EntityManager manager,
+            Entity controller,
+            bool requireStationOwner,
+            out StopContext context)
+        {
+            context = default;
+            if (!manager.Exists(controller) || !manager.HasComponent<Target>(controller))
+            {
+                return false;
+            }
+
+            Entity waypoint = manager.GetComponentData<Target>(controller).m_Target;
+            if (waypoint == Entity.Null ||
+                !manager.Exists(waypoint) ||
+                !manager.HasComponent<Connected>(waypoint) ||
+                !manager.HasComponent<Game.Routes.Position>(waypoint))
+            {
+                return false;
+            }
+
+            Entity stop = manager.GetComponentData<Connected>(waypoint).m_Connected;
+            if (stop == Entity.Null || !manager.Exists(stop))
+            {
+                return false;
+            }
+
+            Entity station = FindStationOwner(manager, stop);
+            if (requireStationOwner && station == Entity.Null)
+            {
+                // Unknown rail topology must not turn into a false far-away verdict.
+                return false;
+            }
+
+            float3 position =
+                manager.GetComponentData<Game.Routes.Position>(waypoint).m_Position;
+            context = new StopContext(waypoint, stop, station, position);
+            return true;
+        }
+
+        // The live pass only needs a yes/no decision. Protect known stop/station riders
+        // before collecting car positions; the on-demand report still uses TryMeasure
+        // to obtain complete distances.
+        public static bool IsClearlyFarWithCachedStop(
+            EntityManager manager,
+            Entity controller,
+            Entity passenger,
+            StopContext context,
+            bool isRail,
+            List<float3> carPositions,
+            ref bool carsCached,
+            ref bool carsValid)
+        {
+            if (!manager.Exists(passenger) ||
+                !manager.HasComponent<HumanCurrentLane>(passenger) ||
+                !manager.HasComponent<Game.Objects.Transform>(passenger))
+            {
+                return false;
+            }
+
+            HumanCurrentLane lane = manager.GetComponentData<HumanCurrentLane>(passenger);
+            if (lane.m_QueueEntity == context.Stop ||
+                lane.m_QueueEntity == context.Waypoint)
+            {
+                return false;
+            }
+
+            if (manager.HasComponent<Creature>(passenger))
+            {
+                Entity queuedAt = manager.GetComponentData<Creature>(passenger).m_QueueEntity;
+                if (queuedAt == context.Stop || queuedAt == context.Waypoint)
+                {
+                    return false;
+                }
+            }
+
+            float3 passengerPosition =
+                manager.GetComponentData<Game.Objects.Transform>(passenger).m_Position;
+            float threshold = isRail ? kRailClearlyFarMeters : kBusTramClearlyFarMeters;
+            float thresholdSquared = threshold * threshold;
+            if (!(math.distancesq(passengerPosition, context.Position) > thresholdSquared))
+            {
+                return false;
+            }
+
+            if (context.Station != Entity.Null &&
+                IsOwnedBy(manager, lane.m_Lane, context.Station))
+            {
+                return false;
+            }
+
+            if (!carsCached)
+            {
+                carsCached = true;
+                carsValid = TryCacheCarPositions(manager, controller, carPositions);
+            }
+
+            if (!carsValid)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < carPositions.Count; i++)
+            {
+                // The negated comparison also fails closed for an invalid NaN position.
+                if (!(math.distancesq(passengerPosition, carPositions[i]) > thresholdSquared))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static bool TryCacheCarPositions(
+            EntityManager manager,
+            Entity controller,
+            List<float3> carPositions)
+        {
+            carPositions.Clear();
+            if (manager.HasBuffer<LayoutElement>(controller))
+            {
+                DynamicBuffer<LayoutElement> layout =
+                    manager.GetBuffer<LayoutElement>(controller, isReadOnly: true);
+                if (layout.Length > 0)
+                {
+                    for (int i = 0; i < layout.Length; i++)
+                    {
+                        Entity car = layout[i].m_Vehicle;
+                        if (!manager.Exists(car) ||
+                            !manager.HasComponent<Game.Objects.Transform>(car))
+                        {
+                            carPositions.Clear();
+                            return false;
+                        }
+
+                        carPositions.Add(
+                            manager.GetComponentData<Game.Objects.Transform>(car).m_Position);
+                    }
+
+                    return true;
+                }
+            }
+
+            if (!manager.HasComponent<Game.Objects.Transform>(controller))
+            {
+                return false;
+            }
+
+            carPositions.Add(
+                manager.GetComponentData<Game.Objects.Transform>(controller).m_Position);
+            return true;
+        }
+
         public static TransportType GetTransportType(EntityManager manager, Entity controller)
         {
             if (!manager.Exists(controller) ||
@@ -42,39 +218,6 @@ namespace BetterBoarding
             }
 
             return manager.GetComponentData<PublicTransportVehicleData>(prefab).m_TransportType;
-        }
-
-        public static bool IsClearlyFar(
-            EntityManager manager,
-            Entity controller,
-            Entity passenger)
-        {
-            return TryMeasure(
-                    manager,
-                    controller,
-                    passenger,
-                    out float stopDistance,
-                    out float carDistance,
-                    out bool onStationLane) &&
-                IsClearlyFar(stopDistance, carDistance, onStationLane);
-        }
-
-        public static bool IsClearlyFarFromBusOrTram(
-            EntityManager manager,
-            Entity controller,
-            Entity passenger)
-        {
-            return TryMeasure(
-                    manager,
-                    controller,
-                    passenger,
-                    requireStationOwner: false,
-                    out float stopDistance,
-                    out float carDistance,
-                    out bool onStopLane) &&
-                !onStopLane &&
-                stopDistance > kBusTramClearlyFarMeters &&
-                carDistance > kBusTramClearlyFarMeters;
         }
 
         public static bool IsClearlyFar(

@@ -23,6 +23,7 @@ namespace BetterBoarding
     using Game.Vehicles;
     using Unity.Collections;
     using Unity.Entities;
+    using Unity.Mathematics;
     using TransportType = Game.Prefabs.TransportType;
 
     public partial class LateBoarderCancelSystem : GameSystemBase
@@ -50,6 +51,7 @@ namespace BetterBoarding
         private readonly HashSet<Entity> m_PendingCancellation = new HashSet<Entity>();
         private readonly HashSet<Entity> m_CanceledPassengers = new HashSet<Entity>();
         private readonly List<Entity> m_PassengerVehicles = new List<Entity>(8);
+        private readonly List<float3> m_CachedCarPositions = new List<float3>(8);
         private Game.Simulation.SimulationSystem? m_SimulationSystem;
 
         public override int GetUpdateInterval(SystemUpdatePhase phase)
@@ -259,8 +261,15 @@ namespace BetterBoarding
                     }
                     }
 
+                    // Only these modes have a verified stop/vehicle proximity rule. For
+                    // ports, ferries, airports and unknown modes, Ready only means that
+                    // boarding has finished; it cannot tell us a rider is far away.
+                    if (!isRail && !isBusOrTram)
+                    {
+                        continue;
+                    }
+
                     if (m_SimulationSystem == null ||
-                        transportType == TransportType.None ||
                         !cancelLateBoarders ||
                         !IsPastLateCancelGraceFrame(
                             latestDepartureFrame,
@@ -271,6 +280,15 @@ namespace BetterBoarding
                         // Late-passenger cancellation waits a short grace after planned departure.
                         continue;
                     }
+
+                    // Resolve the stop only for the first viable late rider, then reuse
+                    // that controller's context and car positions for the rest of this pass.
+                    bool stopContextChecked = false;
+                    bool stopContextValid = false;
+                    LatePassengerProximityPolicy.StopContext stopContext = default;
+                    bool carsCached = false;
+                    bool carsValid = false;
+                    List<float3> carPositions = m_CachedCarPositions;
 
                     List<Entity> passengerVehicles = m_PassengerVehicles;
                     passengerVehicles.Clear();
@@ -350,16 +368,28 @@ namespace BetterBoarding
                                 continue;
                             }
 
-                            if ((isRail &&
-                                 !LatePassengerProximityPolicy.IsClearlyFar(
-                                     EntityManager,
-                                     vehicleEntity,
-                                     passenger)) ||
-                                (isBusOrTram &&
-                                 !LatePassengerProximityPolicy.IsClearlyFarFromBusOrTram(
-                                     EntityManager,
-                                     vehicleEntity,
-                                     passenger)))
+                            if (!stopContextChecked)
+                            {
+                                stopContextChecked = true;
+                                stopContextValid =
+                                    LatePassengerProximityPolicy.TryCreateStopContext(
+                                        EntityManager,
+                                        vehicleEntity,
+                                        requireStationOwner: isRail,
+                                        out stopContext);
+                                carPositions.Clear();
+                            }
+
+                            if (!stopContextValid ||
+                                !LatePassengerProximityPolicy.IsClearlyFarWithCachedStop(
+                                    EntityManager,
+                                    vehicleEntity,
+                                    passenger,
+                                    stopContext,
+                                    isRail,
+                                    carPositions,
+                                    ref carsCached,
+                                    ref carsValid))
                             {
                                 continue;
                             }

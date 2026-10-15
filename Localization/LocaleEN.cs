@@ -46,7 +46,7 @@ namespace BetterBoarding
 
             const string ToggleName = "Skip Late Passengers";
 
-            string SpeedDescription(string transitName, string shortName, string extraLine)
+            string SpeedDescription(string transitName, string extraLine)
             {
                 return
                     "<1x = vanilla>\n" +
@@ -54,15 +54,15 @@ namespace BetterBoarding
                     $"Higher values reduce {transitName} boarding and loading time.\n" +
         
                     "This helps normal queues clear faster, but a late passenger can still delay departure because of vanilla design.\n" +
-                    $"Use [✓] <{ToggleName}> if you want late cims to miss the vehicle after departure time.\n" +
-                    "Skipped late citizens are not deleted; vanilla will naturally reroute them.\n" +
+                    $"<{ToggleName}> can release clearly distant bus, tram, train, and subway riders after departure time; nearby riders stay assigned.\n" +
+                    "Skipped citizens are not deleted; vanilla may continue or reroute their trips. Airplane riders are not skipped early.\n" +
                     "<==========================>\n" +
                     "Loading value:\n" +
                     "1x = 100% vanilla dwell\n" +
                     "2x = ~1/2 planned dwell\n" +
                     "3x = ~1/3 planned dwell (recommended)\n" +
                     "5x = ~1/5 planned dwell (max)\n" +
-                    $"This is not the same as <{ToggleName}>; that checkbox decides whether late cims can miss the {shortName} after departure time.";
+                    $"This is separate from <{ToggleName}>; boarding speed alone does not remove a rider's assignment.";
             }
 
             // One helper keeps all seven status tooltips in sync for future translations.
@@ -74,7 +74,7 @@ namespace BetterBoarding
                     "**Avg** = average wait time for those passengers.\n" +
                     "**Worst** stop = highest average wait at one stop.\n" +
                     "Worst stops are good places to inspect for traffic accidents, blocked/bugged stops, or need more vehicles assigned.\n" +
-                    $"**Late today** = solo late passengers skipped today by <{ToggleName}>.\n" +
+                    $"**Released today** = solo rider assignments removed today by <{ToggleName}> after the distance check; it is not a count of unique people or failed trips.\n" +
                     "Use <Stats to Log> for detailed report: stop names, entity IDs, and more.";
             }
 
@@ -100,33 +100,30 @@ namespace BetterBoarding
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.BusBoardingSpeedFactor)),
                     SpeedDescription(
                         "bus stop",
-                        "bus",
                         string.Empty)
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.RailBoardingSpeedFactor)), "Rail boarding speed" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.RailBoardingSpeedFactor)),
                     SpeedDescription(
                         "train, tram, and subway stop",
-                        "vehicle",
                         "Applies to train, tram, and subway stops.\n")
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)), "Airplane speed" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)),
                     SpeedDescription(
                         "airplane terminal",
-                        "airplane",
                         "Applies to passenger airplane terminals.\n")
                 },
 
                 // Late passenger behavior
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CancelLateBoarders)), ToggleName },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CancelLateBoarders)),
-                    "<Late passengers> who are still <not ready> after the <scheduled departure time> may be released so the vehicle can leave.\n" +
+                    "Only assigned riders confirmed clearly far away after the <scheduled departure time> and a short grace may be released. <Not ready> alone does not mean far away.\n" +
                     "- Bus and tram riders at or near the stop keep boarding; riders clearly far away may be released after a short grace.\n" +
                     "- Train and subway riders already in or near the station keep boarding; only riders clearly far from both the stop and every car may be released early.\n" +
                     "- Groups/families get a little extra grace. A bus, tram, train, or subway leader at the stop stays assigned; a clearly distant leader may be released with the group.\n" +
                     "- If the leader is already aboard, lagging child/pet members receive a vanilla boarding nudge so one straggler is less likely to hold the vehicle.\n" +
-                    "- Skipped late citizens are not deleted; vanilla can naturally continue or reroute them."
+                    "- Ships and airplanes are not skipped early. Released citizens are not deleted; vanilla may continue or reroute their trips."
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cims Run Sooner (see tooltip, 3rd panel)" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
@@ -206,7 +203,7 @@ namespace BetterBoarding
                 { WaitStatus.KeyNoStopsFound, "No stops found." },
 
                 { WaitStatus.KeyStatusLine, "{0} waiting | avg {1} | worst {2} | {3}" },
-                { WaitStatus.KeyStatusLateSkipped, "{0} late today" },
+                { WaitStatus.KeyStatusLateSkipped, "{0} released today" },
                 { WaitStatus.KeyStatusSkipOff, "skip OFF" },
 
                 { WaitStatus.KeyStatusOverviewLine, "{0} tourist/mo | {1} citizens/mo | updated {2}" },
@@ -220,14 +217,14 @@ namespace BetterBoarding
                 { WaitStatus.KeyReportNote, "Line hint comes from the highest-wait waypoint at that stop." },
                 { WaitStatus.KeyReportTesterHintsHeader, "Tester hints" },
                 { WaitStatus.KeyReportHintWorstStops, "Worst stops: inspect these first in-game or with Scene Explorer mod (find locations with entity ID). Look for traffic, bad transit stop location, or a bugged stop." },
-                { WaitStatus.KeyReportHintSkippedCims, "Skipped solo cims: late passengers we skip to allow transit to leave. Later state should usually become 'has path' or 'assigned'. If it stays 'no path yet', inspect that cim entity after more time." },
+                { WaitStatus.KeyReportHintSkippedCims, "Released solo assignments: each count is one assignment removal after the distance check, not proof of a completed or failed trip. A later 'assigned' state does not prove that the rider boarded. Inspect a sampled cim after more time." },
                 { WaitStatus.KeyReportHintLateGroups, "Late groups (families): shows groups that are still unresolved at the instant this report is taken. BetterBoarding gives groups a short extra grace, then releases an outside group or nudges vanilla to finish lagging members when the leader is already aboard." },
                 { WaitStatus.KeyReportFamilyHeader, "{0}" },
                 { WaitStatus.KeyReportServedStops, "Served stops: {0}" },
                 { WaitStatus.KeyReportStopsWithWaiting, "Stops with waiting passengers: {0}" },
                 { WaitStatus.KeyReportWaitingPassengers, "Waiting passengers: {0}" },
                 { WaitStatus.KeyReportAverageWait, "Average wait: {0}" },
-                { WaitStatus.KeyReportLateBoardersSkipped, "Late passengers skipped today: {0}" },
+                { WaitStatus.KeyReportLateBoardersSkipped, "Solo assignments released today: {0}" },
                 { WaitStatus.KeyReportWorstStopNone, "Worst stop: none, no waiting passengers right now." },
                 { WaitStatus.KeyReportWorstStopAverageWait, "Worst stop avg wait: {0}" },
                 { WaitStatus.KeyReportWorstStopName, "Worst stop name: {0}" },

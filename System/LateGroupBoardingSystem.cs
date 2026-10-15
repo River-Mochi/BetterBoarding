@@ -12,6 +12,7 @@
 namespace BetterBoarding
 {
     using System;
+    using System.Collections.Generic;
     using CS2Shared.RiverMochi;
     using Game;
     using Game.Common;
@@ -23,6 +24,7 @@ namespace BetterBoarding
     using Game.Vehicles;
     using Unity.Collections;
     using Unity.Entities;
+    using Unity.Mathematics;
 
     /// <summary>
     /// Handles the group/family cases deliberately excluded from the normal late-passenger pass.
@@ -48,6 +50,7 @@ namespace BetterBoarding
         private const int kMaxGroupsPerUpdate = 32;
 
         private EntityQuery m_VehicleQuery;
+        private readonly List<float3> m_CachedCarPositions = new List<float3>(8);
 
         private SimulationSystem? m_SimulationSystem;
 
@@ -128,6 +131,14 @@ namespace BetterBoarding
 
                 candidateCount = candidates.Length;
 
+                Entity cachedController = Entity.Null;
+                TransportType cachedMode = TransportType.None;
+                bool stopContextValid = false;
+                LatePassengerProximityPolicy.StopContext stopContext = default;
+                bool carsCached = false;
+                bool carsValid = false;
+                List<float3> carPositions = m_CachedCarPositions;
+
                 for (int i = 0; i < candidates.Length; i++)
                 {
                     GroupCandidate candidate = candidates[i];
@@ -145,25 +156,42 @@ namespace BetterBoarding
                     // existing missing-leader path.
                     if (EntityManager.HasComponent<HumanCurrentLane>(candidate.Leader))
                     {
-                        TransportType mode = LatePassengerProximityPolicy.GetTransportType(
-                            EntityManager,
-                            candidate.ControllerVehicle);
-                        bool railAtStation =
-                            (mode == TransportType.Train || mode == TransportType.Subway) &&
-                            !LatePassengerProximityPolicy.IsClearlyFar(
-                                EntityManager,
-                                candidate.ControllerVehicle,
-                                candidate.Leader);
-                        bool busOrTramAtStop =
-                            (mode == TransportType.Bus || mode == TransportType.Tram) &&
-                            !LatePassengerProximityPolicy.IsClearlyFarFromBusOrTram(
-                                EntityManager,
-                                candidate.ControllerVehicle,
-                                candidate.Leader);
-                        if (railAtStation || busOrTramAtStop)
+                        if (candidate.ControllerVehicle != cachedController)
                         {
-                            // A leader at the station or stop may still be walking toward
-                            // the vehicle. Keep the whole group assigned in that case.
+                            cachedController = candidate.ControllerVehicle;
+                            cachedMode = LatePassengerProximityPolicy.GetTransportType(
+                                EntityManager,
+                                cachedController);
+                            bool isRail = cachedMode == TransportType.Train ||
+                                cachedMode == TransportType.Subway;
+                            bool isBusOrTram = cachedMode == TransportType.Bus ||
+                                cachedMode == TransportType.Tram;
+                            stopContextValid = (isRail || isBusOrTram) &&
+                                LatePassengerProximityPolicy.TryCreateStopContext(
+                                    EntityManager,
+                                    cachedController,
+                                    requireStationOwner: isRail,
+                                    out stopContext);
+                            carPositions.Clear();
+                            carsCached = false;
+                            carsValid = false;
+                        }
+
+                        bool rail = cachedMode == TransportType.Train ||
+                            cachedMode == TransportType.Subway;
+                        if (!stopContextValid ||
+                            !LatePassengerProximityPolicy.IsClearlyFarWithCachedStop(
+                                EntityManager,
+                                candidate.ControllerVehicle,
+                                candidate.Leader,
+                                stopContext,
+                                rail,
+                                carPositions,
+                                ref carsCached,
+                                ref carsValid))
+                        {
+                            // Keep nearby and unmeasurable leaders assigned. Sea, air and
+                            // unknown modes have no verified proximity rule yet.
                             continue;
                         }
 

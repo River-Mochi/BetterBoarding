@@ -523,7 +523,7 @@ namespace BetterBoarding
                 "Worst stops: inspect these first in-game or with Scene Explorer. Look for accidents, blocked traffic, bad stop placement, or a bugged stop."));
             sb.AppendLine("- " + Localize(
                 KeyReportHintSkippedCims,
-                "Skipped solo cims: later state should usually become 'has path' or 'assigned'. If it stays 'no path yet', inspect that cim entity after more time."));
+                "Released solo assignments: each count is one removal after the distance check, not proof of a completed or failed trip. A later 'assigned' state does not prove boarding."));
             sb.AppendLine("- " + Localize(
                 KeyReportHintLateGroups,
                 "Late groups (families): groups still unresolved when this report was taken. " +
@@ -814,7 +814,7 @@ namespace BetterBoarding
             AppendField(
                 sb,
                 label,
-                $"{LocaleUtils.FormatN0(family.WaitingPassengers)} waiting | avg wait {FormatDuration(family.AverageWaitSeconds)} | worst stop {FormatDuration(family.WorstStopWaitSeconds)} | queued/total stops {LocaleUtils.FormatN0(family.ActiveQueueStops)}/{LocaleUtils.FormatN0(family.StopCount)} | {LocaleUtils.FormatN0(lateBoardersCanceledToday)} skipped late passengers");
+                $"{LocaleUtils.FormatN0(family.WaitingPassengers)} waiting | avg wait {FormatDuration(family.AverageWaitSeconds)} | worst stop {FormatDuration(family.WorstStopWaitSeconds)} | queued/total stops {LocaleUtils.FormatN0(family.ActiveQueueStops)}/{LocaleUtils.FormatN0(family.StopCount)} | {LocaleUtils.FormatN0(lateBoardersCanceledToday)} solo assignments released");
         }
 
         private static void AppendFamilyReport(
@@ -839,7 +839,7 @@ namespace BetterBoarding
                 sb,
                 "Status",
                 $"{LocaleUtils.FormatN0(family.WaitingPassengers)} waiting | avg wait {FormatDuration(family.AverageWaitSeconds)} | worst stop {FormatDuration(family.WorstStopWaitSeconds)} | queued/total stops {LocaleUtils.FormatN0(family.ActiveQueueStops)}/{LocaleUtils.FormatN0(family.StopCount)}");
-            AppendField(sb, "Late solo cims skipped", LocaleUtils.FormatN0(lateBoardersCanceledToday) + " today");
+            AppendField(sb, "Solo assignments released", LocaleUtils.FormatN0(lateBoardersCanceledToday) + " today");
             AppendField(
                 sb,
                 "Late groups unresolved now",
