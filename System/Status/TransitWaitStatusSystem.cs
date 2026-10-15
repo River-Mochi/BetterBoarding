@@ -354,6 +354,7 @@ namespace BetterBoarding
 
         private EntityQuery m_WaitingWaypointQuery;
         private EntityQuery m_BoardingVehicleQuery;
+        private EntityQuery m_RailControllerQuery;
         private EntityQuery m_TransportConfigQuery;
         private NameSystem m_NameSystem = null!;
         private SimulationSystem m_SimulationSystem = null!;
@@ -376,6 +377,11 @@ namespace BetterBoarding
 
             m_BoardingVehicleQuery = SystemAPI.QueryBuilder()
                 .WithAll<Game.Vehicles.PublicTransport, Passenger>()
+                .WithNone<Deleted, Destroyed, Temp, Overridden>()
+                .Build();
+
+            m_RailControllerQuery = SystemAPI.QueryBuilder()
+                .WithAll<Game.Vehicles.PublicTransport, PrefabRef>()
                 .WithNone<Deleted, Destroyed, Temp, Overridden>()
                 .Build();
 

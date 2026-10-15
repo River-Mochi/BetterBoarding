@@ -81,7 +81,9 @@ namespace BetterBoarding
 
             EntityCommandBuffer ecb = default;
             bool hasCommandBuffer = false;
+#if DEBUG
             bool playedCommandBuffer = false;
+#endif
             int controllersScanned = 0;
             int candidateCount = 0;
             int groupsReleased = 0;
@@ -143,6 +145,28 @@ namespace BetterBoarding
                     // existing missing-leader path.
                     if (EntityManager.HasComponent<HumanCurrentLane>(candidate.Leader))
                     {
+                        TransportType mode = LatePassengerProximityPolicy.GetTransportType(
+                            EntityManager,
+                            candidate.ControllerVehicle);
+                        bool railAtStation =
+                            (mode == TransportType.Train || mode == TransportType.Subway) &&
+                            !LatePassengerProximityPolicy.IsClearlyFar(
+                                EntityManager,
+                                candidate.ControllerVehicle,
+                                candidate.Leader);
+                        bool busOrTramAtStop =
+                            (mode == TransportType.Bus || mode == TransportType.Tram) &&
+                            !LatePassengerProximityPolicy.IsClearlyFarFromBusOrTram(
+                                EntityManager,
+                                candidate.ControllerVehicle,
+                                candidate.Leader);
+                        if (railAtStation || busOrTramAtStop)
+                        {
+                            // A leader at the station or stop may still be walking toward
+                            // the vehicle. Keep the whole group assigned in that case.
+                            continue;
+                        }
+
                         if (ContainsEntity(releasedLeaders, candidate.Leader))
                         {
                             continue;
@@ -194,7 +218,9 @@ namespace BetterBoarding
                     // Apply structural and buffer changes only after every live source buffer
                     // used by this pass has finished being read.
                     ecb.Playback(EntityManager);
+#if DEBUG
                     playedCommandBuffer = true;
+#endif
                 }
 
                 if (BoardingRuntimeSettings.EnableVerboseLogging &&
@@ -261,10 +287,10 @@ namespace BetterBoarding
             }
 
             uint departureFrame = publicTransport.m_DepartureFrame;
-            if (EntityManager.HasComponent<CargoTransport>(controllerVehicle))
+            if (EntityManager.HasComponent<Game.Vehicles.CargoTransport>(controllerVehicle))
             {
-                CargoTransport cargo =
-                    EntityManager.GetComponentData<CargoTransport>(controllerVehicle);
+                Game.Vehicles.CargoTransport cargo =
+                    EntityManager.GetComponentData<Game.Vehicles.CargoTransport>(controllerVehicle);
 
                 if (cargo.m_DepartureFrame > departureFrame)
                 {
@@ -279,27 +305,17 @@ namespace BetterBoarding
                 return false;
             }
 
-            // The planned departure frame is not proof that a long-platform rider
-            // has stopped making progress toward a short train. Let vanilla finish
-            // both solo and group boarding for train and subway controllers.
-            if (EntityManager.HasComponent<PrefabRef>(controllerVehicle))
+            // Fail closed if a custom vehicle cannot be classified. Rail leaders are
+            // protected by the station-proximity gate; boarded leaders can still receive
+            // the family assist below.
+            if (!EntityManager.HasComponent<PrefabRef>(controllerVehicle))
             {
-                Entity prefab =
-                    EntityManager.GetComponentData<PrefabRef>(controllerVehicle).m_Prefab;
-                if (EntityManager.HasComponent<PublicTransportVehicleData>(prefab))
-                {
-                    TransportType transportType =
-                        EntityManager.GetComponentData<PublicTransportVehicleData>(prefab)
-                            .m_TransportType;
-                    if (transportType == TransportType.Train ||
-                        transportType == TransportType.Subway)
-                    {
-                        return false;
-                    }
-                }
+                return false;
             }
 
-            return true;
+            Entity prefab =
+                EntityManager.GetComponentData<PrefabRef>(controllerVehicle).m_Prefab;
+            return EntityManager.HasComponent<PublicTransportVehicleData>(prefab);
         }
 
         private void CollectLateGroupCandidates(

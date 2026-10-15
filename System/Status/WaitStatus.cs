@@ -493,6 +493,11 @@ namespace BetterBoarding
                 AppendFamilyReport(sb, "Ship", snapshot.Ship, s_ShipLateBoardersToday, s_ShipSkippedSamples, s_ShipFollowUpOutcomes, s_ShipFollowUpSamples);
                 AppendFamilyReport(sb, "Airplane", snapshot.Air, s_AirLateBoardersToday, s_AirSkippedSamples, s_AirFollowUpOutcomes, s_AirFollowUpSamples);
 
+                // An on-demand, bounded live view of boarding train/subway riders. Unlike
+                // the city-wide wait totals, this shows whether the particular vehicle is
+                // still boarding and which assigned riders are not ready yet.
+                system.AppendRailBoardingReport(sb);
+
 #if DEBUG
                 TransitHeadwayDiagnosticSystem headwayDiagnostics =
                     world.GetOrCreateSystemManaged<TransitHeadwayDiagnosticSystem>();
@@ -522,8 +527,9 @@ namespace BetterBoarding
             sb.AppendLine("- " + Localize(
                 KeyReportHintLateGroups,
                 "Late groups (families): groups still unresolved when this report was taken. " +
-                "BetterBoarding gives them extra grace, then safely releases an outside group " +
-                "or nudges vanilla to finish members whose leader is already aboard."));
+                "BetterBoarding gives them extra grace, then releases an eligible outside group " +
+                "or nudges vanilla to finish members whose leader is already aboard. " +
+                "Bus/tram leaders near their stop and rail leaders near their station are protected."));
         }
 
 #if DEBUG

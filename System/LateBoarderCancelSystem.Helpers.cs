@@ -87,11 +87,14 @@ namespace BetterBoarding
             return latestDepartureFrame != 0 && frame > latestDepartureFrame;
         }
 
-        private static bool IsPastLateCancelGraceFrame(uint latestDepartureFrame, uint frame)
+        private static bool IsPastLateCancelGraceFrame(
+            uint latestDepartureFrame,
+            uint frame,
+            uint graceFrames)
         {
             return latestDepartureFrame != 0 &&
                    frame >= latestDepartureFrame &&
-                   frame - latestDepartureFrame >= kLatePassengerCancelGraceFrames;
+                   frame - latestDepartureFrame >= graceFrames;
         }
 
         private uint GetLatestDepartureFrame(

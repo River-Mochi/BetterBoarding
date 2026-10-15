@@ -121,11 +121,11 @@ namespace BetterBoarding
                 // Late passenger behavior
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CancelLateBoarders)), ToggleName },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CancelLateBoarders)),
-                    "<Late passengers> who are still <not ready> after <departure time> are allowed to miss the vehicle.\n" +
-                    "- Solo late passengers are released after a short grace so transit can depart.\n" +
-                    "- Groups/families get a little extra grace. If the leader is still outside, the group is released through vanilla group cancellation.\n" +
-                    "- If the leader is already aboard, lagging child/pet members are finished aboard so one straggler cannot hold the vehicle for vanilla's long timeout.\n" +
-                    "- Train and subway passengers keep vanilla's boarding time to avoid repeated missed trains on long platforms.\n" +
+                    "<Late passengers> who are still <not ready> after the <scheduled departure time> may be released so the vehicle can leave.\n" +
+                    "- Bus and tram riders at or near the stop keep boarding; riders clearly far away may be released after a short grace.\n" +
+                    "- Train and subway riders already in or near the station keep boarding; only riders clearly far from both the stop and every car may be released early.\n" +
+                    "- Groups/families get a little extra grace. A bus, tram, train, or subway leader at the stop stays assigned; a clearly distant leader may be released with the group.\n" +
+                    "- If the leader is already aboard, lagging child/pet members receive a vanilla boarding nudge so one straggler is less likely to hold the vehicle.\n" +
                     "- Skipped late citizens are not deleted; vanilla can naturally continue or reroute them."
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cims Run Sooner (see tooltip, 3rd panel)" },

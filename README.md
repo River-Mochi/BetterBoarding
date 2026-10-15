@@ -9,18 +9,18 @@ Better Boarding helps much sooner by improving late-passenger behavior while lea
 ### What It Does
 
 - Faster Boarding/loading sliders for bus, rail, and airplane.
-- `Skip Late Passengers`: late solo cims can miss a bus or other supported vehicle after a short grace instead of holding everyone. Train and subway passengers keep vanilla boarding time on long platforms.
+- `Skip Late Passengers`: late solo cims clearly far from a bus/tram stop or rail station can miss that vehicle after a short grace instead of holding everyone. Riders at or near those stops remain assigned so they can board.
 - Groups/families get extra help so one lagging child, pet, or group member does not cause a long delay.
 - `Cims Run Sooner`: assigned late passengers start running earlier for bus, tram, train, and subway.
-- Compact Options status plus `Stats to Log` for waits, worst stops, skipped passengers, and troubleshooting.
+- Compact Options status plus `Stats to Log` for waits, worst stops, skipped passengers, and an on-demand train/subway boarding snapshot.
 
 ### Late Passengers
 
 Better Boarding mainly targets citizen behavior because the schedule does not help much if a cim several blocks away can keep a vehicle from leaving.
 
-- Late solo passengers can miss the vehicle after departure instead of holding everyone.
+- Late solo passengers can miss the vehicle after its scheduled departure time instead of holding everyone. The scheduled time is not the moment it actually leaves the stop.
 - Skipped cims are not deleted; vanilla can naturally reassign or reroute them.
-- Families/groups are kept together where possible. If the leader is already aboard, a separated child or pet can be instantly placed on the same vehicle so it can leave.
+- Families/groups are kept together where possible. If the leader is already aboard, Better Boarding nudges vanilla's existing child and pet boarding flow rather than directly teleporting members.
 
 ### Cims Run Sooner
 
