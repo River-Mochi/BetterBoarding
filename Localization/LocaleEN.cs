@@ -125,6 +125,7 @@ namespace BetterBoarding
                     "- Solo late passengers are released after a short grace so transit can depart.\n" +
                     "- Groups/families get a little extra grace. If the leader is still outside, the group is released through vanilla group cancellation.\n" +
                     "- If the leader is already aboard, lagging child/pet members are finished aboard so one straggler cannot hold the vehicle for vanilla's long timeout.\n" +
+                    "- Train and subway passengers keep vanilla's boarding time to avoid repeated missed trains on long platforms.\n" +
                     "- Skipped late citizens are not deleted; vanilla can naturally continue or reroute them."
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cims Run Sooner (see tooltip, 3rd panel)" },

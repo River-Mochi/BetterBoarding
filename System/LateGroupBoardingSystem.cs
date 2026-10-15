@@ -17,6 +17,7 @@ namespace BetterBoarding
     using Game.Common;
     using Game.Creatures;
     using Game.Pathfind;
+    using Game.Prefabs;
     using Game.Simulation;
     using Game.Tools;
     using Game.Vehicles;
@@ -271,9 +272,34 @@ namespace BetterBoarding
                 }
             }
 
-            return departureFrame != 0 &&
-                frame >= departureFrame &&
-                frame - departureFrame >= kLateGroupGraceFrames;
+            if (departureFrame == 0 ||
+                frame < departureFrame ||
+                frame - departureFrame < kLateGroupGraceFrames)
+            {
+                return false;
+            }
+
+            // The planned departure frame is not proof that a long-platform rider
+            // has stopped making progress toward a short train. Let vanilla finish
+            // both solo and group boarding for train and subway controllers.
+            if (EntityManager.HasComponent<PrefabRef>(controllerVehicle))
+            {
+                Entity prefab =
+                    EntityManager.GetComponentData<PrefabRef>(controllerVehicle).m_Prefab;
+                if (EntityManager.HasComponent<PublicTransportVehicleData>(prefab))
+                {
+                    TransportType transportType =
+                        EntityManager.GetComponentData<PublicTransportVehicleData>(prefab)
+                            .m_TransportType;
+                    if (transportType == TransportType.Train ||
+                        transportType == TransportType.Subway)
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
         }
 
         private void CollectLateGroupCandidates(

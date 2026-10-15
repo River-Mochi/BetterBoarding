@@ -30,7 +30,8 @@ namespace BetterBoarding
         // High-level flow:
         // 1. Scan vehicles while vanilla still has them in the boarding state.
         // 2. Optionally set vanilla's Run flag shortly before bus/tram/train departure so assigned cims hurry sooner.
-        // 3. After departure, optionally detach safe solo late passengers whose remaining path still contains that exact vehicle.
+        // 3. After planned departure time, optionally detach eligible solo late passengers
+        //    whose remaining path still contains that exact vehicle.
         // 4. Optionally record delayed "what happened next?" samples for verbose diagnostics.
         // 2048/day means every 128 simulation frames (~42 game seconds); cancellation work is also capped below.
         public const int UpdatesPerDay = 2048;
@@ -39,7 +40,8 @@ namespace BetterBoarding
         // Higher caps process large crowds faster but can create larger one-frame edits.
         private const int kMaxCancellationsPerUpdate = 128;
 
-        // Wait one boarding-assist interval after vanilla departure before trimming paths.
+        // Wait one boarding-assist interval after the planned departure frame before trimming paths.
+        // The vehicle can still be boarding then; train/subway passengers are excluded below.
         // This gives vanilla and other mods one extra assist interval to settle same-frame boarding edits.
         private const uint kLatePassengerCancelGraceFrames = 128u;
 
@@ -242,10 +244,21 @@ namespace BetterBoarding
                     }
                     }
 
+                    // A rail platform can be much longer than the train. A rider assigned
+                    // to a short train may still be walking along the platform when its
+                    // planned departure frame passes. Vanilla keeps boarding open for that
+                    // rider; removing the assignment here can make the crowd miss every train.
+                    // Keep Run Sooner above, but leave train/subway completion to vanilla.
+                    if (transportType == TransportType.Train ||
+                        transportType == TransportType.Subway)
+                    {
+                        continue;
+                    }
+
                     if (m_SimulationSystem == null ||
                         !IsPastLateCancelGraceFrame(latestDepartureFrame, frame))
                     {
-                        // Late-passenger cancellation waits a short grace after vanilla departure.
+                        // Late-passenger cancellation waits a short grace after planned departure.
                         continue;
                     }
 
