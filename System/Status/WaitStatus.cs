@@ -493,6 +493,11 @@ namespace BetterBoarding
                 AppendFamilyReport(sb, "Ship", snapshot.Ship, s_ShipLateBoardersToday, s_ShipSkippedSamples, s_ShipFollowUpOutcomes, s_ShipFollowUpSamples);
                 AppendFamilyReport(sb, "Airplane", snapshot.Air, s_AirLateBoardersToday, s_AirSkippedSamples, s_AirFollowUpOutcomes, s_AirFollowUpSamples);
 
+                // An on-demand, bounded live view of boarding train/subway riders. Unlike
+                // the city-wide wait totals, this shows whether the particular vehicle is
+                // still boarding and which assigned riders are not ready yet.
+                system.AppendRailBoardingReport(sb);
+
 #if DEBUG
                 TransitHeadwayDiagnosticSystem headwayDiagnostics =
                     world.GetOrCreateSystemManaged<TransitHeadwayDiagnosticSystem>();
@@ -518,12 +523,13 @@ namespace BetterBoarding
                 "Worst stops: inspect these first in-game or with Scene Explorer. Look for accidents, blocked traffic, bad stop placement, or a bugged stop."));
             sb.AppendLine("- " + Localize(
                 KeyReportHintSkippedCims,
-                "Skipped solo cims: later state should usually become 'has path' or 'assigned'. If it stays 'no path yet', inspect that cim entity after more time."));
+                "Released solo assignments: each count is one removal after the distance check, not proof of a completed or failed trip. A later 'assigned' state does not prove boarding."));
             sb.AppendLine("- " + Localize(
                 KeyReportHintLateGroups,
                 "Late groups (families): groups still unresolved when this report was taken. " +
-                "BetterBoarding gives them extra grace, then safely releases an outside group " +
-                "or nudges vanilla to finish members whose leader is already aboard."));
+                "BetterBoarding gives them extra grace, then releases an eligible outside group " +
+                "or nudges vanilla to finish members whose leader is already aboard. " +
+                "Bus/tram leaders near their stop and rail leaders near their station are protected."));
         }
 
 #if DEBUG
@@ -550,15 +556,15 @@ namespace BetterBoarding
             AppendTimingFields(sb, snapshot.BoardingAssist);
             AppendField(sb, "Vehicles scanned", LocaleUtils.FormatN0(snapshot.VehiclesScanned));
             AppendField(sb, "Passengers scanned", LocaleUtils.FormatN0(snapshot.PassengersScanned));
-            AppendField(sb, "Late solo candidates", LocaleUtils.FormatN0(snapshot.LateSoloCandidates));
-            AppendField(sb, "Late solo canceled", LocaleUtils.FormatN0(snapshot.LateSoloCanceled));
+            AppendField(sb, "Far solo candidates", LocaleUtils.FormatN0(snapshot.LateSoloCandidates));
+            AppendField(sb, "Solo assignments released", LocaleUtils.FormatN0(snapshot.LateSoloCanceled));
             AppendField(sb, "Run Sooners applied", LocaleUtils.FormatN0(snapshot.RunSoonerAssists));
             AppendField(
                 sb,
                 "Command buffer playbacks",
                 LocaleUtils.FormatN0(snapshot.BoardingCommandBufferPlaybacks));
 
-            AppendSubHeader(sb, "Late-family assist");
+            AppendSubHeader(sb, "Group boarding assist");
             AppendTimingFields(sb, snapshot.LateGroups);
             AppendField(
                 sb,
@@ -808,7 +814,7 @@ namespace BetterBoarding
             AppendField(
                 sb,
                 label,
-                $"{LocaleUtils.FormatN0(family.WaitingPassengers)} waiting | avg wait {FormatDuration(family.AverageWaitSeconds)} | worst stop {FormatDuration(family.WorstStopWaitSeconds)} | queued/total stops {LocaleUtils.FormatN0(family.ActiveQueueStops)}/{LocaleUtils.FormatN0(family.StopCount)} | {LocaleUtils.FormatN0(lateBoardersCanceledToday)} skipped late passengers");
+                $"{LocaleUtils.FormatN0(family.WaitingPassengers)} waiting | avg wait {FormatDuration(family.AverageWaitSeconds)} | worst stop {FormatDuration(family.WorstStopWaitSeconds)} | queued/total stops {LocaleUtils.FormatN0(family.ActiveQueueStops)}/{LocaleUtils.FormatN0(family.StopCount)} | {LocaleUtils.FormatN0(lateBoardersCanceledToday)} solo assignments released");
         }
 
         private static void AppendFamilyReport(
@@ -833,10 +839,10 @@ namespace BetterBoarding
                 sb,
                 "Status",
                 $"{LocaleUtils.FormatN0(family.WaitingPassengers)} waiting | avg wait {FormatDuration(family.AverageWaitSeconds)} | worst stop {FormatDuration(family.WorstStopWaitSeconds)} | queued/total stops {LocaleUtils.FormatN0(family.ActiveQueueStops)}/{LocaleUtils.FormatN0(family.StopCount)}");
-            AppendField(sb, "Late solo cims skipped", LocaleUtils.FormatN0(lateBoardersCanceledToday) + " today");
+            AppendField(sb, "Solo assignments released", LocaleUtils.FormatN0(lateBoardersCanceledToday) + " today");
             AppendField(
                 sb,
-                "Late groups unresolved now",
+                "Group boarding incomplete now",
                 $"{LocaleUtils.FormatN0(family.LateGroupPassengers)} passengers | {LocaleUtils.FormatN0(family.LateGroupGroups)} groups | {LocaleUtils.FormatN0(family.LateGroupVehicles)} vehicles");
 #if DEBUG
             AppendField(sb, "Follow-up outcomes (verbose)", FormatFollowUpOutcomes(followUpOutcomes));

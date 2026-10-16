@@ -11,20 +11,20 @@
 
 namespace BetterBoarding
 {
-    using System; // Math
-    using System.Collections.Generic; // HashSet
-    using Game; // GameSystemBase
-    using Game.Common; // Deleted, Destroyed, Overridden
-    using Game.Creatures; // Human, CurrentVehicle, group checks
-    using Game.Pathfind; // PathOwner, PathElement
-    using Game.Tools; // Temp
-    using Game.Vehicles; // CargoTransport, LayoutElement, Passenger
-    using Unity.Collections; // Allocator
-    using Unity.Entities; // DynamicBuffer, Entity, EntityCommandBuffer
-    using Unity.Mathematics; // math
-    using PrefabRef = Game.Prefabs.PrefabRef; // prefab lookup
+    using System;                                                   // Math
+    using System.Collections.Generic;                               // HashSet
+    using Game;                                                     // GameSystemBase
+    using Game.Common;                                              // Deleted, Destroyed, Overridden
+    using Game.Creatures;                                           // Human, CurrentVehicle, group checks
+    using Game.Pathfind;                                            // PathOwner, PathElement
+    using Game.Tools;                                               // Temp
+    using Game.Vehicles;                                            // CargoTransport, LayoutElement, Passenger
+    using Unity.Collections;                                        // Allocator
+    using Unity.Entities;                                           // DynamicBuffer, Entity, EntityCommandBuffer
+    using Unity.Mathematics;                                        // math
+    using PrefabRef = Game.Prefabs.PrefabRef;                       // prefab lookup
     using PublicTransportVehicleData = Game.Prefabs.PublicTransportVehicleData; // transport type source
-    using TransportType = Game.Prefabs.TransportType; // bus/train/etc.
+    using TransportType = Game.Prefabs.TransportType;               // bus/train/etc.
 
     public partial class LateBoarderCancelSystem : GameSystemBase
     {
@@ -87,11 +87,14 @@ namespace BetterBoarding
             return latestDepartureFrame != 0 && frame > latestDepartureFrame;
         }
 
-        private static bool IsPastLateCancelGraceFrame(uint latestDepartureFrame, uint frame)
+        private static bool IsPastLateCancelGraceFrame(
+            uint latestDepartureFrame,
+            uint frame,
+            uint graceFrames)
         {
             return latestDepartureFrame != 0 &&
                    frame >= latestDepartureFrame &&
-                   frame - latestDepartureFrame >= kLatePassengerCancelGraceFrames;
+                   frame - latestDepartureFrame >= graceFrames;
         }
 
         private uint GetLatestDepartureFrame(
@@ -202,18 +205,22 @@ namespace BetterBoarding
             for (int i = 0; i < passengers.Length; i++)
             {
                 Entity passenger = passengers[i].m_Passenger;
+
                 if (!EntityManager.Exists(passenger) ||
                     EntityManager.HasComponent<Deleted>(passenger) ||
                     EntityManager.HasComponent<Destroyed>(passenger) ||
                     EntityManager.HasComponent<Temp>(passenger) ||
                     EntityManager.HasComponent<Overridden>(passenger) ||
                     !EntityManager.HasComponent<CurrentVehicle>(passenger) ||
-                    !EntityManager.HasComponent<Human>(passenger))
+                    !EntityManager.HasComponent<Human>(passenger) ||
+                    !EntityManager.HasComponent<HumanCurrentLane>(passenger))
                 {
                     continue;
                 }
 
-                CurrentVehicle currentVehicle = EntityManager.GetComponentData<CurrentVehicle>(passenger);
+                CurrentVehicle currentVehicle =
+                    EntityManager.GetComponentData<CurrentVehicle>(passenger);
+
                 if (currentVehicle.m_Vehicle != vehicleEntity ||
                     (currentVehicle.m_Flags & CreatureVehicleFlags.Ready) != 0)
                 {

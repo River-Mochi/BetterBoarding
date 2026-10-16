@@ -18,11 +18,11 @@ namespace BetterBoarding
     using Game;
     using Game.Common;
     using Game.Creatures;
-    using Game.Pathfind;
     using Game.Tools;
     using Game.Vehicles;
     using Unity.Collections;
     using Unity.Entities;
+    using Unity.Mathematics;
     using TransportType = Game.Prefabs.TransportType;
 
     public partial class LateBoarderCancelSystem : GameSystemBase
@@ -30,8 +30,9 @@ namespace BetterBoarding
         // High-level flow:
         // 1. Scan vehicles while vanilla still has them in the boarding state.
         // 2. Optionally set vanilla's Run flag shortly before bus/tram/train departure so assigned cims hurry sooner.
-        // 3. After departure, optionally detach safe solo late passengers whose remaining path still contains that exact vehicle.
-        // 4. Optionally record delayed "what happened next?" samples for verbose diagnostics.
+        // 3. After planned departure time, optionally detach eligible solo late passengers
+        //    whose remaining path still contains that exact vehicle.
+        // 4. Optionally record delayed "what happened next" samples for verbose diagnostics.
         // 2048/day means every 128 simulation frames (~42 game seconds); cancellation work is also capped below.
         public const int UpdatesPerDay = 2048;
 
@@ -39,13 +40,17 @@ namespace BetterBoarding
         // Higher caps process large crowds faster but can create larger one-frame edits.
         private const int kMaxCancellationsPerUpdate = 128;
 
-        // Wait one boarding-assist interval after vanilla departure before trimming paths.
+        // Wait one boarding-assist interval after the planned departure frame before trimming paths.
+        // The vehicle can still be boarding then; rail decisions require station proximity checks.
         // This gives vanilla and other mods one extra assist interval to settle same-frame boarding edits.
         private const uint kLatePassengerCancelGraceFrames = 128u;
+        private const uint kRailFarPassengerCancelGraceFrames = 256u;
 
         private EntityQuery m_VehicleQuery;
         private readonly HashSet<Entity> m_PendingCancellation = new HashSet<Entity>();
         private readonly HashSet<Entity> m_CanceledPassengers = new HashSet<Entity>();
+        private readonly List<Entity> m_PassengerVehicles = new List<Entity>(8);
+        private readonly List<float3> m_CachedCarPositions = new List<float3>(8);
         private Game.Simulation.SimulationSystem? m_SimulationSystem;
 
         public override int GetUpdateInterval(SystemUpdatePhase phase)
@@ -208,6 +213,19 @@ namespace BetterBoarding
                     }
 
                     TransportType transportType = GetTransportType(vehicleEntity);
+                    bool isRail = transportType == TransportType.Train ||
+                        transportType == TransportType.Subway;
+                    bool isBusOrTram = transportType == TransportType.Bus ||
+                        transportType == TransportType.Tram;
+                    if (isRail &&
+                        EntityManager.HasComponent<Controller>(vehicleEntity) &&
+                        EntityManager.GetComponentData<Controller>(vehicleEntity).m_Controller != Entity.Null &&
+                        EntityManager.GetComponentData<Controller>(vehicleEntity).m_Controller != vehicleEntity)
+                    {
+                        // The consist controller handles every car once below.
+                        continue;
+                    }
+
                     uint latestDepartureFrame = GetLatestDepartureFrame(vehicleEntity, publicTransport);
 
                     if (cimsRunSoonerToCatchBuses)
@@ -242,121 +260,208 @@ namespace BetterBoarding
                     }
                     }
 
+                    // Only these modes have a verified stop/vehicle proximity rule. For
+                    // ports, ferries, airports and unknown modes, Ready only means that
+                    // boarding has finished; it cannot tell us a rider is far away.
+                    if (!isRail && !isBusOrTram)
+                    {
+                        continue;
+                    }
+
                     if (m_SimulationSystem == null ||
-                        !IsPastLateCancelGraceFrame(latestDepartureFrame, frame))
+                        !cancelLateBoarders ||
+                        !IsPastLateCancelGraceFrame(
+                            latestDepartureFrame,
+                            frame,
+                            isRail ? kRailFarPassengerCancelGraceFrames :
+                                kLatePassengerCancelGraceFrames))
                     {
-                        // Late-passenger cancellation waits a short grace after vanilla departure.
+                        // Late-passenger cancellation waits a short grace after planned departure.
                         continue;
                     }
 
-                    bool hasPassengerBuffer = EntityManager.HasBuffer<Passenger>(vehicleEntity);
-                    DynamicBuffer<Passenger> passengers = hasPassengerBuffer
-                        ? EntityManager.GetBuffer<Passenger>(vehicleEntity, isReadOnly: true)
-                        : default;
+                    // Resolve the stop only for the first viable late rider, then reuse
+                    // that controller's context and car positions for the rest of this pass.
+                    bool stopContextChecked = false;
+                    bool stopContextValid = false;
+                    LatePassengerProximityPolicy.StopContext stopContext = default;
+                    bool carsCached = false;
+                    bool carsValid = false;
+                    List<float3> carPositions = m_CachedCarPositions;
 
-                    if (!hasPassengerBuffer || passengers.Length == 0)
+                    List<Entity> passengerVehicles = m_PassengerVehicles;
+                    passengerVehicles.Clear();
+                    if (isRail && EntityManager.HasBuffer<LayoutElement>(vehicleEntity))
                     {
-                        continue;
+                        DynamicBuffer<LayoutElement> layout =
+                            EntityManager.GetBuffer<LayoutElement>(vehicleEntity, isReadOnly: true);
+                        for (int carIndex = 0; carIndex < layout.Length; carIndex++)
+                        {
+                            passengerVehicles.Add(layout[carIndex].m_Vehicle);
+                        }
+
+                        if (layout.Length == 0)
+                        {
+                            passengerVehicles.Add(vehicleEntity);
+                        }
+                    }
+                    else
+                    {
+                        passengerVehicles.Add(vehicleEntity);
                     }
 
-                    // Collect first, then mutate afterward, so the passenger buffer is not edited while scanned.
-                    // Reused managed sets avoid per-vehicle GC while staying simple for this main-thread pass.
-                    pendingCancellation.Clear();
-
-                    for (int i = 0; i < passengers.Length; i++)
+                    for (int vehicleIndex = 0; vehicleIndex < passengerVehicles.Count; vehicleIndex++)
                     {
-                        passengersScanned++;
-                        Entity passenger = passengers[i].m_Passenger;
-                        if (!EntityManager.Exists(passenger) ||
-                            EntityManager.HasComponent<Deleted>(passenger) ||
-                            EntityManager.HasComponent<Destroyed>(passenger) ||
-                            EntityManager.HasComponent<Temp>(passenger) ||
-                            EntityManager.HasComponent<Overridden>(passenger) ||
-                            !EntityManager.HasComponent<CurrentVehicle>(passenger))
+                        Entity assignedVehicle = passengerVehicles[vehicleIndex];
+                        if (!EntityManager.Exists(assignedVehicle))
                         {
                             continue;
                         }
 
-                        CurrentVehicle currentVehicle = EntityManager.GetComponentData<CurrentVehicle>(passenger);
-                        if (currentVehicle.m_Vehicle != vehicleEntity)
+                        bool hasPassengerBuffer = EntityManager.HasBuffer<Passenger>(assignedVehicle);
+                        DynamicBuffer<Passenger> passengers = hasPassengerBuffer
+                            ? EntityManager.GetBuffer<Passenger>(assignedVehicle, isReadOnly: true)
+                            : default;
+
+                        if (!hasPassengerBuffer || passengers.Length == 0)
                         {
                             continue;
                         }
 
-                        if ((currentVehicle.m_Flags & CreatureVehicleFlags.Ready) != 0)
-                        {
-                            continue;
-                        }
+                        // Collect first, then mutate afterward, so the passenger buffer is not edited while scanned.
+                        // Reused managed sets avoid per-vehicle GC while staying simple for this main-thread pass.
+                        pendingCancellation.Clear();
 
-                        if (IsGroupPassenger(passenger))
+                        for (int i = 0; i < passengers.Length; i++)
                         {
-                            continue;
-                        }
+                            passengersScanned++;
+                            Entity passenger = passengers[i].m_Passenger;
+                            if (!EntityManager.Exists(passenger) ||
+                                EntityManager.HasComponent<Deleted>(passenger) ||
+                                EntityManager.HasComponent<Destroyed>(passenger) ||
+                                EntityManager.HasComponent<Temp>(passenger) ||
+                                EntityManager.HasComponent<Overridden>(passenger) ||
+                                !EntityManager.HasComponent<CurrentVehicle>(passenger))
+                            {
+                                continue;
+                            }
 
-                        if (!cancelLateBoarders)
-                        {
-                            continue;
-                        }
+                            CurrentVehicle currentVehicle = EntityManager.GetComponentData<CurrentVehicle>(passenger);
+                            if (currentVehicle.m_Vehicle != assignedVehicle)
+                            {
+                                continue;
+                            }
 
-                        if (CanSafelyCancelPassenger(vehicleEntity, passenger))
-                        {
+                            if ((currentVehicle.m_Flags &
+                                (CreatureVehicleFlags.Ready | CreatureVehicleFlags.Entering)) != 0)
+                            {
+                                // Ready = boarding completed.
+                                // Entering = vanilla is actively completing boarding.
+                                // Better Boarding must never abandon either state.
+                                continue;
+                            }
+
+                            if (IsGroupPassenger(passenger))
+                            {
+                                continue;
+                            }
+
+                            if (!stopContextChecked)
+                            {
+                                stopContextChecked = true;
+                                stopContextValid =
+                                    LatePassengerProximityPolicy.TryCreateStopContext(
+                                        EntityManager,
+                                        vehicleEntity,
+                                        requireStationOwner: isRail,
+                                        out stopContext);
+                                carPositions.Clear();
+                            }
+
+                            if (!stopContextValid ||
+                                !LatePassengerProximityPolicy.IsClearlyFarWithCachedStop(
+                                    EntityManager,
+                                    vehicleEntity,
+                                    passenger,
+                                    stopContext,
+                                    isRail,
+                                    carPositions,
+                                    ref carsCached,
+                                    ref carsValid))
+                            {
+                                continue;
+                            }
+
+                            // Only inspect the remaining path after the inexpensive
+                            // physical proximity checks say this rider is clearly far away.
+                            if (!CanSafelyCancelPassenger(assignedVehicle, passenger))
+                            {
+                                continue;
+                            }
+    
+
                             pendingCancellation.Add(passenger);
                             candidates++;
                         }
-                    }
 
-                    int canceledForVehicle = 0;
-                    canceledPassengers.Clear();
-                    foreach (Entity passenger in pendingCancellation)
-                    {
-                        if (cancellationsThisUpdate >= kMaxCancellationsPerUpdate)
+                        int canceledForVehicle = 0;
+                        canceledPassengers.Clear();
+                        foreach (Entity passenger in pendingCancellation)
                         {
-                            // Spread very large crowds over multiple ticks instead of spiking one frame.
-                            break;
-                        }
-
-                        if (QueuePassengerCancellation(
-                                ref ecb,
-                                ref hasCommandBuffer,
-                                vehicleEntity,
-                                passenger))
-                        {
-                            canceledPassengers.Add(passenger);
-                            cancellationsThisUpdate++;
-                            canceledForVehicle++;
-
-                            if (sampledCanceledPassengerCount < kMaxSampledCimsPerUpdate &&
-                                TryCountCanceledSample(
-                                    transportType,
-                                    ref busSampleCount,
-                                    ref trainSampleCount,
-                                    ref tramSampleCount,
-                                    ref subwaySampleCount,
-                                    ref shipSampleCount,
-                                    ref ferrySampleCount,
-                                    ref airSampleCount))
+                            if (cancellationsThisUpdate >= kMaxCancellationsPerUpdate)
                             {
-                                // Keep a few entity IDs per mode for the on-demand troubleshooting report.
-                                sampledCanceledPassengers ??= new CanceledPassengerSample[kMaxSampledCimsPerUpdate];
-                                sampledCanceledPassengers[sampledCanceledPassengerCount++] =
-                                    new CanceledPassengerSample(transportType, vehicleEntity, passenger);
+                                // Spread very large crowds over multiple ticks instead of spiking one frame.
+                                break;
+                            }
+
+                            if (QueuePassengerCancellation(
+                                    ref ecb,
+                                    ref hasCommandBuffer,
+                                    assignedVehicle,
+                                    passenger))
+                            {
+                                canceledPassengers.Add(passenger);
+                                cancellationsThisUpdate++;
+                                canceledForVehicle++;
+
+                                if (sampledCanceledPassengerCount < kMaxSampledCimsPerUpdate &&
+                                    TryCountCanceledSample(
+                                        transportType,
+                                        ref busSampleCount,
+                                        ref trainSampleCount,
+                                        ref tramSampleCount,
+                                        ref subwaySampleCount,
+                                        ref shipSampleCount,
+                                        ref ferrySampleCount,
+                                        ref airSampleCount))
+                                {
+                                    // Keep a few entity IDs per mode for the on-demand troubleshooting report.
+                                    sampledCanceledPassengers ??= new CanceledPassengerSample[kMaxSampledCimsPerUpdate];
+                                    sampledCanceledPassengers[sampledCanceledPassengerCount++] =
+                                        new CanceledPassengerSample(transportType, assignedVehicle, passenger);
+                                }
                             }
                         }
-                    }
 
-                    if (canceledForVehicle > 0)
-                    {
-                        QueueVehiclePassengerBuffer(ref ecb, vehicleEntity, passengers, canceledPassengers);
-                        AccumulateCanceledCount(
-                            transportType,
-                            canceledForVehicle,
-                            ref busCanceled,
-                            ref trainCanceled,
-                            ref tramCanceled,
-                            ref subwayCanceled,
-                            ref shipCanceled,
-                            ref ferryCanceled,
-                            ref airCanceled);
+                        if (canceledForVehicle > 0)
+                        {
+                            QueueVehiclePassengerBuffer(ref ecb, assignedVehicle, passengers, canceledPassengers);
+                            AccumulateCanceledCount(
+                                transportType,
+                                canceledForVehicle,
+                                ref busCanceled,
+                                ref trainCanceled,
+                                ref tramCanceled,
+                                ref subwayCanceled,
+                                ref shipCanceled,
+                                ref ferryCanceled,
+                                ref airCanceled);
+                        }
+
+                        if (cancellationsThisUpdate >= kMaxCancellationsPerUpdate)
+                        {
+                            break;
+                        }
                     }
 
                     if (cancellationsThisUpdate >= kMaxCancellationsPerUpdate)

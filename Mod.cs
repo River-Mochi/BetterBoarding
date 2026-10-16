@@ -71,7 +71,8 @@ namespace BetterBoarding
 
             if (localizationManager == null)
             {
-                LogUtils.Warn("LocalizationManager is null; locale sources were not registered.");
+                LogUtils.Warn(
+                    "LocalizationManager is null; locale sources were not registered.");
             }
             else
             {
@@ -105,7 +106,9 @@ namespace BetterBoarding
             try
             {
                 AssetDatabase.global.LoadSettings(
-                    ModId, setting, new BBoardSettings(this));
+                    ModId,
+                    setting,
+                    new BBoardSettings(this));
 
                 // Keep saved values inside the current slider range.
                 setting.RepairLoadedValues();
@@ -147,14 +150,18 @@ namespace BetterBoarding
 #endif
 
                 // Retune once on load even if Options was never opened.
-                updateSystem.World.GetOrCreateSystemManaged<TransportStopTuningSystem>().Enabled = true;
+                updateSystem.World
+                    .GetOrCreateSystemManaged<TransportStopTuningSystem>()
+                    .Enabled = true;
 
                 // Start boarding assists in their saved ON/OFF state.
-                updateSystem.World.GetOrCreateSystemManaged<LateBoarderCancelSystem>().Enabled =
-                    BoardingRuntimeSettings.BoardingAssistEnabled;
+                updateSystem.World
+                    .GetOrCreateSystemManaged<LateBoarderCancelSystem>()
+                    .Enabled = BoardingRuntimeSettings.BoardingAssistEnabled;
 
-                updateSystem.World.GetOrCreateSystemManaged<LateGroupBoardingSystem>().Enabled =
-                    BoardingRuntimeSettings.CancelLateBoarders;
+                updateSystem.World
+                    .GetOrCreateSystemManaged<LateGroupBoardingSystem>()
+                    .Enabled = BoardingRuntimeSettings.CancelLateBoarders;
             }
             catch (Exception ex)
             {
@@ -166,8 +173,11 @@ namespace BetterBoarding
 
         public void OnDispose()
         {
-            Settings?.UnregisterInOptionsUI();
-            Settings = null;
+            if (Settings != null)
+            {
+                Settings.UnregisterInOptionsUI();
+                Settings = null;
+            }
         }
     }
 }

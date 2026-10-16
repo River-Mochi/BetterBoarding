@@ -12,22 +12,25 @@
 namespace BetterBoarding
 {
     using System;
+    using System.Collections.Generic;
     using CS2Shared.RiverMochi;
     using Game;
     using Game.Common;
     using Game.Creatures;
     using Game.Pathfind;
+    using Game.Prefabs;
     using Game.Simulation;
     using Game.Tools;
     using Game.Vehicles;
     using Unity.Collections;
     using Unity.Entities;
+    using Unity.Mathematics;
 
     /// <summary>
-    /// Handles the group/family cases deliberately excluded from the normal late-passenger pass.
+    /// Handles the group/family cases we exclude from the normal late-passenger pass.
     ///
-    /// If the leader is still outside, the leader is safely detached and vanilla cancels the
-    /// followers after observing that their leader no longer has CurrentVehicle. If the leader
+    /// If leader is still outside, the leader is safely detached and vanilla cancels the
+    /// followers after seeing their leader no longer has CurrentVehicle. If the leader
     /// has boarded, walking members are prompted to enter and assigned members receive vanilla's
     /// existing boarding-timeout nudge. ResidentAISystem or PetAISystem still performs every
     /// actual enter/finish transition and its bookkeeping.
@@ -47,6 +50,7 @@ namespace BetterBoarding
         private const int kMaxGroupsPerUpdate = 32;
 
         private EntityQuery m_VehicleQuery;
+        private readonly List<float3> m_CachedCarPositions = new List<float3>(8);
 
         private SimulationSystem? m_SimulationSystem;
 
@@ -80,7 +84,9 @@ namespace BetterBoarding
 
             EntityCommandBuffer ecb = default;
             bool hasCommandBuffer = false;
+#if DEBUG
             bool playedCommandBuffer = false;
+#endif
             int controllersScanned = 0;
             int candidateCount = 0;
             int groupsReleased = 0;
@@ -125,6 +131,14 @@ namespace BetterBoarding
 
                 candidateCount = candidates.Length;
 
+                Entity cachedController = Entity.Null;
+                TransportType cachedMode = TransportType.None;
+                bool stopContextValid = false;
+                LatePassengerProximityPolicy.StopContext stopContext = default;
+                bool carsCached = false;
+                bool carsValid = false;
+                List<float3> carPositions = m_CachedCarPositions;
+
                 for (int i = 0; i < candidates.Length; i++)
                 {
                     GroupCandidate candidate = candidates[i];
@@ -142,6 +156,45 @@ namespace BetterBoarding
                     // existing missing-leader path.
                     if (EntityManager.HasComponent<HumanCurrentLane>(candidate.Leader))
                     {
+                        if (candidate.ControllerVehicle != cachedController)
+                        {
+                            cachedController = candidate.ControllerVehicle;
+                            cachedMode = LatePassengerProximityPolicy.GetTransportType(
+                                EntityManager,
+                                cachedController);
+                            bool isRail = cachedMode == TransportType.Train ||
+                                cachedMode == TransportType.Subway;
+                            bool isBusOrTram = cachedMode == TransportType.Bus ||
+                                cachedMode == TransportType.Tram;
+                            stopContextValid = (isRail || isBusOrTram) &&
+                                LatePassengerProximityPolicy.TryCreateStopContext(
+                                    EntityManager,
+                                    cachedController,
+                                    requireStationOwner: isRail,
+                                    out stopContext);
+                            carPositions.Clear();
+                            carsCached = false;
+                            carsValid = false;
+                        }
+
+                        bool rail = cachedMode == TransportType.Train ||
+                            cachedMode == TransportType.Subway;
+                        if (!stopContextValid ||
+                            !LatePassengerProximityPolicy.IsClearlyFarWithCachedStop(
+                                EntityManager,
+                                candidate.ControllerVehicle,
+                                candidate.Leader,
+                                stopContext,
+                                rail,
+                                carPositions,
+                                ref carsCached,
+                                ref carsValid))
+                        {
+                            // Keep nearby and unmeasurable leaders assigned. Sea, air and
+                            // unknown modes have no verified proximity rule yet.
+                            continue;
+                        }
+
                         if (ContainsEntity(releasedLeaders, candidate.Leader))
                         {
                             continue;
@@ -193,7 +246,9 @@ namespace BetterBoarding
                     // Apply structural and buffer changes only after every live source buffer
                     // used by this pass has finished being read.
                     ecb.Playback(EntityManager);
+#if DEBUG
                     playedCommandBuffer = true;
+#endif
                 }
 
                 if (BoardingRuntimeSettings.EnableVerboseLogging &&
@@ -260,10 +315,10 @@ namespace BetterBoarding
             }
 
             uint departureFrame = publicTransport.m_DepartureFrame;
-            if (EntityManager.HasComponent<CargoTransport>(controllerVehicle))
+            if (EntityManager.HasComponent<Game.Vehicles.CargoTransport>(controllerVehicle))
             {
-                CargoTransport cargo =
-                    EntityManager.GetComponentData<CargoTransport>(controllerVehicle);
+                Game.Vehicles.CargoTransport cargo =
+                    EntityManager.GetComponentData<Game.Vehicles.CargoTransport>(controllerVehicle);
 
                 if (cargo.m_DepartureFrame > departureFrame)
                 {
@@ -271,9 +326,24 @@ namespace BetterBoarding
                 }
             }
 
-            return departureFrame != 0 &&
-                frame >= departureFrame &&
-                frame - departureFrame >= kLateGroupGraceFrames;
+            if (departureFrame == 0 ||
+                frame < departureFrame ||
+                frame - departureFrame < kLateGroupGraceFrames)
+            {
+                return false;
+            }
+
+            // Fail closed if a custom vehicle cannot be classified. Rail leaders are
+            // protected by the station-proximity gate; boarded leaders can still receive
+            // the family assist below.
+            if (!EntityManager.HasComponent<PrefabRef>(controllerVehicle))
+            {
+                return false;
+            }
+
+            Entity prefab =
+                EntityManager.GetComponentData<PrefabRef>(controllerVehicle).m_Prefab;
+            return EntityManager.HasComponent<PublicTransportVehicleData>(prefab);
         }
 
         private void CollectLateGroupCandidates(
@@ -386,7 +456,9 @@ namespace BetterBoarding
             Entity leader,
             Entity assignedVehicle)
         {
-            if (!EntityManager.HasComponent<Game.Creatures.Resident>(leader) ||
+
+            if (!EntityManager.HasComponent<CurrentVehicle>(leader) ||
+                !EntityManager.HasComponent<Game.Creatures.Resident>(leader) ||
                 !EntityManager.HasComponent<Human>(leader) ||
                 !EntityManager.HasComponent<PathOwner>(leader) ||
                 !EntityManager.HasBuffer<PathElement>(leader) ||
@@ -394,6 +466,17 @@ namespace BetterBoarding
             {
                 return false;
             }
+
+            CurrentVehicle currentVehicle =
+                EntityManager.GetComponentData<CurrentVehicle>(leader);
+
+            if (currentVehicle.m_Vehicle != assignedVehicle ||
+                (currentVehicle.m_Flags &
+                    (CreatureVehicleFlags.Ready | CreatureVehicleFlags.Entering)) != 0)
+            {
+                return false;
+            }
+
 
             PathOwner pathOwner = EntityManager.GetComponentData<PathOwner>(leader);
             DynamicBuffer<PathElement> pathElements =
