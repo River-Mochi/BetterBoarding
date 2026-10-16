@@ -55,27 +55,33 @@ namespace BetterBoarding
                 return
                     "<1x = vanilla>\n" +
                     extraLine +
-                    $"Higher values make {transitName} boarding and loading faster.\n" +
-                    "This shortens normal boarding time when passengers are getting on/off.\n" +
+                    $"Higher values make {transitName} boarding/loading faster.\n" +
+                    "This shortens normal time spent getting passengers on/off.\n" +
                     "<==========================>\n" +
-                    "Loading value:\n" +
                     "1x = 100% vanilla dwell\n" +
                     "2x = ~1/2 planned dwell\n" +
                     "3x = ~1/3 planned dwell (recommended)\n" +
                     "5x = ~1/5 planned dwell (max)";
             }
 
-            // One helper keeps all seven status tooltips in sync for future translations.
-            string StatusDescription(string transitName)
+            // One helper keeps the status tooltips consistent while explaining
+            // which modes Better Boarding can actually skip late passengers for.
+            string StatusDescription(string transitName, bool skipSupported)
             {
+                string skippedText = skipSupported
+                    ? "**Skipped** = late passengers skipped today so transit didn't keep waiting for them.\n" +
+                      "Better Boarding can do this much sooner than vanilla's ~10-minute stuck-vehicle fallback.\n" +
+                      $"Controlled by <{ToggleName}>.\n"
+                    : "**Skipped** = 0 for this mode. It keeps vanilla late-passenger handling.\n";
+
                 return
                     $"<Current {transitName} status>\n" +
-                    "**Waiting** = total passengers waiting right now.\n" +
-                    "**Avg** = average wait time for those passengers.\n" +
-                    "**Worst** stop = highest average wait at one stop.\n" +
-                    "Worst stops are good places to check for traffic, blocked/bugged stops, or too few vehicles.\n" +
-                    $"**Released today** = late passenger assignments released by <{ToggleName}>.\n" +
-                    "Use <Stats to Log> for a detailed report with stop names, entity IDs, and more.";
+                    "**Waiting** = passengers waiting now.\n" +
+                    "**Avg** = average wait.\n" +
+                    "**Worst** = highest average wait at one stop.\n" +
+                    "Check worst stops for traffic, blocked/bugged stops, or too few vehicles.\n" +
+                    skippedText +
+                    "Use <Stats to Log> for stop names, entity IDs, and more.";
             }
 
             return new Dictionary<string, string>
@@ -118,56 +124,56 @@ namespace BetterBoarding
                 // Late passenger behavior
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CancelLateBoarders)), ToggleName },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CancelLateBoarders)),
-                    "Helps buses, trams, trains, and subways leave when an assigned passenger is clearly too far away to board.\n" +
-                    "- Riders at or near the stop or station stay assigned and keep boarding.\n" +
-                    "- Train and subway riders on long platforms stay protected.\n" +
-                    "- Clearly distant riders may be released after the scheduled departure time and a short grace.\n" +
-                    "- Groups/families get extra protection so children and pets can finish boarding.\n" +
-                    "- Ships, ferries, and airplanes keep vanilla late-passenger handling.\n" +
-                    "Released cims stay in the city and continue or reroute their trip normally."
+                    "A late passenger who is too far from the stop can be skipped, so transit doesn't keep waiting.\n" +
+                    "Better Boarding can step in much sooner than vanilla's ~10-minute stuck-vehicle fallback.\n" +
+                    "- Riders at or near the stop/station stay assigned and keep boarding.\n" +
+                    "- Long train/subway platforms stay protected.\n" +
+                    "- Groups/families get extra protection.\n" +
+                    "- Skipped cims stay in the city; vanilla can continue or reroute their trip, often onto a later vehicle.\n" +
+                    "- Ships, ferries, and airplanes keep vanilla late-passenger handling."
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cims Run Sooner" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
-                    "Assigned cims start <running sooner> to help catch a bus, tram, train, or subway before it leaves.\n" +
-                    "- Helps on long platforms and while approaching a stop.\n" +
+                    "Assigned cims start <running sooner> to help catch transit before it leaves.\n" +
                     "- Starts up to about 3 in-game minutes earlier than vanilla.\n" +
-                    "- Only affects cims already assigned to a vehicle that is boarding.\n" +
-                    "- Does not teleport cims, force boarding, or change the departure time."
+                    "- Helps on long platforms and while approaching a stop.\n" +
+                    "- Only affects cims already assigned to a boarding vehicle.\n" +
+                    "- Does not teleport cims or change departure times."
                 },
 
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusOverview)), "Total usage" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusOverview)),
                     "Monthly public transit usage from the game's Transportation infoview.\n" +
-                    "Updated time shows when this status snapshot was taken (usually after entering Options menu)."
+                    "Updated = when this snapshot was taken."
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)), "Cims run earlier" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)),
-                    "If enabled [x], counts cims today that Better Boarding started **running sooner** to catch a bus, tram, train, or subway.\n" +
-                    "Run Sooner starts up to about 3 in-game minutes earlier than vanilla."
+                    "Counts cims today that Better Boarding started **running sooner**.\n" +
+                    "Up to about 3 in-game minutes earlier than vanilla."
                 },
 
                 // Status rows
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusBus)), "Bus" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusBus)), StatusDescription("bus") },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusBus)), StatusDescription("bus", skipSupported: true) },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusTram)), "Tram" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTram)), StatusDescription("tram") },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTram)), StatusDescription("tram", skipSupported: true) },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusTrain)), "Train" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTrain)), StatusDescription("train") },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTrain)), StatusDescription("train", skipSupported: true) },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusSubway)), "Subway" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusSubway)), StatusDescription("subway") },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusSubway)), StatusDescription("subway", skipSupported: true) },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusFerry)), "Ferry" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusFerry)), StatusDescription("ferry") },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusFerry)), StatusDescription("ferry", skipSupported: false) },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusShip)), "Ship" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusShip)), StatusDescription("ship") },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusShip)), StatusDescription("ship", skipSupported: false) },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusAir)), "Airplane" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusAir)), StatusDescription("airplane") },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusAir)), StatusDescription("airplane", skipSupported: false) },
 
                 // Status buttons
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatsToLog)), "Stats to Log" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatsToLog)),
                     "Writes a detailed one-time report to **BetterBoarding.log**.\n" +
-                    "Includes waiting totals, top 3 worst stops per mode, released rider examples, entity IDs, and line hints."
+                    "Includes waiting totals, top 3 worst stops, skipped late passenger examples, entity IDs, and line hints."
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.OpenLog)), "Open Log" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.OpenLog)),
@@ -187,14 +193,11 @@ namespace BetterBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.EnableVerboseLogging)), "Enable verbose logging" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.EnableVerboseLogging)),
                     "**Debug / Testing ONLY**\n" +
-                    "Recommended to KEEP OFF at all times unless you know what this is for.\n" +
+                    "Keep OFF for normal gameplay.\n" +
                     "Adds <live> details to <Logs/BetterBoarding.log> while the city runs.\n" +
-                    "**Do Not enable for normal gameplay.**\n" +
-                    "Leaving this on can decrease performance and create huge log files.\n" +
-                    "You can delete old log files later.\n" +
-                    "Note: <Stats to Log> writes a one-time snapshot and has little performance impact compared with Verbose logging.\n" +
-                    "Run verbose logging for 10-15 min if you need a timeline of what happened over time, but it creates a lot of data.\n" +
-                    "Important: Don't forget to turn **OFF** verbose again before normal gameplay."
+                    "Can reduce performance and create large log files.\n" +
+                    "Use for 10-15 min when troubleshooting, then turn it OFF again.\n" +
+                    "<Stats to Log> is a lighter one-time snapshot."
                 },
 
                 // Runtime status strings
@@ -203,7 +206,7 @@ namespace BetterBoarding
                 { WaitStatus.KeyNoStopsFound, "No stops found." },
 
                 { WaitStatus.KeyStatusLine, "{0} waiting | avg {1} | worst {2} | {3}" },
-                { WaitStatus.KeyStatusLateSkipped, "{0} released today" },
+                { WaitStatus.KeyStatusLateSkipped, "{0} late skipped" },
                 { WaitStatus.KeyStatusSkipOff, "skip OFF" },
 
                 { WaitStatus.KeyStatusOverviewLine, "{0} tourist/mo | {1} citizens/mo | updated {2}" },
@@ -217,14 +220,14 @@ namespace BetterBoarding
                 { WaitStatus.KeyReportNote, "Line hint comes from the highest-wait waypoint at that stop." },
                 { WaitStatus.KeyReportTesterHintsHeader, "Tester hints" },
                 { WaitStatus.KeyReportHintWorstStops, "Worst stops: inspect these first in-game or with Scene Explorer mod (find locations with entity ID). Look for traffic, bad transit stop location, or a bugged stop." },
-                { WaitStatus.KeyReportHintSkippedCims, "Released solo assignments: each count is one vehicle assignment released after the distance check. Use the follow-up examples to see what happened next." },
+                { WaitStatus.KeyReportHintSkippedCims, "Skipped late passengers: riders too far away after departure, so Better Boarding stopped that vehicle from waiting for them. Follow-up examples show what happened next." },
                 { WaitStatus.KeyReportHintLateGroups, "Group boarding: shows families/groups still incomplete when this report is taken. Better Boarding gives them extra grace and helps lagging members finish boarding." },
                 { WaitStatus.KeyReportFamilyHeader, "{0}" },
                 { WaitStatus.KeyReportServedStops, "Served stops: {0}" },
                 { WaitStatus.KeyReportStopsWithWaiting, "Stops with waiting passengers: {0}" },
                 { WaitStatus.KeyReportWaitingPassengers, "Waiting passengers: {0}" },
                 { WaitStatus.KeyReportAverageWait, "Average wait: {0}" },
-                { WaitStatus.KeyReportLateBoardersSkipped, "Solo assignments released today: {0}" },
+                { WaitStatus.KeyReportLateBoardersSkipped, "Late passengers skipped today: {0}" },
                 { WaitStatus.KeyReportWorstStopNone, "Worst stop: none, no waiting passengers right now." },
                 { WaitStatus.KeyReportWorstStopAverageWait, "Worst stop avg wait: {0}" },
                 { WaitStatus.KeyReportWorstStopName, "Worst stop name: {0}" },
@@ -236,7 +239,7 @@ namespace BetterBoarding
                 { WaitStatus.KeyReportTopWorstStopsHeader, "Top {0} worst stops by average wait:" },
                 { WaitStatus.KeyReportTopWorstStopLine, "{0}. {1} | avg {2} | waiting {3} | stop entity {4} | waypoint entity {5} | line entity {6} | line hint {7}" },
                 { WaitStatus.KeyReportLateGroups, "Group boarding incomplete now: {0} passengers in {1} groups on {2} vehicles" },
-                { WaitStatus.KeyReportLastSkippedSamplesHeader, "Released solo rider examples" },
+                { WaitStatus.KeyReportLastSkippedSamplesHeader, "Skipped late passenger examples" },
                 { WaitStatus.KeyReportLastSkippedSampleLine, "{0}. {1} | passenger {2} | missed vehicle {3} | time {4} | now {5}" },
                 { WaitStatus.KeyReportNone, "none" },
                 { WaitStatus.KeyReportUnknown, "(unknown)" },
