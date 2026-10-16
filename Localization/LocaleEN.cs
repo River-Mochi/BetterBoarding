@@ -123,7 +123,7 @@ namespace BetterBoarding
                     "- Train and subway riders already in or near the station keep boarding; only riders clearly far from both the stop and every car may be released early.\n" +
                     "- Groups/families get a little extra grace. A bus, tram, train, or subway leader at the stop stays assigned; a clearly distant leader may be released with the group.\n" +
                     "- If the leader is already aboard, lagging child/pet members receive a vanilla boarding nudge so one straggler is less likely to hold the vehicle.\n" +
-                    "- Ships and airplanes are not skipped early. Released citizens are not deleted; vanilla may continue or reroute their trips."
+                    "- Ships and airplanes are not skipped early. Released citizens are not deleted; vanilla may continue or reroute their trips naturally."
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cims Run Sooner (see tooltip, 3rd panel)" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
@@ -191,7 +191,7 @@ namespace BetterBoarding
                     "**Do Not enable for normal gameplay.**\n" +
                     "Leaving this on can decrease performance and create huge log files.\n" +
                     "You can delete old log files later.\n" +
-                    "Note: <Stats to Log> is right-now report with today's late-skip counters; it does not have the performance impact of Verbose logging.\n" +
+                    "Note: <Stats to Log> is right-now report with today's late-skip counters; it does not have heavy performance impact of Verbose logging.\n" +
                     "Run verbose logging for 10-15 min if you want a timeline of what happened over time, but it's a lot of data.\n" +
                     "Important: Don't forget to turn **OFF** verbose again before normal gameplay."
                 },
