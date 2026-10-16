@@ -47,23 +47,29 @@ namespace BetterBoarding
                     $"ค่าสูงขึ้นทำให้การขึ้นลงที่ {transitName} เร็วขึ้น\n" +
                     "ช่วยลดเวลาจอดปกติระหว่างผู้โดยสารขึ้นลง\n" +
                     "<==========================>\n" +
-                    "ค่าการขึ้นลง:\n" +
                     "1x = เวลาจอด vanilla 100%\n" +
                     "2x = ~1/2 ของเวลาที่กำหนด\n" +
                     "3x = ~1/3 (แนะนำ)\n" +
                     "5x = ~1/5 (สูงสุด)";
             }
 
-            // One helper keeps all seven status tooltips in sync for future translations.
-            string StatusDescription(string transitName)
+            // One helper keeps the status tooltips consistent while explaining
+            // which modes Better Boarding can actually skip late passengers for.
+            string StatusDescription(string transitName, bool skipSupported)
             {
+                string skippedText = skipSupported
+                    ? "**ข้าม** = วันนี้ข้ามผู้โดยสารที่มาช้า เพื่อไม่ให้รถต้องรอต่อ\n" +
+                      "Better Boarding ช่วยได้เร็วกว่าระบบแก้รถค้างของ vanilla ที่รอราว 10 นาทีมาก\n" +
+                      $"ควบคุมด้วย <{ToggleName}>\n"
+                    : "**ข้าม** = 0 สำหรับโหมดนี้ ยังใช้การจัดการผู้โดยสารมาช้าของ vanilla\n";
+
                 return
                     $"<สถานะ {transitName} ตอนนี้>\n" +
                     "**รอ** = จำนวนผู้โดยสารที่กำลังรอ\n" +
                     "**เฉลี่ย** = เวลารอเฉลี่ย\n" +
                     "**แย่สุด** = เวลารอเฉลี่ยสูงสุดของหนึ่งป้าย\n" +
                     "ถ้าสูง ให้ตรวจรถติด ป้ายติด/บั๊ก หรือจำนวนรถไม่พอ\n" +
-                    $"**ปล่อยวันนี้** = งานโดยสารที่มาช้าซึ่ง <{ToggleName}> ปล่อยแล้ว\n" +
+                    skippedText +
                     "ใช้ <สถิติลง Log> เพื่อดูชื่อป้าย Entity ID และรายละเอียดเพิ่ม";
             }
 
@@ -107,56 +113,56 @@ namespace BetterBoarding
                 // Late passenger behavior
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CancelLateBoarders)), ToggleName },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CancelLateBoarders)),
-                    "ช่วยให้รถบัส รถราง รถไฟ และรถไฟใต้ดินออกได้ เมื่อผู้โดยสารที่ถูกกำหนดอยู่ไกลเกินกว่าจะขึ้นรถอย่างชัดเจน\n" +
-                    "- ผู้โดยสารที่อยู่ในหรือใกล้ป้าย/สถานียังถูกกำหนดไว้และขึ้นรถต่อ\n" +
-                    "- ผู้โดยสารบนชานชาลารถไฟและรถไฟใต้ดินยาว ๆ จะไม่ถูกปล่อย\n" +
-                    "- ผู้โดยสารที่อยู่ไกลอย่างชัดเจนอาจถูกปล่อยหลังเวลาออกตามตารางและช่วงผ่อนผันสั้น ๆ\n" +
-                    "- กลุ่ม/ครอบครัวได้รับการป้องกันเพิ่ม เพื่อให้เด็กและสัตว์เลี้ยงขึ้นรถได้ครบ\n" +
-                    "- เรือ เฟอร์รี และเครื่องบินยังใช้การจัดการผู้โดยสารมาช้าของ vanilla\n" +
-                    "Cim ที่ถูกปล่อยยังอยู่ในเมืองและเดินทางต่อหรือหาเส้นทางใหม่ตามปกติ"
+                    "ผู้โดยสารที่มาช้าและอยู่ไกลป้ายเกินไปจะถูกข้ามได้ เพื่อไม่ให้รถต้องรอต่อ\n" +
+                    "Better Boarding ช่วยได้เร็วกว่าระบบแก้รถค้างของ vanilla ที่รอราว 10 นาทีมาก\n" +
+                    "- ผู้โดยสารที่อยู่ตรงหรือใกล้ป้าย/สถานียังถูกกำหนดไว้และขึ้นรถต่อ\n" +
+                    "- ชานชาลารถไฟ/รถไฟใต้ดินยาวยังได้รับการป้องกัน\n" +
+                    "- กลุ่ม/ครอบครัวได้รับการป้องกันเพิ่ม\n" +
+                    "- Cim ที่ถูกข้ามยังอยู่ในเมือง; vanilla สามารถให้เดินทางต่อหรือจัดเส้นทางใหม่ มักขึ้นรถคันหลังได้\n" +
+                    "- เรือ เรือเฟอร์รี่ และเครื่องบินยังใช้การจัดการผู้โดยสารมาช้าของ vanilla"
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "ให้ Cim วิ่งเร็วขึ้น" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
-                    "Cim ที่ถูกกำหนดแล้วจะเริ่ม <วิ่งเร็วขึ้น> เพื่อให้ทันรถบัส รถราง รถไฟ หรือรถไฟใต้ดินก่อนออก\n" +
-                    "- ช่วยบนชานชาลายาวและตอนกำลังเข้าหาป้าย\n" +
+                    "Cim ที่ถูกกำหนดแล้วจะ <เริ่มวิ่งเร็วขึ้น> เพื่อให้ทันรถก่อนออก\n" +
                     "- เริ่มได้เร็วกว่า vanilla สูงสุดประมาณ 3 นาทีในเกม\n" +
+                    "- ช่วยบนชานชาลายาวและตอนกำลังเข้าใกล้ป้าย\n" +
                     "- มีผลเฉพาะ Cim ที่ถูกกำหนดให้รถที่กำลังรับผู้โดยสารแล้ว\n" +
-                    "- ไม่วาร์ป ไม่บังคับขึ้นรถ และไม่เปลี่ยนเวลาออก"
+                    "- ไม่วาร์ป Cim และไม่เปลี่ยนเวลาออก"
                 },
 
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusOverview)), "การใช้งานรวม" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusOverview)),
                     "จำนวนใช้ขนส่งสาธารณะต่อเดือนจากมุมมอง Transportation ของเกม\n" +
-                    "เวลาอัปเดตคือเวลาที่เก็บสถานะนี้ (ปกติเมื่อเปิด Options)"
+                    "อัปเดต = เวลาที่เก็บสถานะนี้"
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)), "Cim วิ่งเร็วขึ้น" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)),
-                    "เมื่อเปิด [x] จะนับ Cim วันนี้ที่ Better Boarding ให้ **เริ่มวิ่งเร็วขึ้น** เพื่อให้ทันรถบัส รถราง รถไฟ หรือรถไฟใต้ดิน\n" +
-                    "Run Sooner เริ่มได้เร็วกว่า vanilla สูงสุดประมาณ 3 นาทีในเกม"
+                    "นับ Cim วันนี้ที่ Better Boarding ทำให้ **เริ่มวิ่งเร็วขึ้น**\n" +
+                    "เร็วกว่า vanilla ได้สูงสุดประมาณ 3 นาทีในเกม"
                 },
 
                 // Status rows
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusBus)), "รถบัส" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusBus)), StatusDescription("รถบัส") },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusBus)), StatusDescription("รถบัส", skipSupported: true) },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusTram)), "รถราง" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTram)), StatusDescription("รถราง") },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTram)), StatusDescription("รถราง", skipSupported: true) },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusTrain)), "รถไฟ" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTrain)), StatusDescription("รถไฟ") },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTrain)), StatusDescription("รถไฟ", skipSupported: true) },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusSubway)), "รถไฟใต้ดิน" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusSubway)), StatusDescription("รถไฟใต้ดิน") },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusSubway)), StatusDescription("รถไฟใต้ดิน", skipSupported: true) },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusFerry)), "เฟอร์รี" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusFerry)), StatusDescription("เฟอร์รี") },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusFerry)), StatusDescription("เฟอร์รี", skipSupported: false) },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusShip)), "เรือ" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusShip)), StatusDescription("เรือ") },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusShip)), StatusDescription("เรือ", skipSupported: false) },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusAir)), "เครื่องบิน" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusAir)), StatusDescription("เครื่องบิน") },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusAir)), StatusDescription("เครื่องบิน", skipSupported: false) },
 
                 // Status buttons
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatsToLog)), "สถิติลง Log" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatsToLog)),
                     "เขียนรายงานละเอียดหนึ่งครั้งลง **BetterBoarding.log**\n" +
-                    "มีจำนวนรอ 3 ป้ายแย่สุดต่อประเภท ตัวอย่างผู้โดยสารที่ถูกปล่อย Entity ID และข้อมูลสาย"
+                    "รวมยอดผู้โดยสารรอ ป้ายแย่สุด 3 จุด ตัวอย่างผู้โดยสารมาช้าที่ถูกข้าม Entity ID และข้อมูลสาย"
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.OpenLog)), "เปิด Log" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.OpenLog)),
@@ -175,15 +181,12 @@ namespace BetterBoarding
                 // Debug
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.EnableVerboseLogging)), "เปิดบันทึกละเอียด" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.EnableVerboseLogging)),
-                    "**สำหรับดีบัก / ทดสอบเท่านั้น**\n" +
-                    "ปกติให้ **ปิด** ไว้\n" +
-                    "เพิ่มรายละเอียด <live> ลง <Logs/BetterBoarding.log> ขณะเมืองทำงาน\n" +
-                    "**อย่าเปิดระหว่างเล่นปกติ**\n" +
-                    "อาจลดประสิทธิภาพและสร้างไฟล์ log ใหญ่มาก\n" +
-                    "ลบ log เก่าได้ภายหลัง\n" +
-                    "<สถิติลง Log> เขียน snapshot ครั้งเดียวและกระทบประสิทธิภาพน้อยกว่าบันทึกละเอียด\n" +
-                    "เปิด 10-15 นาทีเมื่อจำเป็นต้องดูเหตุการณ์ตามเวลา เพราะจะสร้างข้อมูลจำนวนมาก\n" +
-                    "ก่อนเล่นปกติให้ **ปิด** อีกครั้ง"
+                    "**สำหรับ Debug / ทดสอบเท่านั้น**\n" +
+                    "ปิดไว้ในการเล่นปกติ\n" +
+                    "เพิ่มรายละเอียด <สด> ลง <Logs/BetterBoarding.log> ขณะเมืองทำงาน\n" +
+                    "อาจลดประสิทธิภาพและสร้างไฟล์ log ขนาดใหญ่\n" +
+                    "ใช้ 10-15 นาทีตอนตรวจปัญหา แล้วปิดอีกครั้ง\n" +
+                    "<สถิติลง Log> เป็น snapshot ครั้งเดียวที่เบากว่า"
                 },
 
                 // Runtime status strings
@@ -192,7 +195,7 @@ namespace BetterBoarding
                 { WaitStatus.KeyNoStopsFound, "ไม่พบป้าย" },
 
                 { WaitStatus.KeyStatusLine, "รอ {0} | เฉลี่ย {1} | แย่ {2} | {3}" },
-                { WaitStatus.KeyStatusLateSkipped, "ปล่อยวันนี้ {0}" },
+                { WaitStatus.KeyStatusLateSkipped, "ข้ามผู้โดยสารมาช้า {0}" },
                 { WaitStatus.KeyStatusSkipOff, "ไม่รอ OFF" },
 
                 { WaitStatus.KeyStatusOverviewLine, "นักท่องเที่ยว {0}/ด. | พลเมือง {1}/ด. | {2}" },
@@ -206,14 +209,14 @@ namespace BetterBoarding
                 { WaitStatus.KeyReportNote, "ข้อมูลสายมาจาก waypoint ที่มีเวลารอสูงสุดของป้ายนั้น" },
                 { WaitStatus.KeyReportTesterHintsHeader, "คำแนะนำทดสอบ" },
                 { WaitStatus.KeyReportHintWorstStops, "ป้ายแย่สุด: ตรวจในเกมหรือ Scene Explorer ก่อน (หาตำแหน่งจาก Entity ID) ตรวจรถติด ตำแหน่งป้าย หรือป้ายที่มีบั๊ก" },
-                { WaitStatus.KeyReportHintSkippedCims, "งานโดยสารเดี่ยวที่ปล่อย: ทุกจำนวนคือการปล่อยการกำหนดรถ 1 ครั้งหลังตรวจระยะทาง ดูตัวอย่างติดตามเพื่อดูว่าเกิดอะไรต่อ" },
+                { WaitStatus.KeyReportHintSkippedCims, "ผู้โดยสารมาช้าที่ถูกข้าม: หลังเวลาออกยังอยู่ไกลเกินไป Better Boarding จึงไม่ให้รถต้องรอต่อ ดูตัวอย่างติดตามเพื่อดูว่าเกิดอะไรต่อ" },
                 { WaitStatus.KeyReportHintLateGroups, "การขึ้นรถของกลุ่ม: แสดงครอบครัว/กลุ่มที่ยังขึ้นไม่ครบตอนสร้างรายงาน Better Boarding ให้เวลาพิเศษและช่วยสมาชิกที่ช้าขึ้นรถให้เสร็จ" },
                 { WaitStatus.KeyReportFamilyHeader, "{0}" },
                 { WaitStatus.KeyReportServedStops, "ป้ายที่ให้บริการ: {0}" },
                 { WaitStatus.KeyReportStopsWithWaiting, "ป้ายที่มีผู้โดยสารรอ: {0}" },
                 { WaitStatus.KeyReportWaitingPassengers, "ผู้โดยสารรอ: {0}" },
                 { WaitStatus.KeyReportAverageWait, "เวลารอเฉลี่ย: {0}" },
-                { WaitStatus.KeyReportLateBoardersSkipped, "งานโดยสารเดี่ยวที่ปล่อยวันนี้: {0}" },
+                { WaitStatus.KeyReportLateBoardersSkipped, "ผู้โดยสารมาช้าที่ถูกข้ามวันนี้: {0}" },
                 { WaitStatus.KeyReportWorstStopNone, "ป้ายแย่สุด: ไม่มี ตอนนี้ไม่มีผู้โดยสารรอ" },
                 { WaitStatus.KeyReportWorstStopAverageWait, "เวลารอเฉลี่ยป้ายแย่สุด: {0}" },
                 { WaitStatus.KeyReportWorstStopName, "ชื่อป้ายแย่สุด: {0}" },
@@ -225,7 +228,7 @@ namespace BetterBoarding
                 { WaitStatus.KeyReportTopWorstStopsHeader, "{0} ป้ายแย่สุดตามเวลารอเฉลี่ย:" },
                 { WaitStatus.KeyReportTopWorstStopLine, "{0}. {1} | เฉลี่ย {2} | รอ {3} | ป้าย {4} | waypoint {5} | สาย {6} | ข้อมูล {7}" },
                 { WaitStatus.KeyReportLateGroups, "กลุ่มขึ้นรถยังไม่ครบ: ผู้โดยสาร {0} ใน {1} กลุ่ม บน {2} คัน" },
-                { WaitStatus.KeyReportLastSkippedSamplesHeader, "ตัวอย่างผู้โดยสารเดี่ยวที่ถูกปล่อย" },
+                { WaitStatus.KeyReportLastSkippedSamplesHeader, "ตัวอย่างผู้โดยสารมาช้าที่ถูกข้าม" },
                 { WaitStatus.KeyReportLastSkippedSampleLine, "{0}. {1} | ผู้โดยสาร {2} | รถที่พลาด {3} | เวลา {4} | ตอนนี้ {5}" },
                 { WaitStatus.KeyReportNone, "ไม่มี" },
                 { WaitStatus.KeyReportUnknown, "(ไม่ทราบ)" },
