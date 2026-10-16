@@ -25,7 +25,7 @@ using Game.Vehicles;
 using Unity.Collections;
 using Unity.Entities;
 
-    public sealed partial class TransitWaitStatusSystem
+    public partial class TransitWaitStatusSystem
     {
         private const int kMaxReportedRailVehicles = 20;
         private const int kMaxReportedRidersPerVehicle = 5;
