@@ -21,55 +21,50 @@ namespace BetterBoarding
     {
         private readonly BBoardSettings m_Setting;
 
-        /// <summary>
-        /// Constructs the Polish locale.
-        /// </summary>
-        /// <param name="setting">Settings object used for locale IDs.</param>
         public LocalePL(BBoardSettings setting)
         {
             m_Setting = setting;
         }
 
-        /// <summary>
-        /// Creates all Polish localization entries for this mod.
-        /// </summary>
         public IEnumerable<KeyValuePair<string, string>> ReadEntries(
             IList<IDictionaryEntryError> errors,
             Dictionary<string, int> indexCounts)
         {
             string title = Mod.ModName;
 
+            if (!string.IsNullOrEmpty(Mod.ModVersion))
+            {
+                title = title + " (" + Mod.ModVersion + ")";
+            }
+
             const string ToggleName = "Pomiń spóźnionych pasażerów";
 
-            string SpeedDescription(string transitName, string shortName, string extraLine)
+            string SpeedDescription(string transitName, string extraLine)
             {
                 return
                     "<1x = vanilla>\n" +
                     extraLine +
-                    $"Wyższe wartości skracają czas wsiadania i załadunku na {transitName}.\n" +
-                    "Pomaga to szybciej rozładować zwykłe kolejki, ale spóźniony pasażer nadal może opóźnić odjazd przez mechanikę vanilla.\n" +
-                    $"Użyj [✓] <{ToggleName}>, jeśli spóźnieni cims mają móc przegapić pojazd po czasie odjazdu.\n" +
-                    "Pominięci spóźnieni mieszkańcy nie są usuwani; vanilla naturalnie wyznaczy im dalszą trasę.\n" +
+                    $"Wyższe wartości przyspieszają wsiadanie i wysiadanie na {transitName}.\n" +
+                    "Skraca to normalny czas postoju podczas wymiany pasażerów.\n" +
                     "<==========================>\n" +
-                    "Wartość ładowania:\n" +
-                    "1x = 100% postoju vanilla\n" +
+                    "Wartość obsługi:\n" +
+                    "1x = 100% czasu vanilla\n" +
                     "2x = ~1/2 planowanego postoju\n" +
                     "3x = ~1/3 planowanego postoju (zalecane)\n" +
-                    "5x = ~1/5 planowanego postoju (maks.)\n" +
-                    $"To nie to samo co <{ToggleName}>; ten checkbox decyduje, czy spóźnieni cims mogą przegapić {shortName} po czasie odjazdu.";
+                    "5x = ~1/5 planowanego postoju (maks.)";
             }
 
             // One helper keeps all seven status tooltips in sync for future translations.
             string StatusDescription(string transitName)
             {
                 return
-                    $"<Aktualny status {transitName}>\n" +
-                    "**Czeka** = łączna liczba pasażerów czekających teraz.\n" +
-                    "**Śr.** = średni czas oczekiwania tych pasażerów.\n" +
-                    "**Najgorszy** przystanek = najwyższy średni czas oczekiwania na jednym przystanku.\n" +
-                    "Najgorsze przystanki warto sprawdzić pod kątem wypadków, zablokowanych/zbugowanych przystanków lub zbyt małej liczby pojazdów.\n" +
-                    $"**Spóźnieni dziś** = spóźnieni pasażerowie solo pominięci dziś przez <{ToggleName}>.\n" +
-                    "Użyj <Statystyki do logu>, aby zapisać szczegółowy raport: nazwy przystanków, ID encji i więcej.";
+                    $"<Bieżący stan: {transitName}>\n" +
+                    "**Czeka** = liczba pasażerów czekających teraz.\n" +
+                    "**Śr.** = średni czas oczekiwania.\n" +
+                    "**Najg.** = najwyższa średnia na jednym przystanku.\n" +
+                    "Przy wysokiej wartości sprawdź korki, zablokowany/błędny przystanek lub za mało pojazdów.\n" +
+                    $"**Zwolniono dziś** = spóźnione przydziały zwolnione przez <{ToggleName}>.\n" +
+                    "<Statystyki do logu> pokazują nazwy przystanków, ID encji i więcej szczegółów.";
             }
 
             return new Dictionary<string, string>
@@ -79,161 +74,159 @@ namespace BetterBoarding
 
                 // Tabs
                 { m_Setting.GetOptionTabLocaleID(BBoardSettings.ActionsTab), "Akcje" },
-                { m_Setting.GetOptionTabLocaleID(BBoardSettings.AboutTab), "Informacje" },
+                { m_Setting.GetOptionTabLocaleID(BBoardSettings.AboutTab), "O modzie" },
 
                 // Groups
                 { m_Setting.GetOptionGroupLocaleID(BBoardSettings.SpeedGroup), "Szybkość wsiadania" },
                 { m_Setting.GetOptionGroupLocaleID(BBoardSettings.BehaviorGroup), "Zachowanie" },
-                { m_Setting.GetOptionGroupLocaleID(BBoardSettings.StatusGroup), "Status" },
+                { m_Setting.GetOptionGroupLocaleID(BBoardSettings.StatusGroup), "Stan" },
                 { m_Setting.GetOptionGroupLocaleID(BBoardSettings.AboutInfoGroup), "Info o modzie" },
                 { m_Setting.GetOptionGroupLocaleID(BBoardSettings.AboutLinksGroup), "Linki" },
                 { m_Setting.GetOptionGroupLocaleID(BBoardSettings.DebugGroup), "Debug" },
 
                 // Boarding speed sliders
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.BusBoardingSpeedFactor)), "Szybkość autobusów" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.BusBoardingSpeedFactor)), "Wsiadanie do autobusu" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.BusBoardingSpeedFactor)),
                     SpeedDescription(
                         "przystankach autobusowych",
-                        "autobus",
                         string.Empty)
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.RailBoardingSpeedFactor)), "Szybkość kolei" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.RailBoardingSpeedFactor)), "Wsiadanie kolejowe" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.RailBoardingSpeedFactor)),
                     SpeedDescription(
-                        "przystankach pociągów, tramwajów i metra",
-                        "pojazd",
-                        "Dotyczy przystanków pociągów, tramwajów i metra.\n")
+                        "przystankach pociągu, tramwaju i metra",
+                        "Dotyczy pociągów, tramwajów i metra.\n")
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)), "Szybkość samolotów" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)), "Wsiadanie do samolotu" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)),
                     SpeedDescription(
-                        "terminalach samolotów",
-                        "samolot",
-                        "Dotyczy terminali samolotów pasażerskich.\n")
+                        "terminalach lotniczych",
+                        "Dotyczy terminali pasażerskich samolotów.\n")
                 },
 
                 // Late passenger behavior
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CancelLateBoarders)), ToggleName },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CancelLateBoarders)),
-                    "<Spóźnieni pasażerowie>, którzy po <czasie odjazdu> nadal są <niegotowi>, mogą przegapić pojazd.\n" +
-                    "- Spóźnieni pasażerowie podróżujący solo są zwalniani po krótkiej chwili, aby transport mógł odjechać.\n" +
-                    "- Grupy/rodziny dostają trochę więcej czasu. Jeśli lider nadal jest na zewnątrz, vanilla anuluje wejście grupy i zwalnia wszystkich razem.\n" +
-                    "- Jeśli lider jest już w pojeździe, Better Boarding pozwala vanilla dokończyć wejście spóźnionych dzieci/zwierząt, aby jedna osoba nie blokowała pojazdu aż do długiego timeoutu vanilla.\n" +
-                    "- Pominięci spóźnieni mieszkańcy nie są usuwani; vanilla może naturalnie kontynuować lub wyznaczyć im nową trasę."
+                    "Pomaga autobusom, tramwajom, pociągom i metru odjechać, gdy przypisany pasażer jest wyraźnie za daleko, by wsiąść.\n" +
+                    "- Pasażerowie na przystanku/stacji lub blisko niego pozostają przypisani i dalej wsiadają.\n" +
+                    "- Pasażerowie na długich peronach pociągu i metra są chronieni.\n" +
+                    "- Wyraźnie odległy pasażer może zostać zwolniony po planowanej godzinie odjazdu i krótkim zapasie.\n" +
+                    "- Grupy/rodziny mają dodatkową ochronę, aby dzieci i zwierzęta mogły dokończyć wsiadanie.\n" +
+                    "- Statki, promy i samoloty zachowują vanilla obsługę spóźnionych pasażerów.\n" +
+                    "Zwolnione cimy zostają w mieście i normalnie kontynuują lub wyznaczają ponownie trasę."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cimy biegną wcześniej (patrz opis, 3. panel)" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cimy biegną wcześniej" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
-                    "Obywatele, którzy są <spóźnieni>, zaczynają <biec wcześniej>, aby zdążyć **przed** czasem odjazdu.\n" +
-                    "- Działa dla autobusów, tramwajów, pociągów i metra, szczególnie na długich peronach.\n" +
-                    "- Dotyczy tylko cimów już przypisanych do pojazdu, który aktualnie wpuszcza pasażerów.\n" +
-                    "- Vanilla każe cimom biec dopiero w chwili odjazdu, co może być za późno.\n" +
-                    $"- Dobrze działa z <{ToggleName}>, bo może zmniejszyć liczbę cimów, które przegapią pojazd i muszą zostać przypisane ponownie.\n" +
-                    "- Nie zmienia czasu odjazdu, nie wymusza wejścia ani nie teleportuje obywateli."
+                    "Przypisane cimy zaczynają <biec wcześniej>, aby zdążyć na autobus, tramwaj, pociąg lub metro przed odjazdem.\n" +
+                    "- Pomaga na długich peronach i podczas dojścia do przystanku.\n" +
+                    "- Zaczyna do ok. 3 minut w grze wcześniej niż vanilla.\n" +
+                    "- Dotyczy tylko cimów już przypisanych do pojazdu, który właśnie przyjmuje pasażerów.\n" +
+                    "- Nie teleportuje, nie wymusza wejścia i nie zmienia czasu odjazdu."
                 },
 
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusOverview)), "Łączne użycie" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusOverview)),
-                    "Miesięczne użycie transportu publicznego z widoku informacji Transport w grze.\n" +
-                    "Czas aktualizacji pokazuje, kiedy wykonano ten status (zwykle po wejściu do menu Opcje)."
+                    "Miesięczne użycie transportu publicznego z widoku Transport w grze.\n" +
+                    "Czas aktualizacji pokazuje, kiedy zrobiono ten odczyt (zwykle po wejściu do Opcji)."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)), "Cimy biegną wcześniej" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)), "Cimy wcześniej" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)),
-                    "Gdy włączone [x], liczy wszystkie cimy (dzisiaj), które zaczęły **biec wcześniej**, aby złapać autobus, tramwaj, pociąg lub metro przed odjazdem.\n" +
-                    "Cimy biegną 512 klatek wcześniej niż w vanilla (~2-8 sekund wcześniej w czasie rzeczywistym, ~2 minuty w grze)."
+                    "Gdy włączone [x], liczy dzisiejsze cimy, którym Better Boarding włączył **wcześniejszy bieg** do autobusu, tramwaju, pociągu lub metra.\n" +
+                    "Run Sooner zaczyna do ok. 3 minut w grze wcześniej niż vanilla."
                 },
 
                 // Status rows
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusBus)), "Autobus" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusBus)), StatusDescription("autobusu") },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusBus)), StatusDescription("autobus") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusTram)), "Tramwaj" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTram)), StatusDescription("tramwaju") },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTram)), StatusDescription("tramwaj") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusTrain)), "Pociąg" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTrain)), StatusDescription("pociągu") },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTrain)), StatusDescription("pociąg") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusSubway)), "Metro" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusSubway)), StatusDescription("metra") },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusSubway)), StatusDescription("metro") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusFerry)), "Prom" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusFerry)), StatusDescription("promu") },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusFerry)), StatusDescription("prom") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusShip)), "Statek" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusShip)), StatusDescription("statku") },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusShip)), StatusDescription("statek") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusAir)), "Samolot" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusAir)), StatusDescription("samolotu") },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusAir)), StatusDescription("samolot") },
 
                 // Status buttons
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatsToLog)), "Statystyki do logu" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatsToLog)),
                     "Zapisuje jednorazowy szczegółowy raport do **BetterBoarding.log**.\n" +
-                    "Zawiera sumy oczekujących, 3 najgorsze przystanki dla każdego trybu, przykłady pominiętych cims, ID encji i wskazówki linii."
+                    "Zawiera liczbę oczekujących, 3 najgorsze przystanki na typ, przykłady zwolnionych pasażerów, ID encji i wskazówki linii."
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.OpenLog)), "Otwórz log" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.OpenLog)),
                     "Otwiera **BetterBoarding.log**, jeśli istnieje.\n" +
-                    "Jeśli pliku jeszcze nie ma, otwiera zamiast tego folder Logs."
+                    "Jeśli nie, otwiera folder Logs."
                 },
 
                 // About
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AboutName)), "Mod" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AboutName)), "Wyświetlana nazwa tego moda." },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AboutName)), "Wyświetlana nazwa moda." },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AboutVersion)), "Wersja" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AboutVersion)), "Aktualna wersja moda." },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AboutVersion)), "Bieżąca wersja moda." },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.OpenParadoxMods)), "Mochi's Paradox Mods" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.OpenParadoxMods)), "Otwiera stronę autora w Paradox Mods." },
 
                 // Debug
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.EnableVerboseLogging)), "Włącz szczegółowy log" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.EnableVerboseLogging)), "Szczegółowe logowanie" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.EnableVerboseLogging)),
                     "**Tylko debug / testy**\n" +
-                    "Najlepiej zawsze zostawić **OFF**, chyba że wiesz dokładnie, do czego to służy.\n" +
-                    "Dodaje szczegóły <live> do <Logs/BetterBoarding.log>, gdy miasto działa.\n" +
-                    "**Nie włączaj do normalnej gry.**\n" +
-                    "Pozostawienie tego włączonego może obniżyć wydajność i utworzyć ogromne pliki logów.\n" +
-                    "Stare pliki logów można później usunąć.\n" +
-                    "Uwaga: <Statystyki do logu> to raport bieżącego stanu z dzisiejszymi licznikami pominiętych spóźnionych pasażerów; nie ma wpływu na wydajność jak szczegółowe logowanie.\n" +
-                    "Włącz szczegółowe logowanie na 10-15 min, jeśli potrzebna jest oś czasu zdarzeń, ale zapisuje ono dużo danych.\n" +
-                    "Nie zapomnij przełączyć z powrotem na **OFF** przed normalną grą."
+                    "Normalnie zostaw **WYŁ.**\n" +
+                    "Dodaje dane <live> do <Logs/BetterBoarding.log> podczas działania miasta.\n" +
+                    "**Nie używaj w normalnej rozgrywce.**\n" +
+                    "Może obniżyć wydajność i tworzyć ogromne logi.\n" +
+                    "Stare logi można później usunąć.\n" +
+                    "<Statystyki do logu> zapisują tylko pojedynczy stan i mają mały wpływ na wydajność.\n" +
+                    "Włącz na 10-15 min, jeśli potrzebujesz osi czasu; tworzy dużo danych.\n" +
+                    "Przed normalną grą znów ustaw **WYŁ.**"
                 },
 
                 // Runtime status strings
-                { WaitStatus.KeyStatusNotLoaded, "Status niezaładowany." },
-                { WaitStatus.KeyNoCityLoaded, "Brak załadowanego miasta." },
+                { WaitStatus.KeyStatusNotLoaded, "Stan niezaładowany." },
+                { WaitStatus.KeyNoCityLoaded, "Brak wczytanego miasta." },
                 { WaitStatus.KeyNoStopsFound, "Nie znaleziono przystanków." },
 
                 { WaitStatus.KeyStatusLine, "{0} czeka | śr. {1} | najg. {2} | {3}" },
-                { WaitStatus.KeyStatusLateSkipped, "{0} spóźn. dziś" },
-                { WaitStatus.KeyStatusSkipOff, "pomijanie OFF" },
+                { WaitStatus.KeyStatusLateSkipped, "{0} zwoln. dziś" },
+                { WaitStatus.KeyStatusSkipOff, "pomijanie WYŁ." },
 
-                { WaitStatus.KeyStatusOverviewLine, "{0} turystów/mies. | {1} mieszkańców/mies. | aktual. {2}" },
+                { WaitStatus.KeyStatusOverviewLine, "{0} tur./mies. | {1} mieszk./mies. | akt. {2}" },
                 { WaitStatus.KeyStatusRunSoonerLine, "{0}" },
-                { WaitStatus.KeyStatusRunSoonerOff, "bieg wcześniej OFF" },
+                { WaitStatus.KeyStatusRunSoonerOff, "bieg wcześniej WYŁ." },
 
                 // Stats-to-log report strings
-                { WaitStatus.KeyReportNoCityLoaded, "[BBoard] Zażądano raportu, ale żadne miasto nie jest załadowane." },
-                { WaitStatus.KeyReportTitle, "Snapshot Statystyki do logu - Better Boarding" },
+                { WaitStatus.KeyReportNoCityLoaded, "[BBoard] Zażądano raportu, ale nie wczytano miasta." },
+                { WaitStatus.KeyReportTitle, "Migawka Statystyki do logu - Better Boarding" },
                 { WaitStatus.KeyReportSettings, "Ustawienia: {0}" },
-                { WaitStatus.KeyReportNote, "Wskazówka linii pochodzi z waypointu o najwyższym oczekiwaniu na tym przystanku." },
-                { WaitStatus.KeyReportTesterHintsHeader, "Wskazówki dla testerów" },
-                { WaitStatus.KeyReportHintWorstStops, "Najgorsze przystanki: sprawdź je najpierw w grze albo modem Scene Explorer (lokalizacja po ID encji). Szukaj korków, złego położenia albo zbugowanego przystanku." },
-                { WaitStatus.KeyReportHintSkippedCims, "Pominięci solo cims: spóźnieni pasażerowie zwalniani, aby transport mógł odjechać. Późniejszy stan zwykle powinien stać się 'has path' albo 'assigned'. Jeśli zostaje 'no path yet', sprawdź tę encję cim po dłuższym czasie." },
-                { WaitStatus.KeyReportHintLateGroups, "Spóźnione grupy (rodziny): grupy nadal nierozwiązane dokładnie w chwili wykonania raportu. Better Boarding daje im trochę więcej czasu; jeśli lider nadal jest na zewnątrz, zwalnia grupę, a jeśli jest już w pojeździe, pomaga vanilla dokończyć wejście spóźnionych członków." },
+                { WaitStatus.KeyReportNote, "Wskazówka linii pochodzi z waypointu o najwyższym czasie oczekiwania na tym przystanku." },
+                { WaitStatus.KeyReportTesterHintsHeader, "Wskazówki testowe" },
+                { WaitStatus.KeyReportHintWorstStops, "Najgorsze przystanki: najpierw sprawdź je w grze lub Scene Explorerem (lokalizacja przez ID encji). Szukaj korków, złego położenia lub błędnego przystanku." },
+                { WaitStatus.KeyReportHintSkippedCims, "Zwolnione przydziały solo: każdy licznik to jedno zwolnienie przydziału pojazdu po sprawdzeniu odległości. Przykłady dalszego losu pokazują, co stało się później." },
+                { WaitStatus.KeyReportHintLateGroups, "Wsiadanie grup: pokazuje rodziny/grupy nadal niekompletne w chwili raportu. Better Boarding daje dodatkowy zapas i pomaga spóźnionym członkom dokończyć wsiadanie." },
                 { WaitStatus.KeyReportFamilyHeader, "{0}" },
                 { WaitStatus.KeyReportServedStops, "Obsługiwane przystanki: {0}" },
-                { WaitStatus.KeyReportStopsWithWaiting, "Przystanki z czekającymi pasażerami: {0}" },
-                { WaitStatus.KeyReportWaitingPassengers, "Czekający pasażerowie: {0}" },
-                { WaitStatus.KeyReportAverageWait, "Średnie oczekiwanie: {0}" },
-                { WaitStatus.KeyReportLateBoardersSkipped, "Spóźnieni pasażerowie pominięci dziś: {0}" },
+                { WaitStatus.KeyReportStopsWithWaiting, "Przystanki z oczekującymi: {0}" },
+                { WaitStatus.KeyReportWaitingPassengers, "Oczekujący pasażerowie: {0}" },
+                { WaitStatus.KeyReportAverageWait, "Średni czas oczekiwania: {0}" },
+                { WaitStatus.KeyReportLateBoardersSkipped, "Zwolnione dziś przydziały solo: {0}" },
                 { WaitStatus.KeyReportWorstStopNone, "Najgorszy przystanek: brak, teraz nikt nie czeka." },
                 { WaitStatus.KeyReportWorstStopAverageWait, "Śr. oczekiwanie najgorszego przystanku: {0}" },
                 { WaitStatus.KeyReportWorstStopName, "Nazwa najgorszego przystanku: {0}" },
                 { WaitStatus.KeyReportWorstStopEntity, "Encja najgorszego przystanku: {0}" },
-                { WaitStatus.KeyReportWorstWaypointEntity, "Encja waypoint najgorszego przystanku: {0}" },
+                { WaitStatus.KeyReportWorstWaypointEntity, "Encja waypointu najgorszego przystanku: {0}" },
                 { WaitStatus.KeyReportWorstLineHint, "Wskazówka najgorszej linii: {0}" },
                 { WaitStatus.KeyReportWorstLineEntity, "Encja najgorszej linii: {0}" },
-                { WaitStatus.KeyReportWorstLineWaypointAverage, "Śr. waypoint najgorszej linii: {0} z {1} czekającymi" },
+                { WaitStatus.KeyReportWorstLineWaypointAverage, "Śr. waypointu najgorszej linii: {0}, oczekuje {1}" },
                 { WaitStatus.KeyReportTopWorstStopsHeader, "Top {0} najgorszych przystanków wg średniego oczekiwania:" },
-                { WaitStatus.KeyReportTopWorstStopLine, "{0}. {1} | śr. {2} | czeka {3} | przystanek {4} | waypoint {5} | linia {6} | wskazówka {7}" },
-                { WaitStatus.KeyReportLateGroups, "Spóźnione cimy w grupach nadal nierozwiązane: {0} pasażerów w {1} grupach na {2} pojazdach" },
-                { WaitStatus.KeyReportLastSkippedSamplesHeader, "Przykłady pominiętych spóźnionych solo cims" },
-                { WaitStatus.KeyReportLastSkippedSampleLine, "{0}. {1} | pasażer {2} | przegapiony pojazd {3} | czas {4} | teraz {5}" },
+                { WaitStatus.KeyReportTopWorstStopLine, "{0}. {1} | śr. {2} | czeka {3} | przystanek {4} | waypoint {5} | linia {6} | wsk. {7}" },
+                { WaitStatus.KeyReportLateGroups, "Wsiadanie grup nieukończone: {0} pasażerów w {1} grupach na {2} pojazdach" },
+                { WaitStatus.KeyReportLastSkippedSamplesHeader, "Przykłady zwolnionych pasażerów solo" },
+                { WaitStatus.KeyReportLastSkippedSampleLine, "{0}. {1} | pasażer {2} | pominięty pojazd {3} | czas {4} | teraz {5}" },
                 { WaitStatus.KeyReportNone, "brak" },
                 { WaitStatus.KeyReportUnknown, "(nieznane)" },
             };

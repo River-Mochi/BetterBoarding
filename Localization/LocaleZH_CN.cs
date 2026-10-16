@@ -21,55 +21,50 @@ namespace BetterBoarding
     {
         private readonly BBoardSettings m_Setting;
 
-        /// <summary>
-        /// Constructs the Simplified Chinese locale.
-        /// </summary>
-        /// <param name="setting">Settings object used for locale IDs.</param>
         public LocaleZH_CN(BBoardSettings setting)
         {
             m_Setting = setting;
         }
 
-        /// <summary>
-        /// Creates all Simplified Chinese localization entries for this mod.
-        /// </summary>
         public IEnumerable<KeyValuePair<string, string>> ReadEntries(
             IList<IDictionaryEntryError> errors,
             Dictionary<string, int> indexCounts)
         {
             string title = Mod.ModName;
 
-            const string ToggleName = "跳过迟到乘客";
+            if (!string.IsNullOrEmpty(Mod.ModVersion))
+            {
+                title = title + " (" + Mod.ModVersion + ")";
+            }
 
-            string SpeedDescription(string transitName, string shortName, string extraLine)
+            const string ToggleName = "不等待迟到乘客";
+
+            string SpeedDescription(string transitName, string extraLine)
             {
                 return
                     "<1x = vanilla>\n" +
                     extraLine +
-                    $"较高的数值会减少{transitName}的上车和装载时间。\n" +
-                    "这能帮助普通队列更快清空，但由于 vanilla 设计，迟到乘客仍可能拖延发车。\n" +
-                    $"如果想让迟到 cim 在发车时间后错过车辆，请使用 [✓] <{ToggleName}>。\n" +
-                    "被跳过的迟到市民不会被删除；vanilla 会自然为他们重新规划路线。\n" +
+                    $"数值越高，{transitName}的上下客越快。\n" +
+                    "可缩短正常上下客时的停站时间。\n" +
                     "<==========================>\n" +
-                    "装载值:\n" +
-                    "1x = 100% vanilla 停靠\n" +
-                    "2x = 约 1/2 计划停靠\n" +
-                    "3x = 约 1/3 计划停靠（推荐）\n" +
-                    "5x = 约 1/5 计划停靠（最大）\n" +
-                    $"这不同于 <{ToggleName}>；该复选框决定迟到 cim 是否能在发车时间后错过{shortName}。";
+                    "上下客倍率：\n" +
+                    "1x = vanilla 100%停站\n" +
+                    "2x = 约1/2计划停站\n" +
+                    "3x = 约1/3（推荐）\n" +
+                    "5x = 约1/5（最大）";
             }
 
             // One helper keeps all seven status tooltips in sync for future translations.
             string StatusDescription(string transitName)
             {
                 return
-                    $"<当前{transitName}状态>\n" +
-                    "**等待中** = 当前正在等待的乘客总数。\n" +
+                    $"<{transitName}当前状态>\n" +
+                    "**等待** = 当前等待乘客数。\n" +
                     "**平均** = 这些乘客的平均等待时间。\n" +
-                    "**最差**站点 = 单个站点的最高平均等待时间。\n" +
-                    "最差站点适合优先检查事故、堵塞/异常站点，或是否需要分配更多车辆。\n" +
-                    $"**今日迟到** = 今天由 <{ToggleName}> 跳过的单独迟到乘客。\n" +
-                    "使用 <统计写入日志> 可输出详细报告：站点名称、实体 ID 等。";
+                    "**最差** = 单个站点最高平均等待时间。\n" +
+                    "过高时请检查拥堵、站点卡住/异常或车辆不足。\n" +
+                    $"**今日释放** = <{ToggleName}>释放的迟到乘客分配。\n" +
+                    "用<统计写入日志>查看站点名、Entity ID等详细信息。";
             }
 
             return new Dictionary<string, string>
@@ -82,65 +77,63 @@ namespace BetterBoarding
                 { m_Setting.GetOptionTabLocaleID(BBoardSettings.AboutTab), "关于" },
 
                 // Groups
-                { m_Setting.GetOptionGroupLocaleID(BBoardSettings.SpeedGroup), "上车速度" },
+                { m_Setting.GetOptionGroupLocaleID(BBoardSettings.SpeedGroup), "上下客速度" },
                 { m_Setting.GetOptionGroupLocaleID(BBoardSettings.BehaviorGroup), "行为" },
                 { m_Setting.GetOptionGroupLocaleID(BBoardSettings.StatusGroup), "状态" },
-                { m_Setting.GetOptionGroupLocaleID(BBoardSettings.AboutInfoGroup), "模组信息" },
+                { m_Setting.GetOptionGroupLocaleID(BBoardSettings.AboutInfoGroup), "Mod信息" },
                 { m_Setting.GetOptionGroupLocaleID(BBoardSettings.AboutLinksGroup), "链接" },
                 { m_Setting.GetOptionGroupLocaleID(BBoardSettings.DebugGroup), "调试" },
 
                 // Boarding speed sliders
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.BusBoardingSpeedFactor)), "公交上车速度" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.BusBoardingSpeedFactor)), "公交上下客速度" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.BusBoardingSpeedFactor)),
                     SpeedDescription(
                         "公交站",
-                        "公交",
                         string.Empty)
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.RailBoardingSpeedFactor)), "轨道上车速度" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.RailBoardingSpeedFactor)), "轨道上下客速度" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.RailBoardingSpeedFactor)),
                     SpeedDescription(
                         "火车、有轨电车和地铁站",
-                        "车辆",
-                        "适用于火车、有轨电车和地铁站。\n")
+                        "适用于火车、有轨电车和地铁。\n")
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)), "飞机速度" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)), "飞机上下客速度" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)),
                     SpeedDescription(
-                        "飞机航站楼",
-                        "飞机",
+                        "机场航站楼",
                         "适用于客运飞机航站楼。\n")
                 },
 
                 // Late passenger behavior
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CancelLateBoarders)), ToggleName },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CancelLateBoarders)),
-                    "<迟到乘客>在<发车时间>后仍然<未准备好>时，可以错过车辆。\n" +
-                    "- 单独迟到的乘客会在短暂宽限后被释放，让车辆可以发车。\n" +
-                    "- 群组/家庭会获得稍长的宽限。如果组长仍在车外，整个群组会通过 vanilla 的群组取消机制一起释放。\n" +
-                    "- 如果组长已经上车，Better Boarding 会让 vanilla 完成落后的儿童/宠物成员上车，避免一个人把车辆拖到 vanilla 的长时间 timeout。\n" +
-                    "- 被跳过的迟到市民不会被删除；vanilla 可以让他们自然继续行程或重新规划路线。"
+                    "当已分配乘客明显离得太远、无法上车时，帮助公交、有轨电车、火车和地铁正常发车。\n" +
+                    "- 在站点/车站内或附近的乘客会保持分配并继续上车。\n" +
+                    "- 长火车/地铁站台上的乘客会受到保护。\n" +
+                    "- 只有明显远离的乘客，才可能在计划发车时间和短暂宽限后释放分配。\n" +
+                    "- 群组/家庭有额外保护，让儿童和宠物能完成上车。\n" +
+                    "- 轮船、渡轮和飞机继续使用 vanilla 的迟到乘客处理。\n" +
+                    "被释放的 Cim 仍留在城市中，会正常继续行程或重新规划路线。"
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "提前奔跑（见提示，第 3 面板）" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cim 提前跑步" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
-                    "<迟到>市民会<提前奔跑>，尝试在发车时间**之前**赶到。\n" +
-                    "- 适用于公交、有轨电车、火车和地铁，尤其适合较长站台。\n" +
-                    "- 只影响已分配到当前正在上客车辆的市民。\n" +
-                    "- Vanilla 只会在发车时间才让市民开始奔跑，这可能已经太晚。\n" +
-                    $"- 和 <{ToggleName}> 配合很好，因为它可能减少错过车辆并需要重新分配的市民数量。\n" +
-                    "- 不会更改车辆发车时间、强制上车或传送市民。"
+                    "已分配的 Cim 会<提前开始跑步>，更容易在公交、有轨电车、火车或地铁发车前赶上。\n" +
+                    "- 对长站台和正在接近站点的 Cim 很有帮助。\n" +
+                    "- 最多比 vanilla 提前约3分钟游戏时间开始。\n" +
+                    "- 只影响已分配给正在上下客车辆的 Cim。\n" +
+                    "- 不传送、不强制上车，也不改变发车时间。"
                 },
 
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusOverview)), "总使用量" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusOverview)),
                     "来自游戏交通信息视图的每月公共交通使用量。\n" +
-                    "更新时间显示此状态快照的获取时间（通常是在进入选项菜单后）。"
+                    "更新时间表示本次状态采集的时间（通常在打开“选项”后）。"
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)), "市民提前奔跑" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)), "Cim 提前跑" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)),
-                    "启用 [x] 时，统计今天开始**提前奔跑**、尝试在发车前赶上公交、有轨电车、火车或地铁的市民。\n" +
-                    "市民会比 vanilla 提前 512 帧奔跑（现实时间约提前 2-8 秒，游戏内约 2 分钟）。"
+                    "启用 [x] 后，统计今天被 Better Boarding **提前跑步**以赶公交、有轨电车、火车或地铁的 Cim。\n" +
+                    "Run Sooner 最多比 vanilla 提前约3分钟游戏时间开始。"
                 },
 
                 // Status rows
@@ -154,43 +147,43 @@ namespace BetterBoarding
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusSubway)), StatusDescription("地铁") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusFerry)), "渡轮" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusFerry)), StatusDescription("渡轮") },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusShip)), "船舶" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusShip)), StatusDescription("船舶") },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusShip)), "轮船" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusShip)), StatusDescription("轮船") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusAir)), "飞机" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusAir)), StatusDescription("飞机") },
 
                 // Status buttons
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatsToLog)), "统计写入日志" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatsToLog)),
-                    "向 **BetterBoarding.log** 写入一次性详细报告。\n" +
-                    "包括等待总数、每种模式最差的 3 个站点、被跳过 cim 示例、实体 ID 和线路提示。"
+                    "向 **BetterBoarding.log** 写入一次详细报告。\n" +
+                    "包含等待总数、各交通方式最差3个站点、已释放乘客示例、Entity ID和线路提示。"
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.OpenLog)), "打开日志" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.OpenLog)),
                     "如果存在，则打开 **BetterBoarding.log**。\n" +
-                    "如果尚未找到该文件，则改为打开 Logs 文件夹。"
+                    "如果还没有，则打开 Logs 文件夹。"
                 },
 
                 // About
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AboutName)), "模组" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AboutName)), "此模组的显示名称。" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AboutName)), "Mod" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AboutName)), "Mod显示名称。" },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AboutVersion)), "版本" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AboutVersion)), "当前模组版本。" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AboutVersion)), "当前Mod版本。" },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.OpenParadoxMods)), "Mochi's Paradox Mods" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.OpenParadoxMods)), "打开作者的 Paradox Mods 页面。" },
 
                 // Debug
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.EnableVerboseLogging)), "启用详细日志" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.EnableVerboseLogging)),
-                    "**仅用于调试 / 测试**\n" +
-                    "除非你清楚它的用途，否则建议始终保持 **OFF**。\n" +
-                    "城市运行时向 <Logs/BetterBoarding.log> 添加 <live> 详细信息。\n" +
-                    "**不要在正常游玩时启用。**\n" +
-                    "保持开启可能降低性能并生成巨大的日志文件。\n" +
-                    "以后可以删除旧日志文件。\n" +
-                    "注意：<统计写入日志> 是当前状态报告，并包含今天的迟到跳过计数；它不会像详细日志那样持续影响性能。\n" +
-                    "如需查看事件时间线，可运行详细日志 10-15 分钟，但会产生大量数据。\n" +
-                    "正常游玩前别忘了再次切回 **OFF**。"
+                    "**仅用于调试/测试**\n" +
+                    "平时请保持 **OFF**。\n" +
+                    "城市运行时向 <Logs/BetterBoarding.log> 写入<实时>详细信息。\n" +
+                    "**正常游戏不要启用。**\n" +
+                    "可能降低性能并产生很大的日志文件。\n" +
+                    "旧日志之后可以删除。\n" +
+                    "<统计写入日志>只写一次快照，比详细日志的性能影响小得多。\n" +
+                    "需要时间线时可开启10-15分钟，但会产生大量数据。\n" +
+                    "恢复正常游戏前请再次设为 **OFF**。"
                 },
 
                 // Runtime status strings
@@ -199,41 +192,41 @@ namespace BetterBoarding
                 { WaitStatus.KeyNoStopsFound, "未找到站点。" },
 
                 { WaitStatus.KeyStatusLine, "{0} 等待 | 平均 {1} | 最差 {2} | {3}" },
-                { WaitStatus.KeyStatusLateSkipped, "{0} 今日迟到" },
-                { WaitStatus.KeyStatusSkipOff, "跳过 OFF" },
+                { WaitStatus.KeyStatusLateSkipped, "今日释放 {0}" },
+                { WaitStatus.KeyStatusSkipOff, "不等待 OFF" },
 
-                { WaitStatus.KeyStatusOverviewLine, "{0} 游客/月 | {1} 市民/月 | 更新 {2}" },
+                { WaitStatus.KeyStatusOverviewLine, "游客 {0}/月 | 市民 {1}/月 | 更新 {2}" },
                 { WaitStatus.KeyStatusRunSoonerLine, "{0}" },
-                { WaitStatus.KeyStatusRunSoonerOff, "提前奔跑OFF" },
+                { WaitStatus.KeyStatusRunSoonerOff, "提前跑 OFF" },
 
                 // Stats-to-log report strings
-                { WaitStatus.KeyReportNoCityLoaded, "[BBoard] 已请求统计报告，但未加载城市。" },
-                { WaitStatus.KeyReportTitle, "统计写入日志快照 - Better Boarding" },
-                { WaitStatus.KeyReportSettings, "设置: {0}" },
-                { WaitStatus.KeyReportNote, "线路提示来自该站点等待最高的 waypoint。" },
+                { WaitStatus.KeyReportNoCityLoaded, "[BBoard] 请求统计报告，但当前未加载城市。" },
+                { WaitStatus.KeyReportTitle, "统计日志快照 - Better Boarding" },
+                { WaitStatus.KeyReportSettings, "设置：{0}" },
+                { WaitStatus.KeyReportNote, "线路提示来自该站点等待时间最高的 waypoint。" },
                 { WaitStatus.KeyReportTesterHintsHeader, "测试提示" },
-                { WaitStatus.KeyReportHintWorstStops, "最差站点：先在游戏中或用 Scene Explorer 模组检查（可用实体 ID 找位置）。查找交通堵塞、站点位置不佳或异常站点。" },
-                { WaitStatus.KeyReportHintSkippedCims, "被跳过的单独 cims：为让交通工具发车而释放的迟到乘客。之后状态通常应变为 'has path' 或 'assigned'。如果仍是 'no path yet'，请过一段时间再检查该 cim 实体。" },
-                { WaitStatus.KeyReportHintLateGroups, "迟到群组（家庭）：显示生成报告时仍未解决的群组。Better Boarding 会给他们短暂的额外宽限；如果组长仍在车外就释放整个群组，如果组长已经上车则帮助 vanilla 完成落后成员的上车。" },
+                { WaitStatus.KeyReportHintWorstStops, "最差站点：先在游戏中或用 Scene Explorer 检查（通过 Entity ID 定位）。查看拥堵、位置不佳或站点异常。" },
+                { WaitStatus.KeyReportHintSkippedCims, "已释放单人分配：每个计数代表一次通过距离检查后释放的车辆分配。可查看后续示例了解之后发生了什么。" },
+                { WaitStatus.KeyReportHintLateGroups, "群组上车：显示生成报告时仍未完成上车的家庭/群组。Better Boarding 会提供额外宽限，并帮助落后的成员完成上车。" },
                 { WaitStatus.KeyReportFamilyHeader, "{0}" },
-                { WaitStatus.KeyReportServedStops, "服务站点: {0}" },
-                { WaitStatus.KeyReportStopsWithWaiting, "有等待乘客的站点: {0}" },
-                { WaitStatus.KeyReportWaitingPassengers, "等待乘客: {0}" },
-                { WaitStatus.KeyReportAverageWait, "平均等待: {0}" },
-                { WaitStatus.KeyReportLateBoardersSkipped, "今天跳过的迟到乘客: {0}" },
-                { WaitStatus.KeyReportWorstStopNone, "最差站点：无，目前没有等待乘客。" },
-                { WaitStatus.KeyReportWorstStopAverageWait, "最差站点平均等待: {0}" },
-                { WaitStatus.KeyReportWorstStopName, "最差站点名称: {0}" },
-                { WaitStatus.KeyReportWorstStopEntity, "最差站点实体: {0}" },
-                { WaitStatus.KeyReportWorstWaypointEntity, "最差 waypoint 实体: {0}" },
-                { WaitStatus.KeyReportWorstLineHint, "最差线路提示: {0}" },
-                { WaitStatus.KeyReportWorstLineEntity, "最差线路实体: {0}" },
-                { WaitStatus.KeyReportWorstLineWaypointAverage, "最差线路 waypoint 平均: {0}，等待 {1}" },
-                { WaitStatus.KeyReportTopWorstStopsHeader, "按平均等待排名的最差站点前 {0} 名:" },
+                { WaitStatus.KeyReportServedStops, "服务站点：{0}" },
+                { WaitStatus.KeyReportStopsWithWaiting, "有乘客等待的站点：{0}" },
+                { WaitStatus.KeyReportWaitingPassengers, "等待乘客：{0}" },
+                { WaitStatus.KeyReportAverageWait, "平均等待：{0}" },
+                { WaitStatus.KeyReportLateBoardersSkipped, "今日释放单人分配：{0}" },
+                { WaitStatus.KeyReportWorstStopNone, "最差站点：无；当前没有乘客等待。" },
+                { WaitStatus.KeyReportWorstStopAverageWait, "最差站点平均等待：{0}" },
+                { WaitStatus.KeyReportWorstStopName, "最差站点名称：{0}" },
+                { WaitStatus.KeyReportWorstStopEntity, "最差站点 Entity：{0}" },
+                { WaitStatus.KeyReportWorstWaypointEntity, "最差 waypoint Entity：{0}" },
+                { WaitStatus.KeyReportWorstLineHint, "最差线路提示：{0}" },
+                { WaitStatus.KeyReportWorstLineEntity, "最差线路 Entity：{0}" },
+                { WaitStatus.KeyReportWorstLineWaypointAverage, "最差线路 waypoint 平均：{0}，等待 {1}" },
+                { WaitStatus.KeyReportTopWorstStopsHeader, "按平均等待排序的最差 {0} 个站点：" },
                 { WaitStatus.KeyReportTopWorstStopLine, "{0}. {1} | 平均 {2} | 等待 {3} | 站点 {4} | waypoint {5} | 线路 {6} | 提示 {7}" },
-                { WaitStatus.KeyReportLateGroups, "仍未解决的迟到群组 cim：{0} 名乘客，{1} 个群组，涉及 {2} 辆车" },
-                { WaitStatus.KeyReportLastSkippedSamplesHeader, "被跳过的单独迟到 cim 示例" },
-                { WaitStatus.KeyReportLastSkippedSampleLine, "{0}. {1} | 乘客 {2} | 错过车辆 {3} | 时间 {4} | 现在 {5}" },
+                { WaitStatus.KeyReportLateGroups, "群组上车未完成：{0} 名乘客 / {1} 个群组 / {2} 辆车" },
+                { WaitStatus.KeyReportLastSkippedSamplesHeader, "已释放单人乘客示例" },
+                { WaitStatus.KeyReportLastSkippedSampleLine, "{0}. {1} | 乘客 {2} | 错过车辆 {3} | 时间 {4} | 当前 {5}" },
                 { WaitStatus.KeyReportNone, "无" },
                 { WaitStatus.KeyReportUnknown, "(未知)" },
             };

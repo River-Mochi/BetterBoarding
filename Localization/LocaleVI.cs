@@ -21,55 +21,50 @@ namespace BetterBoarding
     {
         private readonly BBoardSettings m_Setting;
 
-        /// <summary>
-        /// Constructs the Vietnamese locale.
-        /// </summary>
-        /// <param name="setting">Settings object used for locale IDs.</param>
         public LocaleVI(BBoardSettings setting)
         {
             m_Setting = setting;
         }
 
-        /// <summary>
-        /// Creates all Vietnamese localization entries for this mod.
-        /// </summary>
         public IEnumerable<KeyValuePair<string, string>> ReadEntries(
             IList<IDictionaryEntryError> errors,
             Dictionary<string, int> indexCounts)
         {
             string title = Mod.ModName;
 
-            const string ToggleName = "Bỏ qua hành khách đến trễ";
+            if (!string.IsNullOrEmpty(Mod.ModVersion))
+            {
+                title = title + " (" + Mod.ModVersion + ")";
+            }
 
-            string SpeedDescription(string transitName, string shortName, string extraLine)
+            const string ToggleName = "Không chờ khách đến muộn";
+
+            string SpeedDescription(string transitName, string extraLine)
             {
                 return
                     "<1x = vanilla>\n" +
                     extraLine +
-                    $"Giá trị cao hơn giúp giảm thời gian lên/xếp khách tại {transitName}.\n" +
-                    "Giúp hàng chờ bình thường giải tỏa nhanh hơn, nhưng hành khách đến trễ vẫn có thể làm chậm giờ khởi hành do thiết kế vanilla.\n" +
-                    $"Dùng [✓] <{ToggleName}> nếu muốn cim đến trễ có thể lỡ chuyến sau giờ khởi hành.\n" +
-                    "Công dân đến trễ bị bỏ qua không bị xóa; vanilla sẽ tự chuyển tuyến cho họ.\n" +
+                    $"Giá trị cao hơn giúp lên/xuống nhanh hơn tại {transitName}.\n" +
+                    "Giảm thời gian dừng bình thường khi hành khách lên xuống.\n" +
                     "<==========================>\n" +
-                    "Giá trị tải:\n" +
-                    "1x = 100% thời gian dừng vanilla\n" +
-                    "2x = ~1/2 thời gian dừng dự kiến\n" +
-                    "3x = ~1/3 thời gian dừng dự kiến (khuyên dùng)\n" +
-                    "5x = ~1/5 thời gian dừng dự kiến (tối đa)\n" +
-                    $"Đây không giống <{ToggleName}>; tùy chọn này quyết định cim đến trễ có thể lỡ {shortName} sau giờ khởi hành hay không.";
+                    "Giá trị lên xe:\n" +
+                    "1x = 100% thời gian vanilla\n" +
+                    "2x = ~1/2 thời gian dự kiến\n" +
+                    "3x = ~1/3 (khuyên dùng)\n" +
+                    "5x = ~1/5 (tối đa)";
             }
 
             // One helper keeps all seven status tooltips in sync for future translations.
             string StatusDescription(string transitName)
             {
                 return
-                    $"<Trạng thái hiện tại của {transitName}>\n" +
-                    "**Đang chờ** = tổng số hành khách đang chờ ngay lúc này.\n" +
-                    "**TB** = thời gian chờ trung bình của các hành khách đó.\n" +
-                    "**Tệ nhất** = điểm dừng có thời gian chờ trung bình cao nhất.\n" +
-                    "Các điểm dừng tệ nhất là nơi nên kiểm tra tai nạn, tắc đường, điểm dừng lỗi hoặc thiếu phương tiện.\n" +
-                    $"**Trễ hôm nay** = hành khách đi một mình đến trễ bị bỏ qua hôm nay bởi <{ToggleName}>.\n" +
-                    "Dùng <Ghi thống kê vào Log> để xem báo cáo chi tiết: tên điểm dừng, entity ID và nhiều hơn.";
+                    $"<Trạng thái {transitName} hiện tại>\n" +
+                    "**Đang chờ** = số hành khách đang chờ.\n" +
+                    "**TB** = thời gian chờ trung bình.\n" +
+                    "**Tệ nhất** = thời gian chờ TB cao nhất tại một điểm dừng.\n" +
+                    "Nếu cao, hãy kiểm tra kẹt xe, điểm dừng bị kẹt/lỗi hoặc thiếu xe.\n" +
+                    $"**Đã thả hôm nay** = lượt gán hành khách trễ được <{ToggleName}> thả.\n" +
+                    "<Ghi thống kê> cho biết tên điểm dừng, Entity ID và chi tiết khác.";
             }
 
             return new Dictionary<string, string>
@@ -79,10 +74,10 @@ namespace BetterBoarding
 
                 // Tabs
                 { m_Setting.GetOptionTabLocaleID(BBoardSettings.ActionsTab), "Thao tác" },
-                { m_Setting.GetOptionTabLocaleID(BBoardSettings.AboutTab), "Giới thiệu" },
+                { m_Setting.GetOptionTabLocaleID(BBoardSettings.AboutTab), "Thông tin" },
 
                 // Groups
-                { m_Setting.GetOptionGroupLocaleID(BBoardSettings.SpeedGroup), "Tốc độ lên xe" },
+                { m_Setting.GetOptionGroupLocaleID(BBoardSettings.SpeedGroup), "Tốc độ lên xuống" },
                 { m_Setting.GetOptionGroupLocaleID(BBoardSettings.BehaviorGroup), "Hành vi" },
                 { m_Setting.GetOptionGroupLocaleID(BBoardSettings.StatusGroup), "Trạng thái" },
                 { m_Setting.GetOptionGroupLocaleID(BBoardSettings.AboutInfoGroup), "Thông tin mod" },
@@ -90,64 +85,62 @@ namespace BetterBoarding
                 { m_Setting.GetOptionGroupLocaleID(BBoardSettings.DebugGroup), "Gỡ lỗi" },
 
                 // Boarding speed sliders
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.BusBoardingSpeedFactor)), "Tốc độ lên xe buýt" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.BusBoardingSpeedFactor)), "Lên xuống xe buýt" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.BusBoardingSpeedFactor)),
                     SpeedDescription(
                         "điểm dừng xe buýt",
-                        "xe buýt",
                         string.Empty)
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.RailBoardingSpeedFactor)), "Tốc độ lên phương tiện đường sắt" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.RailBoardingSpeedFactor)), "Lên xuống đường sắt" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.RailBoardingSpeedFactor)),
                     SpeedDescription(
-                        "điểm dừng tàu hỏa, tàu điện và metro",
-                        "phương tiện",
-                        "Áp dụng cho điểm dừng tàu hỏa, tàu điện và metro.\n")
+                        "điểm dừng tàu hỏa, tram và metro",
+                        "Áp dụng cho tàu, tram và metro.\n")
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)), "Tốc độ máy bay" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)), "Lên xuống máy bay" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)),
                     SpeedDescription(
-                        "nhà ga máy bay",
-                        "máy bay",
+                        "nhà ga sân bay",
                         "Áp dụng cho nhà ga máy bay chở khách.\n")
                 },
 
                 // Late passenger behavior
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CancelLateBoarders)), ToggleName },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CancelLateBoarders)),
-                    "<Hành khách đến trễ> vẫn <chưa sẵn sàng> sau <giờ khởi hành> có thể bị lỡ chuyến.\n" +
-                    "- Hành khách đi một mình đến trễ được thả sau một khoảng chờ ngắn để phương tiện có thể rời đi.\n" +
-                    "- Nhóm/gia đình được thêm một chút thời gian. Nếu người dẫn nhóm vẫn ở ngoài, cả nhóm được thả thông qua cơ chế hủy nhóm của vanilla.\n" +
-                    "- Nếu người dẫn nhóm đã lên xe, Better Boarding để vanilla hoàn tất việc lên xe cho trẻ em/thú cưng còn chậm để một người không giữ phương tiện đến timeout dài của vanilla.\n" +
-                    "- Công dân đến trễ bị bỏ qua không bị xóa; vanilla có thể tiếp tục hành trình hoặc tự chuyển tuyến cho họ."
+                    "Giúp xe buýt, tram, tàu và metro rời đi khi hành khách đã được gán rõ ràng ở quá xa để lên xe.\n" +
+                    "- Hành khách ở hoặc gần điểm dừng/ga vẫn giữ lượt gán và tiếp tục lên xe.\n" +
+                    "- Hành khách trên sân ga tàu/metro dài được bảo vệ.\n" +
+                    "- Chỉ người rõ ràng ở xa mới có thể được thả sau giờ khởi hành dự kiến và một khoảng chờ ngắn.\n" +
+                    "- Nhóm/gia đình được bảo vệ thêm để trẻ em và thú cưng kịp lên xe.\n" +
+                    "- Tàu thủy, phà và máy bay vẫn dùng cách xử lý hành khách trễ của vanilla.\n" +
+                    "Cim được thả vẫn ở trong thành phố và tiếp tục hoặc tìm lại tuyến đường bình thường."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cim chạy sớm hơn (xem chú thích, bảng thứ 3)" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cim chạy sớm hơn" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
-                    "Công dân <đến trễ> bắt đầu <chạy sớm hơn> để cố đến **trước** giờ khởi hành.\n" +
-                    "- Hoạt động với xe buýt, tàu điện, tàu hỏa và metro, đặc biệt hữu ích ở sân ga dài.\n" +
-                    "- Chỉ ảnh hưởng cim đã được gán cho phương tiện đang đón khách.\n" +
-                    "- Vanilla chỉ cho cim bắt đầu chạy đúng giờ khởi hành, đôi khi quá muộn.\n" +
-                    $"- Kết hợp tốt với <{ToggleName}> vì có thể giảm số cim lỡ chuyến và phải được phân công lại.\n" +
-                    "- Không thay đổi giờ khởi hành, không ép lên xe và không dịch chuyển công dân."
+                    "Cim đã được gán bắt đầu <chạy sớm hơn> để kịp xe buýt, tram, tàu hoặc metro trước khi rời đi.\n" +
+                    "- Hữu ích trên sân ga dài và khi đang tiến tới điểm dừng.\n" +
+                    "- Bắt đầu sớm hơn vanilla tối đa khoảng 3 phút trong game.\n" +
+                    "- Chỉ ảnh hưởng cim đã được gán cho xe đang đón khách.\n" +
+                    "- Không dịch chuyển tức thời, ép lên xe hay đổi giờ khởi hành."
                 },
 
                 // Status overview
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusOverview)), "Tổng lượt sử dụng" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusOverview)), "Tổng lượt dùng" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusOverview)),
-                    "Lượt sử dụng giao thông công cộng hàng tháng từ bảng Transportation của game.\n" +
-                    "Thời gian cập nhật cho biết lúc trạng thái này được ghi lại (thường khi mở menu Options)."
+                    "Lượt dùng giao thông công cộng hằng tháng từ màn hình Transportation của game.\n" +
+                    "Giờ cập nhật cho biết lúc trạng thái này được lấy (thường khi mở Options)."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)), "Cim chạy sớm hơn" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)), "Cim chạy sớm" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)),
-                    "Nếu bật [x], đếm tất cả cim (hôm nay) đã bắt đầu **chạy sớm hơn** để cố bắt xe buýt, tàu điện, tàu hỏa hoặc metro trước giờ khởi hành.\n" +
-                    "Cim chạy sớm hơn vanilla 512 frame (~2-8 giây ngoài đời, ~2 phút trong game)."
+                    "Nếu bật [x], đếm cim hôm nay được Better Boarding cho **chạy sớm hơn** để kịp xe buýt, tram, tàu hoặc metro.\n" +
+                    "Run Sooner có thể bắt đầu sớm hơn vanilla khoảng 3 phút trong game."
                 },
 
                 // Status rows
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusBus)), "Xe buýt" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusBus)), StatusDescription("xe buýt") },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusTram)), "Tàu điện" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTram)), StatusDescription("tàu điện") },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusTram)), "Tram" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTram)), StatusDescription("tram") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusTrain)), "Tàu hỏa" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTrain)), StatusDescription("tàu hỏa") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusSubway)), "Metro" },
@@ -160,15 +153,15 @@ namespace BetterBoarding
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusAir)), StatusDescription("máy bay") },
 
                 // Status buttons
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatsToLog)), "Ghi thống kê vào Log" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatsToLog)), "Ghi thống kê" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatsToLog)),
                     "Ghi báo cáo chi tiết một lần vào **BetterBoarding.log**.\n" +
-                    "Bao gồm tổng số đang chờ, 3 điểm dừng tệ nhất mỗi loại, ví dụ cim bị bỏ qua, entity ID và gợi ý tuyến."
+                    "Gồm tổng số chờ, 3 điểm dừng tệ nhất mỗi loại, ví dụ hành khách được thả, Entity ID và gợi ý tuyến."
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.OpenLog)), "Mở Log" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.OpenLog)),
-                    "Mở **BetterBoarding.log** nếu tệp tồn tại.\n" +
-                    "Nếu chưa có tệp, mở thư mục Logs."
+                    "Mở **BetterBoarding.log** nếu có.\n" +
+                    "Nếu chưa có, mở thư mục Logs."
                 },
 
                 // About
@@ -180,17 +173,17 @@ namespace BetterBoarding
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.OpenParadoxMods)), "Mở trang Paradox Mods của tác giả." },
 
                 // Debug
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.EnableVerboseLogging)), "Bật ghi log chi tiết" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.EnableVerboseLogging)), "Bật log chi tiết" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.EnableVerboseLogging)),
-                    "**Chỉ dành cho gỡ lỗi / thử nghiệm**\n" +
-                    "Nên luôn để **TẮT**, trừ khi bạn biết rõ tính năng này dùng để làm gì.\n" +
-                    "Thêm chi tiết <trực tiếp> vào <Logs/BetterBoarding.log> khi thành phố đang chạy.\n" +
+                    "**Chỉ gỡ lỗi / thử nghiệm**\n" +
+                    "Bình thường hãy để **OFF**.\n" +
+                    "Thêm chi tiết <live> vào <Logs/BetterBoarding.log> khi thành phố đang chạy.\n" +
                     "**Không bật khi chơi bình thường.**\n" +
-                    "Để bật có thể giảm hiệu năng và tạo tệp log rất lớn.\n" +
-                    "Bạn có thể xóa các tệp log cũ sau.\n" +
-                    "Lưu ý: <Ghi thống kê vào Log> là báo cáo trạng thái hiện tại kèm bộ đếm hành khách trễ bị bỏ qua hôm nay; không ảnh hưởng hiệu năng như verbose log.\n" +
-                    "Chạy verbose log 10-15 phút nếu muốn xem dòng thời gian sự kiện, nhưng nó tạo ra rất nhiều dữ liệu.\n" +
-                    "Đừng quên **TẮT** verbose log trước khi chơi bình thường."
+                    "Có thể giảm hiệu năng và tạo file log rất lớn.\n" +
+                    "Có thể xóa log cũ sau.\n" +
+                    "<Ghi thống kê> chỉ ghi một ảnh chụp trạng thái nên nhẹ hơn nhiều so với log chi tiết.\n" +
+                    "Chỉ bật 10-15 phút nếu cần dòng thời gian; sẽ tạo nhiều dữ liệu.\n" +
+                    "Nhớ **OFF** lại trước khi chơi bình thường."
                 },
 
                 // Runtime status strings
@@ -198,42 +191,42 @@ namespace BetterBoarding
                 { WaitStatus.KeyNoCityLoaded, "Chưa tải thành phố." },
                 { WaitStatus.KeyNoStopsFound, "Không tìm thấy điểm dừng." },
 
-                { WaitStatus.KeyStatusLine, "{0} đang chờ | TB {1} | tệ nhất {2} | {3}" },
-                { WaitStatus.KeyStatusLateSkipped, "{0} trễ hôm nay" },
-                { WaitStatus.KeyStatusSkipOff, "bỏ qua OFF" },
+                { WaitStatus.KeyStatusLine, "{0} chờ | TB {1} | tệ {2} | {3}" },
+                { WaitStatus.KeyStatusLateSkipped, "{0} thả hôm nay" },
+                { WaitStatus.KeyStatusSkipOff, "không chờ OFF" },
 
-                { WaitStatus.KeyStatusOverviewLine, "{0} du khách/tháng | {1} công dân/tháng | cập nhật {2}" },
+                { WaitStatus.KeyStatusOverviewLine, "{0} khách/th | {1} dân/th | {2}" },
                 { WaitStatus.KeyStatusRunSoonerLine, "{0}" },
                 { WaitStatus.KeyStatusRunSoonerOff, "chạy sớm OFF" },
 
                 // Stats-to-log report strings
                 { WaitStatus.KeyReportNoCityLoaded, "[BBoard] Đã yêu cầu báo cáo nhưng chưa tải thành phố." },
-                { WaitStatus.KeyReportTitle, "Ảnh chụp thống kê vào Log - Better Boarding" },
+                { WaitStatus.KeyReportTitle, "Ảnh chụp Ghi thống kê - Better Boarding" },
                 { WaitStatus.KeyReportSettings, "Cài đặt: {0}" },
-                { WaitStatus.KeyReportNote, "Gợi ý tuyến lấy từ waypoint có mức chờ cao nhất tại điểm dừng đó." },
-                { WaitStatus.KeyReportTesterHintsHeader, "Gợi ý kiểm thử" },
-                { WaitStatus.KeyReportHintWorstStops, "Điểm dừng tệ nhất: kiểm tra trước trong game hoặc bằng mod Scene Explorer (tìm theo entity ID). Xem tình trạng giao thông, vị trí điểm dừng kém hoặc điểm dừng bị lỗi." },
-                { WaitStatus.KeyReportHintSkippedCims, "Cim đi một mình bị bỏ qua: hành khách đến trễ được thả để phương tiện có thể rời đi. Sau đó thường sẽ thành 'has path' hoặc 'assigned'. Nếu vẫn 'no path yet', hãy kiểm tra cim sau một lúc." },
-                { WaitStatus.KeyReportHintLateGroups, "Nhóm đến trễ (gia đình): hiển thị các nhóm vẫn chưa giải quyết xong ngay lúc lấy báo cáo. Better Boarding cho thêm một khoảng chờ ngắn; nếu người dẫn nhóm vẫn ở ngoài thì thả cả nhóm, còn nếu đã lên xe thì giúp vanilla hoàn tất việc lên xe cho thành viên bị chậm." },
+                { WaitStatus.KeyReportNote, "Gợi ý tuyến lấy từ waypoint có thời gian chờ cao nhất tại điểm dừng đó." },
+                { WaitStatus.KeyReportTesterHintsHeader, "Gợi ý thử nghiệm" },
+                { WaitStatus.KeyReportHintWorstStops, "Điểm dừng tệ nhất: kiểm tra trước trong game hoặc Scene Explorer (tìm vị trí bằng Entity ID). Kiểm tra kẹt xe, vị trí xấu hoặc điểm dừng lỗi." },
+                { WaitStatus.KeyReportHintSkippedCims, "Lượt gán đơn đã thả: mỗi số là một lượt gán xe được thả sau khi kiểm tra khoảng cách. Dùng ví dụ theo dõi để xem chuyện gì xảy ra sau đó." },
+                { WaitStatus.KeyReportHintLateGroups, "Lên xe theo nhóm: hiển thị gia đình/nhóm chưa lên xong khi báo cáo được tạo. Better Boarding cho thêm thời gian và giúp thành viên chậm lên xe hoàn tất." },
                 { WaitStatus.KeyReportFamilyHeader, "{0}" },
                 { WaitStatus.KeyReportServedStops, "Điểm dừng được phục vụ: {0}" },
                 { WaitStatus.KeyReportStopsWithWaiting, "Điểm dừng có hành khách chờ: {0}" },
                 { WaitStatus.KeyReportWaitingPassengers, "Hành khách đang chờ: {0}" },
-                { WaitStatus.KeyReportAverageWait, "Chờ trung bình: {0}" },
-                { WaitStatus.KeyReportLateBoardersSkipped, "Hành khách trễ bị bỏ qua hôm nay: {0}" },
-                { WaitStatus.KeyReportWorstStopNone, "Điểm dừng tệ nhất: không có, hiện không có hành khách chờ." },
+                { WaitStatus.KeyReportAverageWait, "Thời gian chờ TB: {0}" },
+                { WaitStatus.KeyReportLateBoardersSkipped, "Lượt gán đơn đã thả hôm nay: {0}" },
+                { WaitStatus.KeyReportWorstStopNone, "Điểm dừng tệ nhất: không có; hiện không ai chờ." },
                 { WaitStatus.KeyReportWorstStopAverageWait, "Chờ TB tại điểm dừng tệ nhất: {0}" },
                 { WaitStatus.KeyReportWorstStopName, "Tên điểm dừng tệ nhất: {0}" },
                 { WaitStatus.KeyReportWorstStopEntity, "Entity điểm dừng tệ nhất: {0}" },
-                { WaitStatus.KeyReportWorstWaypointEntity, "Entity waypoint tệ nhất: {0}" },
+                { WaitStatus.KeyReportWorstWaypointEntity, "Waypoint Entity tệ nhất: {0}" },
                 { WaitStatus.KeyReportWorstLineHint, "Gợi ý tuyến tệ nhất: {0}" },
                 { WaitStatus.KeyReportWorstLineEntity, "Entity tuyến tệ nhất: {0}" },
                 { WaitStatus.KeyReportWorstLineWaypointAverage, "TB waypoint tuyến tệ nhất: {0} với {1} người chờ" },
-                { WaitStatus.KeyReportTopWorstStopsHeader, "Top {0} điểm dừng tệ nhất theo chờ trung bình:" },
-                { WaitStatus.KeyReportTopWorstStopLine, "{0}. {1} | TB {2} | chờ {3} | điểm dừng {4} | waypoint {5} | tuyến {6} | gợi ý {7}" },
-                { WaitStatus.KeyReportLateGroups, "Cim trễ theo nhóm vẫn chưa được giải quyết: {0} hành khách trong {1} nhóm trên {2} phương tiện" },
-                { WaitStatus.KeyReportLastSkippedSamplesHeader, "Ví dụ cim đi một mình đến trễ bị bỏ qua" },
-                { WaitStatus.KeyReportLastSkippedSampleLine, "{0}. {1} | hành khách {2} | phương tiện bị lỡ {3} | lúc {4} | hiện tại {5}" },
+                { WaitStatus.KeyReportTopWorstStopsHeader, "Top {0} điểm dừng tệ nhất theo chờ TB:" },
+                { WaitStatus.KeyReportTopWorstStopLine, "{0}. {1} | TB {2} | chờ {3} | điểm {4} | waypoint {5} | tuyến {6} | gợi ý {7}" },
+                { WaitStatus.KeyReportLateGroups, "Lên xe theo nhóm chưa xong: {0} hành khách trong {1} nhóm trên {2} xe" },
+                { WaitStatus.KeyReportLastSkippedSamplesHeader, "Ví dụ hành khách đơn đã thả" },
+                { WaitStatus.KeyReportLastSkippedSampleLine, "{0}. {1} | hành khách {2} | xe bị lỡ {3} | lúc {4} | hiện tại {5}" },
                 { WaitStatus.KeyReportNone, "không có" },
                 { WaitStatus.KeyReportUnknown, "(không rõ)" },
             };

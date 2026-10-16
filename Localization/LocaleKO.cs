@@ -21,42 +21,37 @@ namespace BetterBoarding
     {
         private readonly BBoardSettings m_Setting;
 
-        /// <summary>
-        /// Constructs the Korean locale.
-        /// </summary>
-        /// <param name="setting">Settings object used for locale IDs.</param>
         public LocaleKO(BBoardSettings setting)
         {
             m_Setting = setting;
         }
 
-        /// <summary>
-        /// Creates all Korean localization entries for this mod.
-        /// </summary>
         public IEnumerable<KeyValuePair<string, string>> ReadEntries(
             IList<IDictionaryEntryError> errors,
             Dictionary<string, int> indexCounts)
         {
             string title = Mod.ModName;
 
-            const string ToggleName = "늦은 승객 건너뛰기";
+            if (!string.IsNullOrEmpty(Mod.ModVersion))
+            {
+                title = title + " (" + Mod.ModVersion + ")";
+            }
 
-            string SpeedDescription(string transitName, string shortName, string extraLine)
+            const string ToggleName = "늦은 승객 기다리지 않기";
+
+            string SpeedDescription(string transitName, string extraLine)
             {
                 return
                     "<1x = vanilla>\n" +
                     extraLine +
-                    $"값이 높을수록 {transitName}의 탑승 및 적재 시간이 줄어듭니다.\n" +
-                    "일반 대기열은 더 빨리 줄어들지만, vanilla 설계상 늦은 승객이 여전히 출발을 지연시킬 수 있습니다.\n" +
-                    $"출발 시간 이후 늦은 cim이 차량을 놓치게 하려면 [✓] <{ToggleName}>를 사용하세요.\n" +
-                    "건너뛴 늦은 시민은 삭제되지 않으며, vanilla가 자연스럽게 경로를 다시 잡습니다.\n" +
+                    $"값을 높이면 {transitName}의 승하차가 더 빨라집니다.\n" +
+                    "승객이 타고 내릴 때의 일반 정차 시간을 줄입니다.\n" +
                     "<==========================>\n" +
-                    "적재 값:\n" +
-                    "1x = 100% vanilla 정차\n" +
-                    "2x = 계획 정차의 약 1/2\n" +
-                    "3x = 계획 정차의 약 1/3 (권장)\n" +
-                    "5x = 계획 정차의 약 1/5 (최대)\n" +
-                    $"이것은 <{ToggleName}>와 다릅니다. 이 체크박스는 출발 시간 이후 늦은 cim이 {shortName}을 놓칠 수 있는지를 결정합니다.";
+                    "탑승 값:\n" +
+                    "1x = vanilla 정차 100%\n" +
+                    "2x = 예정 정차의 약 1/2\n" +
+                    "3x = 약 1/3 (권장)\n" +
+                    "5x = 약 1/5 (최대)";
             }
 
             // One helper keeps all seven status tooltips in sync for future translations.
@@ -64,12 +59,12 @@ namespace BetterBoarding
             {
                 return
                     $"<현재 {transitName} 상태>\n" +
-                    "**대기 중** = 지금 대기 중인 총 승객 수.\n" +
-                    "**평균** = 해당 승객들의 평균 대기 시간.\n" +
-                    "**최악** 정류장 = 한 정류장의 가장 높은 평균 대기 시간.\n" +
-                    "최악 정류장은 사고, 막힌/버그난 정류장, 배정 차량 부족을 확인하기 좋은 곳입니다.\n" +
-                    $"**오늘 지각** = 오늘 <{ToggleName}>로 건너뛴 혼자 늦은 승객.\n" +
-                    "<Stats를 로그로>를 사용하면 정류장 이름, 엔티티 ID 등 자세한 보고서를 기록합니다.";
+                    "**대기** = 지금 기다리는 승객 수.\n" +
+                    "**평균** = 해당 승객의 평균 대기 시간.\n" +
+                    "**최악** = 한 정류장의 가장 긴 평균 대기 시간.\n" +
+                    "길다면 교통 체증, 막힘/버그 정류장, 차량 부족을 확인하세요.\n" +
+                    $"**오늘 해제** = <{ToggleName}>가 해제한 지연 승객 배정.\n" +
+                    "<로그에 통계>에서 정류장 이름, Entity ID 등 자세한 내용을 볼 수 있습니다.";
             }
 
             return new Dictionary<string, string>
@@ -78,69 +73,67 @@ namespace BetterBoarding
                 { m_Setting.GetSettingsLocaleID(), title },
 
                 // Tabs
-                { m_Setting.GetOptionTabLocaleID(BBoardSettings.ActionsTab), "작업" },
+                { m_Setting.GetOptionTabLocaleID(BBoardSettings.ActionsTab), "동작" },
                 { m_Setting.GetOptionTabLocaleID(BBoardSettings.AboutTab), "정보" },
 
                 // Groups
-                { m_Setting.GetOptionGroupLocaleID(BBoardSettings.SpeedGroup), "탑승 속도" },
-                { m_Setting.GetOptionGroupLocaleID(BBoardSettings.BehaviorGroup), "동작" },
+                { m_Setting.GetOptionGroupLocaleID(BBoardSettings.SpeedGroup), "승하차 속도" },
+                { m_Setting.GetOptionGroupLocaleID(BBoardSettings.BehaviorGroup), "동작 방식" },
                 { m_Setting.GetOptionGroupLocaleID(BBoardSettings.StatusGroup), "상태" },
                 { m_Setting.GetOptionGroupLocaleID(BBoardSettings.AboutInfoGroup), "모드 정보" },
                 { m_Setting.GetOptionGroupLocaleID(BBoardSettings.AboutLinksGroup), "링크" },
                 { m_Setting.GetOptionGroupLocaleID(BBoardSettings.DebugGroup), "디버그" },
 
                 // Boarding speed sliders
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.BusBoardingSpeedFactor)), "버스 탑승 속도" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.BusBoardingSpeedFactor)), "버스 승하차 속도" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.BusBoardingSpeedFactor)),
                     SpeedDescription(
                         "버스 정류장",
-                        "버스",
                         string.Empty)
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.RailBoardingSpeedFactor)), "철도 탑승 속도" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.RailBoardingSpeedFactor)), "철도 승하차 속도" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.RailBoardingSpeedFactor)),
                     SpeedDescription(
-                        "기차, 트램, 지하철 정류장",
-                        "차량",
-                        "기차, 트램, 지하철 정류장에 적용됩니다.\n")
+                        "기차·트램·지하철 정류장",
+                        "기차, 트램, 지하철에 적용됩니다.\n")
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)), "항공기 속도" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)), "항공기 승하차 속도" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)),
                     SpeedDescription(
-                        "항공기 터미널",
-                        "항공기",
+                        "공항 터미널",
                         "여객기 터미널에 적용됩니다.\n")
                 },
 
                 // Late passenger behavior
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CancelLateBoarders)), ToggleName },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CancelLateBoarders)),
-                    "<늦은 승객>이 <출발 시간> 이후에도 <준비 안 됨> 상태이면 차량을 놓칠 수 있습니다.\n" +
-                    "- 혼자 늦은 승객은 짧은 유예 후 해제되어 대중교통이 출발할 수 있습니다.\n" +
-                    "- 그룹/가족은 조금 더 유예를 받습니다. 리더가 아직 밖에 있으면 vanilla의 그룹 취소로 전체 그룹이 해제됩니다.\n" +
-                    "- 리더가 이미 탑승했다면, 뒤처진 어린이/반려동물이 vanilla 방식으로 탑승을 마치도록 도와 한 명 때문에 긴 vanilla 타임아웃까지 차량이 붙잡히지 않게 합니다.\n" +
-                    "- 건너뛴 늦은 시민은 삭제되지 않으며, vanilla가 자연스럽게 이동을 계속하거나 경로를 다시 잡습니다."
+                    "배정된 승객이 탑승하기에 확실히 너무 멀리 있을 때 버스, 트램, 기차, 지하철이 출발하도록 돕습니다.\n" +
+                    "- 정류장/역 안이나 근처의 승객은 배정을 유지하고 계속 탑승합니다.\n" +
+                    "- 긴 기차·지하철 승강장에 있는 승객은 보호됩니다.\n" +
+                    "- 확실히 멀리 있는 승객만 예정 출발 시각과 짧은 유예 후 배정을 해제할 수 있습니다.\n" +
+                    "- 그룹/가족은 아이와 반려동물이 탑승을 마치도록 추가 보호됩니다.\n" +
+                    "- 선박, 페리, 항공기는 늦은 승객을 vanilla 방식으로 처리합니다.\n" +
+                    "해제된 cim은 도시에 남아 정상적으로 여행을 계속하거나 경로를 다시 찾습니다."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "더 일찍 달리기(도움말 참고, 세 번째 패널)" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cim 더 일찍 달리기" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
-                    "<늦은> 시민이 출발 시간 **전**에 도착하도록 <더 일찍 달리기> 시작합니다.\n" +
-                    "- 버스, 트램, 기차, 지하철에서 작동하며 특히 긴 승강장에서 유용합니다.\n" +
-                    "- 현재 탑승 중인 차량에 이미 배정된 cim에게만 적용됩니다.\n" +
-                    "- vanilla는 출발 시간이 되어야 cim이 달리기 시작해서 너무 늦을 수 있습니다.\n" +
-                    $"- <{ToggleName}>와 잘 맞으며 차량을 놓쳐 다시 배정되어야 하는 cim 수를 줄일 수 있습니다.\n" +
-                    "- 차량 출발 시간을 바꾸거나 강제 탑승 또는 시민 텔레포트를 하지 않습니다."
+                    "이미 배정된 cim이 <더 일찍 달리기> 시작해 버스, 트램, 기차, 지하철을 놓치지 않도록 합니다.\n" +
+                    "- 긴 승강장이나 정류장으로 이동 중일 때 도움이 됩니다.\n" +
+                    "- vanilla보다 게임 시간 약 3분까지 일찍 시작합니다.\n" +
+                    "- 현재 승하차 중인 차량에 이미 배정된 cim만 대상입니다.\n" +
+                    "- 순간이동, 강제 탑승, 출발 시각 변경은 하지 않습니다."
                 },
 
                 // Status overview
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusOverview)), "전체 이용량" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusOverview)), "총 이용량" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusOverview)),
-                    "게임의 교통 정보 보기에서 가져온 월간 대중교통 이용량입니다.\n" +
-                    "업데이트 시간은 이 상태 스냅샷을 찍은 시각입니다(보통 옵션 메뉴에 들어간 뒤)."
+                    "게임 교통 정보 보기의 월간 대중교통 이용량입니다.\n" +
+                    "업데이트 시각은 이 상태를 읽은 시간입니다(보통 옵션을 열 때)."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)), "cim 더 일찍 달리기" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)), "일찍 달린 Cim" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)),
-                    "켜져 있으면 [x], 오늘 출발 전에 버스, 트램, 기차, 지하철을 잡으려고 **더 일찍 달리기 시작한** cim을 셉니다.\n" +
-                    "cim은 vanilla보다 512프레임 일찍 달립니다(실시간 약 2-8초 빠름, 게임 내 약 2분)."
+                    "활성 [x] 시 오늘 Better Boarding이 **더 일찍 달리게 한** cim 수를 셉니다. 버스, 트램, 기차, 지하철 대상입니다.\n" +
+                    "Run Sooner는 vanilla보다 게임 시간 약 3분까지 일찍 시작합니다."
                 },
 
                 // Status rows
@@ -160,79 +153,79 @@ namespace BetterBoarding
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusAir)), StatusDescription("항공기") },
 
                 // Status buttons
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatsToLog)), "Stats를 로그로" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatsToLog)), "로그에 통계" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatsToLog)),
-                    "**BetterBoarding.log**에 일회성 자세한 보고서를 기록합니다.\n" +
-                    "대기 총합, 교통수단별 최악 정류장 Top 3, 건너뛴 cim 예시, 엔티티 ID, 노선 힌트를 포함합니다."
+                    "**BetterBoarding.log**에 한 번 자세한 보고서를 씁니다.\n" +
+                    "대기 수, 교통수단별 최악 정류장 3곳, 해제된 승객 예시, Entity ID, 노선 정보를 포함합니다."
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.OpenLog)), "로그 열기" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.OpenLog)),
-                    "존재하면 **BetterBoarding.log**를 엽니다.\n" +
-                    "파일이 아직 없으면 Logs 폴더를 대신 엽니다."
+                    "**BetterBoarding.log**가 있으면 엽니다.\n" +
+                    "아직 없으면 Logs 폴더를 엽니다."
                 },
 
                 // About
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AboutName)), "모드" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AboutName)), "이 모드의 표시 이름입니다." },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AboutName)), "모드 표시 이름." },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AboutVersion)), "버전" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AboutVersion)), "현재 모드 버전입니다." },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AboutVersion)), "현재 모드 버전." },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.OpenParadoxMods)), "Mochi's Paradox Mods" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.OpenParadoxMods)), "제작자의 Paradox Mods 페이지를 엽니다." },
 
                 // Debug
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.EnableVerboseLogging)), "자세한 로그 사용" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.EnableVerboseLogging)), "상세 로그 사용" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.EnableVerboseLogging)),
                     "**디버그 / 테스트 전용**\n" +
-                    "용도를 정확히 아는 경우가 아니라면 항상 **OFF**로 두는 것을 권장합니다.\n" +
-                    "도시가 실행되는 동안 <Logs/BetterBoarding.log>에 <live> 세부 정보를 추가합니다.\n" +
-                    "**일반 플레이에서는 켜지 마세요.**\n" +
-                    "켜 둔 상태는 성능을 낮추고 거대한 로그 파일을 만들 수 있습니다.\n" +
-                    "오래된 로그 파일은 나중에 삭제할 수 있습니다.\n" +
-                    "참고: <Stats를 로그로>는 현재 상태와 오늘의 늦은 승객 건너뛰기 카운터를 기록하는 보고서이며, 자세한 로그처럼 지속적인 성능 영향은 없습니다.\n" +
-                    "시간 흐름을 보고 싶으면 자세한 로그를 10-15분 동안 실행하세요. 다만 많은 데이터가 기록됩니다.\n" +
-                    "일반 플레이 전에 다시 **OFF**로 바꾸는 것을 잊지 마세요."
+                    "평소에는 **OFF**로 두세요.\n" +
+                    "도시가 실행되는 동안 <Logs/BetterBoarding.log>에 <실시간> 세부 정보를 추가합니다.\n" +
+                    "**일반 플레이에서는 사용하지 마세요.**\n" +
+                    "성능이 떨어지고 로그 파일이 매우 커질 수 있습니다.\n" +
+                    "오래된 로그는 나중에 삭제할 수 있습니다.\n" +
+                    "<로그에 통계>는 한 번의 스냅샷만 기록해 상세 로그보다 부담이 적습니다.\n" +
+                    "시간 흐름이 필요할 때만 10-15분 사용하세요. 많은 데이터가 생깁니다.\n" +
+                    "일반 플레이 전 다시 **OFF**로 바꾸세요."
                 },
 
                 // Runtime status strings
-                { WaitStatus.KeyStatusNotLoaded, "상태를 불러오지 않았습니다." },
-                { WaitStatus.KeyNoCityLoaded, "불러온 도시가 없습니다." },
-                { WaitStatus.KeyNoStopsFound, "정류장을 찾지 못했습니다." },
+                { WaitStatus.KeyStatusNotLoaded, "상태 미로딩." },
+                { WaitStatus.KeyNoCityLoaded, "도시가 로드되지 않았습니다." },
+                { WaitStatus.KeyNoStopsFound, "정류장이 없습니다." },
 
                 { WaitStatus.KeyStatusLine, "{0} 대기 | 평균 {1} | 최악 {2} | {3}" },
-                { WaitStatus.KeyStatusLateSkipped, "{0} 오늘 지각" },
-                { WaitStatus.KeyStatusSkipOff, "스킵 OFF" },
+                { WaitStatus.KeyStatusLateSkipped, "오늘 {0} 해제" },
+                { WaitStatus.KeyStatusSkipOff, "기다리지 않기 OFF" },
 
-                { WaitStatus.KeyStatusOverviewLine, "관광객 {0}/월 | 시민 {1}/월 | 업데이트 {2}" },
+                { WaitStatus.KeyStatusOverviewLine, "관광객 {0}/월 | 시민 {1}/월 | 갱신 {2}" },
                 { WaitStatus.KeyStatusRunSoonerLine, "{0}" },
                 { WaitStatus.KeyStatusRunSoonerOff, "일찍 달리기 OFF" },
 
                 // Stats-to-log report strings
-                { WaitStatus.KeyReportNoCityLoaded, "[BBoard] 통계 보고서가 요청되었지만 불러온 도시가 없습니다." },
-                { WaitStatus.KeyReportTitle, "Stats를 로그로 스냅샷 - Better Boarding" },
+                { WaitStatus.KeyReportNoCityLoaded, "[BBoard] 통계 보고서를 요청했지만 로드된 도시가 없습니다." },
+                { WaitStatus.KeyReportTitle, "로그 통계 스냅샷 - Better Boarding" },
                 { WaitStatus.KeyReportSettings, "설정: {0}" },
-                { WaitStatus.KeyReportNote, "노선 힌트는 해당 정류장에서 대기 시간이 가장 높은 waypoint에서 가져옵니다." },
-                { WaitStatus.KeyReportTesterHintsHeader, "테스터 힌트" },
-                { WaitStatus.KeyReportHintWorstStops, "최악 정류장: 먼저 게임 안이나 Scene Explorer 모드로 확인하세요(엔티티 ID로 위치 찾기). 교통, 나쁜 정류장 위치, 버그난 정류장을 확인하세요." },
-                { WaitStatus.KeyReportHintSkippedCims, "건너뛴 혼자 cim: 대중교통이 출발할 수 있도록 해제한 늦은 승객입니다. 이후 상태는 보통 'has path' 또는 'assigned'가 되어야 합니다. 'no path yet'에 머물면 시간이 더 지난 뒤 해당 cim 엔티티를 확인하세요." },
-                { WaitStatus.KeyReportHintLateGroups, "늦은 그룹(가족): 보고서를 찍는 순간 아직 해결되지 않은 그룹입니다. Better Boarding은 조금 더 유예를 주며, 리더가 밖에 있으면 그룹을 해제하고 이미 탑승했다면 vanilla가 뒤처진 멤버의 탑승을 마치도록 돕습니다." },
+                { WaitStatus.KeyReportNote, "노선 정보는 해당 정류장에서 대기 시간이 가장 긴 waypoint를 기준으로 합니다." },
+                { WaitStatus.KeyReportTesterHintsHeader, "테스트 힌트" },
+                { WaitStatus.KeyReportHintWorstStops, "최악 정류장: 게임 또는 Scene Explorer에서 먼저 확인하세요(Entity ID로 위치 찾기). 교통, 위치, 정류장 버그를 확인합니다." },
+                { WaitStatus.KeyReportHintSkippedCims, "해제된 단독 배정: 각 수치는 거리 확인 후 해제된 차량 배정 1건입니다. 후속 예시에서 이후 상태를 확인하세요." },
+                { WaitStatus.KeyReportHintLateGroups, "그룹 탑승: 보고서 시점에 아직 탑승이 끝나지 않은 가족/그룹입니다. Better Boarding은 추가 유예를 주고 늦은 구성원이 탑승을 마치도록 돕습니다." },
                 { WaitStatus.KeyReportFamilyHeader, "{0}" },
                 { WaitStatus.KeyReportServedStops, "운행 정류장: {0}" },
-                { WaitStatus.KeyReportStopsWithWaiting, "대기 승객이 있는 정류장: {0}" },
+                { WaitStatus.KeyReportStopsWithWaiting, "대기 승객 있는 정류장: {0}" },
                 { WaitStatus.KeyReportWaitingPassengers, "대기 승객: {0}" },
                 { WaitStatus.KeyReportAverageWait, "평균 대기: {0}" },
-                { WaitStatus.KeyReportLateBoardersSkipped, "오늘 건너뛴 늦은 승객: {0}" },
-                { WaitStatus.KeyReportWorstStopNone, "최악 정류장: 없음, 현재 대기 승객이 없습니다." },
+                { WaitStatus.KeyReportLateBoardersSkipped, "오늘 해제한 단독 배정: {0}" },
+                { WaitStatus.KeyReportWorstStopNone, "최악 정류장: 없음. 현재 대기 승객이 없습니다." },
                 { WaitStatus.KeyReportWorstStopAverageWait, "최악 정류장 평균 대기: {0}" },
                 { WaitStatus.KeyReportWorstStopName, "최악 정류장 이름: {0}" },
-                { WaitStatus.KeyReportWorstStopEntity, "최악 정류장 엔티티: {0}" },
-                { WaitStatus.KeyReportWorstWaypointEntity, "최악 waypoint 엔티티: {0}" },
-                { WaitStatus.KeyReportWorstLineHint, "최악 노선 힌트: {0}" },
-                { WaitStatus.KeyReportWorstLineEntity, "최악 노선 엔티티: {0}" },
+                { WaitStatus.KeyReportWorstStopEntity, "최악 정류장 Entity: {0}" },
+                { WaitStatus.KeyReportWorstWaypointEntity, "최악 waypoint Entity: {0}" },
+                { WaitStatus.KeyReportWorstLineHint, "최악 노선 정보: {0}" },
+                { WaitStatus.KeyReportWorstLineEntity, "최악 노선 Entity: {0}" },
                 { WaitStatus.KeyReportWorstLineWaypointAverage, "최악 노선 waypoint 평균: {0}, 대기 {1}" },
-                { WaitStatus.KeyReportTopWorstStopsHeader, "평균 대기 기준 최악 정류장 Top {0}:" },
-                { WaitStatus.KeyReportTopWorstStopLine, "{0}. {1} | 평균 {2} | 대기 {3} | 정류장 {4} | waypoint {5} | 노선 {6} | 힌트 {7}" },
-                { WaitStatus.KeyReportLateGroups, "현재도 해결되지 않은 늦은 그룹 cim: 승객 {0}명, 그룹 {1}개, 차량 {2}대" },
-                { WaitStatus.KeyReportLastSkippedSamplesHeader, "건너뛴 혼자 늦은 cim 예시" },
+                { WaitStatus.KeyReportTopWorstStopsHeader, "평균 대기 최악 {0}개 정류장:" },
+                { WaitStatus.KeyReportTopWorstStopLine, "{0}. {1} | 평균 {2} | 대기 {3} | 정류장 {4} | waypoint {5} | 노선 {6} | 정보 {7}" },
+                { WaitStatus.KeyReportLateGroups, "그룹 탑승 미완료: 승객 {0}명 / 그룹 {1}개 / 차량 {2}대" },
+                { WaitStatus.KeyReportLastSkippedSamplesHeader, "해제된 단독 승객 예시" },
                 { WaitStatus.KeyReportLastSkippedSampleLine, "{0}. {1} | 승객 {2} | 놓친 차량 {3} | 시간 {4} | 현재 {5}" },
                 { WaitStatus.KeyReportNone, "없음" },
                 { WaitStatus.KeyReportUnknown, "(알 수 없음)" },

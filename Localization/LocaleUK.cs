@@ -21,55 +21,50 @@ namespace BetterBoarding
     {
         private readonly BBoardSettings m_Setting;
 
-        /// <summary>
-        /// Constructs the Ukrainian locale.
-        /// </summary>
-        /// <param name="setting">Settings object used for locale IDs.</param>
         public LocaleUK(BBoardSettings setting)
         {
             m_Setting = setting;
         }
 
-        /// <summary>
-        /// Creates all Ukrainian localization entries for this mod.
-        /// </summary>
         public IEnumerable<KeyValuePair<string, string>> ReadEntries(
             IList<IDictionaryEntryError> errors,
             Dictionary<string, int> indexCounts)
         {
             string title = Mod.ModName;
 
-            const string ToggleName = "Пропускати пасажирів, що запізнилися";
+            if (!string.IsNullOrEmpty(Mod.ModVersion))
+            {
+                title = title + " (" + Mod.ModVersion + ")";
+            }
 
-            string SpeedDescription(string transitName, string shortName, string extraLine)
+            const string ToggleName = "Не чекати запізнілих пасажирів";
+
+            string SpeedDescription(string transitName, string extraLine)
             {
                 return
                     "<1x = vanilla>\n" +
                     extraLine +
-                    $"Вищі значення зменшують час посадки й завантаження на {transitName}.\n" +
-                    "Це допомагає звичайним чергам рухатися швидше, але пасажир, що запізнився, все ще може затримати відправлення через логіку vanilla.\n" +
-                    $"Увімкніть [✓] <{ToggleName}>, якщо хочете, щоб cims, які запізнилися, могли пропустити транспорт після часу відправлення.\n" +
-                    "Пропущені пасажири не видаляються; vanilla природно перебудує їхній маршрут.\n" +
+                    $"Вищі значення пришвидшують посадку й висадку на {transitName}.\n" +
+                    "Це скорочує звичайний час зупинки під час обміну пасажирами.\n" +
                     "<==========================>\n" +
-                    "Значення завантаження:\n" +
-                    "1x = 100% часу стоянки vanilla\n" +
-                    "2x = ~1/2 запланованого часу стоянки\n" +
-                    "3x = ~1/3 запланованого часу стоянки (рекомендовано)\n" +
-                    "5x = ~1/5 запланованого часу стоянки (макс.)\n" +
-                    $"Це не те саме, що <{ToggleName}>; ця опція визначає, чи можуть cims, які запізнилися, пропустити {shortName} після часу відправлення.";
+                    "Значення посадки:\n" +
+                    "1x = 100% часу vanilla\n" +
+                    "2x = ~1/2 планової стоянки\n" +
+                    "3x = ~1/3 (рекомендовано)\n" +
+                    "5x = ~1/5 (макс.)";
             }
 
             // One helper keeps all seven status tooltips in sync for future translations.
             string StatusDescription(string transitName)
             {
                 return
-                    $"<Поточний стан {transitName}>\n" +
-                    "**Очікують** = загальна кількість пасажирів, що чекають зараз.\n" +
-                    "**Сер.** = середній час очікування цих пасажирів.\n" +
-                    "**Найгірша** зупинка = найвищий середній час очікування на одній зупинці.\n" +
-                    "Найгірші зупинки варто перевірити на ДТП, затори, зламані зупинки або нестачу транспорту.\n" +
-                    $"**Запізнилися сьогодні** = соло-пасажири, що запізнилися й були пропущені сьогодні через <{ToggleName}>.\n" +
-                    "Використовуйте <Статистику в лог> для детального звіту: назви зупинок, ID сутностей тощо.";
+                    $"<Поточний стан: {transitName}>\n" +
+                    "**Очікує** = пасажири, що чекають зараз.\n" +
+                    "**Сер.** = середній час очікування.\n" +
+                    "**Найгірше** = найбільше середнє очікування на одній зупинці.\n" +
+                    "Якщо воно велике, перевірте затори, заблоковану/зламану зупинку або нестачу транспорту.\n" +
+                    $"**Звільнено сьогодні** = запізнілі призначення, звільнені <{ToggleName}>.\n" +
+                    "<Статистика в лог> показує назви зупинок, Entity ID та інші деталі.";
             }
 
             return new Dictionary<string, string>
@@ -85,62 +80,60 @@ namespace BetterBoarding
                 { m_Setting.GetOptionGroupLocaleID(BBoardSettings.SpeedGroup), "Швидкість посадки" },
                 { m_Setting.GetOptionGroupLocaleID(BBoardSettings.BehaviorGroup), "Поведінка" },
                 { m_Setting.GetOptionGroupLocaleID(BBoardSettings.StatusGroup), "Стан" },
-                { m_Setting.GetOptionGroupLocaleID(BBoardSettings.AboutInfoGroup), "Інформація про мод" },
+                { m_Setting.GetOptionGroupLocaleID(BBoardSettings.AboutInfoGroup), "Інфо мода" },
                 { m_Setting.GetOptionGroupLocaleID(BBoardSettings.AboutLinksGroup), "Посилання" },
                 { m_Setting.GetOptionGroupLocaleID(BBoardSettings.DebugGroup), "Налагодження" },
 
                 // Boarding speed sliders
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.BusBoardingSpeedFactor)), "Швидкість посадки в автобус" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.BusBoardingSpeedFactor)), "Посадка в автобус" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.BusBoardingSpeedFactor)),
                     SpeedDescription(
                         "автобусних зупинках",
-                        "автобус",
                         string.Empty)
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.RailBoardingSpeedFactor)), "Швидкість посадки на рейковий транспорт" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.RailBoardingSpeedFactor)), "Посадка на рейковий транспорт" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.RailBoardingSpeedFactor)),
                     SpeedDescription(
-                        "зупинках потяга, трамвая й метро",
-                        "транспорт",
-                        "Застосовується до зупинок потяга, трамвая й метро.\n")
+                        "зупинках поїзда, трамвая й метро",
+                        "Для поїздів, трамваїв і метро.\n")
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)), "Швидкість літака" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)), "Посадка в літак" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AirBoardingSpeedFactor)),
                     SpeedDescription(
                         "авіатерміналах",
-                        "літак",
-                        "Застосовується до пасажирських авіатерміналів.\n")
+                        "Для пасажирських авіатерміналів.\n")
                 },
 
                 // Late passenger behavior
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CancelLateBoarders)), ToggleName },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CancelLateBoarders)),
-                    "<Пасажири, що запізнилися> і все ще <не готові> після <часу відправлення>, можуть пропустити транспорт.\n" +
-                    "- Соло-пасажирів, що запізнилися, відпускаємо після короткої пільгової паузи, щоб транспорт міг поїхати.\n" +
-                    "- Групи/сім’ї отримують трохи більше часу. Якщо лідер групи ще зовні, уся група звільняється через vanilla-скасування групової посадки.\n" +
-                    "- Якщо лідер уже в транспорті, Better Boarding дозволяє vanilla завершити посадку дітей/тварин, що відстали, щоб один пасажир не тримав транспорт до довгого vanilla timeout.\n" +
-                    "- Пропущені пасажири не видаляються; vanilla може природно продовжити їхню поїздку або перебудувати маршрут."
+                    "Допомагає автобусам, трамваям, поїздам і метро вирушати, коли призначений пасажир явно надто далеко, щоб сісти.\n" +
+                    "- Пасажири на зупинці/станції або поруч залишаються призначеними й продовжують посадку.\n" +
+                    "- Пасажири на довгих платформах поїзда й метро захищені.\n" +
+                    "- Явно далекий пасажир може бути звільнений після планового часу відправлення та короткого запасу.\n" +
+                    "- Групи/сім’ї мають додатковий захист, щоб діти й тварини встигли сісти.\n" +
+                    "- Кораблі, пороми й літаки залишають vanilla-обробку запізнілих пасажирів.\n" +
+                    "Звільнені cims залишаються в місті й нормально продовжують або перебудовують маршрут."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cims біжать раніше (див. підказку, 3-тя панель)" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cims біжать раніше" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
-                    "Громадяни, які <запізнюються>, починають <бігти раніше>, щоб встигнути **до** часу відправлення.\n" +
-                    "- Працює для автобусів, трамваїв, потягів і метро, особливо на довгих платформах.\n" +
-                    "- Впливає лише на cims, уже призначених до транспорту, який зараз проводить посадку.\n" +
-                    "- У vanilla cims починають бігти лише в момент відправлення, що іноді запізно.\n" +
-                    $"- Добре працює разом із <{ToggleName}>, бо може зменшити кількість cims, які пропускають транспорт і потребують нового призначення.\n" +
-                    "- Не змінює час відправлення, не змушує сідати й не телепортує громадян."
+                    "Уже призначені cims починають <бігти раніше>, щоб встигнути на автобус, трамвай, поїзд або метро до відправлення.\n" +
+                    "- Допомагає на довгих платформах і на підході до зупинки.\n" +
+                    "- Починається до ~3 ігрових хвилин раніше за vanilla.\n" +
+                    "- Впливає лише на cims, уже призначених транспорту, що здійснює посадку.\n" +
+                    "- Не телепортує, не примушує сідати й не змінює час відправлення."
                 },
 
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusOverview)), "Загальне використання" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusOverview)),
-                    "Місячне використання громадського транспорту з інфопанелі Transportation гри.\n" +
-                    "Час оновлення показує, коли зроблено цей знімок стану (зазвичай після відкриття меню параметрів)."
+                    "Місячне використання громадського транспорту з інфовікна Transportation.\n" +
+                    "Час оновлення показує, коли знято цей стан (зазвичай після відкриття Options)."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)), "Cims біжать раніше" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)), "Cims раніше" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)),
-                    "Якщо ввімкнено [x], рахує всіх cims (сьогодні), які почали **бігти раніше**, щоб встигнути на автобус, трамвай, потяг або метро до відправлення.\n" +
-                    "Cims починають бігти на 512 кадрів раніше, ніж у vanilla (~2-8 секунд реального часу, ~2 хвилини в грі)."
+                    "Якщо ввімкнено [x], рахує cims за сьогодні, яких Better Boarding змусив **бігти раніше** до автобуса, трамвая, поїзда або метро.\n" +
+                    "Run Sooner починається до ~3 ігрових хвилин раніше за vanilla."
                 },
 
                 // Status rows
@@ -148,8 +141,8 @@ namespace BetterBoarding
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusBus)), StatusDescription("автобус") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusTram)), "Трамвай" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTram)), StatusDescription("трамвай") },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusTrain)), "Потяг" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTrain)), StatusDescription("потяг") },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusTrain)), "Поїзд" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTrain)), StatusDescription("поїзд") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusSubway)), "Метро" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusSubway)), StatusDescription("метро") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusFerry)), "Пором" },
@@ -160,37 +153,37 @@ namespace BetterBoarding
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusAir)), StatusDescription("літак") },
 
                 // Status buttons
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatsToLog)), "Статистику в лог" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatsToLog)), "Статистика в лог" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatsToLog)),
                     "Записує одноразовий детальний звіт у **BetterBoarding.log**.\n" +
-                    "Містить загальну кількість очікувань, 3 найгірші зупинки для кожного виду, приклади пропущених cims, ID сутностей і підказки ліній."
+                    "Містить кількість очікувань, 3 найгірші зупинки для кожного виду, приклади звільнених пасажирів, Entity ID та підказки ліній."
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.OpenLog)), "Відкрити лог" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.OpenLog)),
                     "Відкриває **BetterBoarding.log**, якщо він існує.\n" +
-                    "Якщо файл ще не створено, відкриває папку Logs."
+                    "Якщо ні — відкриває папку Logs."
                 },
 
                 // About
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AboutName)), "Mod" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AboutName)), "Відображувана назва мода." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AboutName)), "Мод" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AboutName)), "Назва мода, що відображається." },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.AboutVersion)), "Версія" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.AboutVersion)), "Поточна версія мода." },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.OpenParadoxMods)), "Mochi's Paradox Mods" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.OpenParadoxMods)), "Відкриває сторінку автора на Paradox Mods." },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.OpenParadoxMods)), "Відкриває сторінку автора в Paradox Mods." },
 
                 // Debug
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.EnableVerboseLogging)), "Увімкнути детальний лог" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.EnableVerboseLogging)), "Детальний лог" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.EnableVerboseLogging)),
-                    "**Лише для налагодження / тестування**\n" +
-                    "Рекомендується завжди тримати **ВИМК.**, якщо ви не знаєте, для чого це потрібно.\n" +
-                    "Додає <живі> подробиці до <Logs/BetterBoarding.log>, поки місто працює.\n" +
+                    "**Лише налагодження / тест**\n" +
+                    "Зазвичай залишайте **ВИМК.**\n" +
+                    "Додає <live>-деталі в <Logs/BetterBoarding.log> під час роботи міста.\n" +
                     "**Не вмикайте для звичайної гри.**\n" +
-                    "Якщо залишити це ввімкненим, продуктивність може знизитися, а файли логів сильно вирости.\n" +
-                    "Старі файли логів можна видалити пізніше.\n" +
-                    "Примітка: <Статистику в лог> — це звіт про поточний стан із сьогоднішніми лічильниками пропущених пасажирів; він не має такого впливу на продуктивність, як детальний лог.\n" +
-                    "Запустіть детальний лог на 10-15 хв, якщо хочете побачити хронологію подій, але він створює багато даних.\n" +
-                    "Не забудьте знову **ВИМКНУТИ** детальний лог перед звичайною грою."
+                    "Може знизити продуктивність і створити дуже великі логи.\n" +
+                    "Старі логи можна видалити пізніше.\n" +
+                    "<Статистика в лог> записує лише один знімок і має малий вплив порівняно з детальним логом.\n" +
+                    "Увімкніть на 10-15 хв, якщо потрібна хронологія; це створює багато даних.\n" +
+                    "Перед звичайною грою знову **ВИМК.**"
                 },
 
                 // Runtime status strings
@@ -198,41 +191,41 @@ namespace BetterBoarding
                 { WaitStatus.KeyNoCityLoaded, "Місто не завантажено." },
                 { WaitStatus.KeyNoStopsFound, "Зупинок не знайдено." },
 
-                { WaitStatus.KeyStatusLine, "{0} очікують | сер. {1} | найгірша {2} | {3}" },
-                { WaitStatus.KeyStatusLateSkipped, "{0} запізнилися сьогодні" },
-                { WaitStatus.KeyStatusSkipOff, "пропуск ВИМК." },
+                { WaitStatus.KeyStatusLine, "{0} чекає | сер. {1} | гірш. {2} | {3}" },
+                { WaitStatus.KeyStatusLateSkipped, "{0} звіл. сьогодні" },
+                { WaitStatus.KeyStatusSkipOff, "не чекати ВИМК." },
 
-                { WaitStatus.KeyStatusOverviewLine, "{0} туристів/міс. | {1} громадян/міс. | оновл. {2}" },
+                { WaitStatus.KeyStatusOverviewLine, "{0} тур./міс. | {1} мешк./міс. | {2}" },
                 { WaitStatus.KeyStatusRunSoonerLine, "{0}" },
-                { WaitStatus.KeyStatusRunSoonerOff, "ранній біг ВИМК." },
+                { WaitStatus.KeyStatusRunSoonerOff, "біг раніше ВИМК." },
 
                 // Stats-to-log report strings
                 { WaitStatus.KeyReportNoCityLoaded, "[BBoard] Запитано звіт, але місто не завантажено." },
                 { WaitStatus.KeyReportTitle, "Знімок статистики в лог - Better Boarding" },
                 { WaitStatus.KeyReportSettings, "Налаштування: {0}" },
                 { WaitStatus.KeyReportNote, "Підказка лінії береться з waypoint із найбільшим очікуванням на цій зупинці." },
-                { WaitStatus.KeyReportTesterHintsHeader, "Підказки тестувальнику" },
-                { WaitStatus.KeyReportHintWorstStops, "Найгірші зупинки: перевірте їх першими в грі або через мод Scene Explorer (знайдіть за entity ID). Шукайте затори, невдале розташування або зламану зупинку." },
-                { WaitStatus.KeyReportHintSkippedCims, "Пропущені соло-cims: пасажири, що запізнилися, яких відпускаємо, щоб транспорт міг поїхати. Пізніше стан зазвичай має стати 'has path' або 'assigned'. Якщо лишається 'no path yet', перевірте сутність пізніше." },
-                { WaitStatus.KeyReportHintLateGroups, "Групи, що запізнилися (сім’ї): показує групи, які ще не вирішені саме в момент звіту. Better Boarding дає їм трохи більше часу; якщо лідер ще зовні, відпускає всю групу, а якщо вже в транспорті — допомагає vanilla завершити посадку тих, хто відстав." },
+                { WaitStatus.KeyReportTesterHintsHeader, "Підказки тестування" },
+                { WaitStatus.KeyReportHintWorstStops, "Найгірші зупинки: спочатку перевірте в грі або через Scene Explorer (місце за Entity ID). Шукайте затори, невдале розташування або зламану зупинку." },
+                { WaitStatus.KeyReportHintSkippedCims, "Звільнені одиночні призначення: кожен рахунок — одне призначення транспорту, звільнене після перевірки відстані. Приклади нижче показують, що сталося далі." },
+                { WaitStatus.KeyReportHintLateGroups, "Посадка груп: показує сім’ї/групи, що ще не завершили посадку на момент звіту. Better Boarding дає додатковий час і допомагає відсталим членам завершити посадку." },
                 { WaitStatus.KeyReportFamilyHeader, "{0}" },
                 { WaitStatus.KeyReportServedStops, "Обслуговувані зупинки: {0}" },
-                { WaitStatus.KeyReportStopsWithWaiting, "Зупинки з пасажирами, що чекають: {0}" },
-                { WaitStatus.KeyReportWaitingPassengers, "Пасажири в очікуванні: {0}" },
+                { WaitStatus.KeyReportStopsWithWaiting, "Зупинки з пасажирами: {0}" },
+                { WaitStatus.KeyReportWaitingPassengers, "Пасажири очікують: {0}" },
                 { WaitStatus.KeyReportAverageWait, "Середнє очікування: {0}" },
-                { WaitStatus.KeyReportLateBoardersSkipped, "Пасажири, пропущені сьогодні через запізнення: {0}" },
+                { WaitStatus.KeyReportLateBoardersSkipped, "Звільнено одиночних призначень сьогодні: {0}" },
                 { WaitStatus.KeyReportWorstStopNone, "Найгірша зупинка: немає, зараз ніхто не чекає." },
-                { WaitStatus.KeyReportWorstStopAverageWait, "Сер. очікування на найгіршій зупинці: {0}" },
+                { WaitStatus.KeyReportWorstStopAverageWait, "Сер. очікування найгіршої зупинки: {0}" },
                 { WaitStatus.KeyReportWorstStopName, "Назва найгіршої зупинки: {0}" },
                 { WaitStatus.KeyReportWorstStopEntity, "Entity найгіршої зупинки: {0}" },
-                { WaitStatus.KeyReportWorstWaypointEntity, "Entity найгіршого waypoint: {0}" },
+                { WaitStatus.KeyReportWorstWaypointEntity, "Waypoint Entity найгіршої зупинки: {0}" },
                 { WaitStatus.KeyReportWorstLineHint, "Підказка найгіршої лінії: {0}" },
                 { WaitStatus.KeyReportWorstLineEntity, "Entity найгіршої лінії: {0}" },
-                { WaitStatus.KeyReportWorstLineWaypointAverage, "Сер. waypoint найгіршої лінії: {0}, очікують {1}" },
+                { WaitStatus.KeyReportWorstLineWaypointAverage, "Середнє waypoint найгіршої лінії: {0}, чекає {1}" },
                 { WaitStatus.KeyReportTopWorstStopsHeader, "Топ {0} найгірших зупинок за середнім очікуванням:" },
-                { WaitStatus.KeyReportTopWorstStopLine, "{0}. {1} | сер. {2} | очікують {3} | зупинка {4} | waypoint {5} | лінія {6} | підказка {7}" },
-                { WaitStatus.KeyReportLateGroups, "Групові cims, що запізнилися й досі не вирішені: {0} пасажирів у {1} групах на {2} транспортних засобах" },
-                { WaitStatus.KeyReportLastSkippedSamplesHeader, "Приклади пропущених соло-cims, що запізнилися" },
+                { WaitStatus.KeyReportTopWorstStopLine, "{0}. {1} | сер. {2} | чекає {3} | зупинка {4} | waypoint {5} | лінія {6} | підказка {7}" },
+                { WaitStatus.KeyReportLateGroups, "Посадка груп не завершена: {0} пасажирів у {1} групах на {2} транспортних засобах" },
+                { WaitStatus.KeyReportLastSkippedSamplesHeader, "Приклади звільнених одиночних пасажирів" },
                 { WaitStatus.KeyReportLastSkippedSampleLine, "{0}. {1} | пасажир {2} | пропущений транспорт {3} | час {4} | зараз {5}" },
                 { WaitStatus.KeyReportNone, "немає" },
                 { WaitStatus.KeyReportUnknown, "(невідомо)" },
