@@ -12,7 +12,9 @@
 namespace BetterBoarding
 {
     using System;
+#if DEBUG
     using System.Globalization;
+#endif
     using System.Text;
     using CS2Shared.RiverMochi;
     using Game;
