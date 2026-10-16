@@ -115,6 +115,7 @@ tags: faster boarding, boarding time, bus stop issues, slow stuck transit, debun
 <!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
 <ChangeLog>
 - Fix for 1.3.0 passenger-release behavior, especially for trains.
+- Performance improvements: reduced boarding-assist overhead with earlier filtering, and cached data.
 </ChangeLog>
 <!--External link. supported types are discord, github, youtube, twitch, x, paypal, patreon, buymeacoffee, kofi, crowdin, gitlab-->
 <ExternalLink Type="github" Url="https://github.com/River-Mochi/BetterBoarding"/>
