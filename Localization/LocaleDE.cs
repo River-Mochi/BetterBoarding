@@ -30,7 +30,7 @@ namespace BetterBoarding
             IList<IDictionaryEntryError> errors,
             Dictionary<string, int> indexCounts)
         {
-            string title = Mod.ModName;
+            string title = Mod.ModName + " (Besseres Einsteigen)";
 
             if (!string.IsNullOrEmpty(Mod.ModVersion))
             {

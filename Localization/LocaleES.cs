@@ -30,12 +30,7 @@ namespace BetterBoarding
             IList<IDictionaryEntryError> errors,
             Dictionary<string, int> indexCounts)
         {
-            string title = Mod.ModName;
-
-            if (!string.IsNullOrEmpty(Mod.ModVersion))
-            {
-                title = title + " (" + Mod.ModVersion + ")";
-            }
+            string title = Mod.ModName + " (Embarque mejorado)";
 
             const string ToggleName = "Omitir pasajeros retrasados";
 
