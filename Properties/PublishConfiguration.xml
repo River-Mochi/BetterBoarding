@@ -20,15 +20,15 @@ Vanilla only releases a stuck transit vehicle after ~10 in-game minutes.
 
 └─────────────────────────────────────────────────────────┘
 
-**Better Boarding steps in much sooner to skip late passengers who are too far away so they don't hold everyone up. Transit can keep moving sooner.** In testing, before-and-after comparisons also showed higher total transit usage.
+**Better Boarding steps in sooner to skip late passengers who are too far away so they don't hold everyone up. Transit can keep moving sooner.** In testing, before-and-after comparisons also showed higher total transit usage.
 
 ### 🏃‍➡️🏃‍♀️‍➡️🏃‍♂️‍➡️ 🚍 More Transit Use
 
-*   ✅ **Skip Late Passengers** — after a short grace, a late passenger who is too far away from the stop/station and vehicle can miss it instead of holding it up (bus, tram, train, or subway). Groups/families are handled too.
 *   ✅ **Cims Run Sooner** — assigned passengers start running before vanilla normally tells them to.
 *   ✅ **Helps long train platforms** — cims hanging around far from the doors get a head start instead of waiting until departure time to start running (vanilla behavior).
+*   ✅ **Skip Late Passengers** — after a short grace, a late cim who is too far away from the stop/station and vehicle can miss it instead of holding it up (bus, tram, train, or subway). Groups/families are handled too.
 *   ✅ **Boarding/Loading** — adjust from **1x vanilla to 5x**, for shorter planned dwell/loading times.
-*   Vanilla may still **hold a vehicle briefly for spacing** as part of its un-bunching system.
+*   Vanilla may still hold a vehicle briefly **for spacing** as part of its un-bunching system.
 *   Skipped cims aren't deleted; vanilla can continue or reroute their trip.
 
 Reduce boarding delays, traffic backups, and vehicles bunching up — especially in busy transit cities.
@@ -52,7 +52,7 @@ Better Boarding mainly fixes citizen behavior that can keep boarding open too lo
 
 **Late passengers / families**
 
-*   Riders confirmed far from the bus/tram stop or train/subway station get a short grace after scheduled departure time, then can miss that vehicle instead of holding everyone. Vanilla naturally reassigns them, often to the next vehicle.
+*   Riders confirmed far from the bus/tram stop or train/subway station get a short grace after scheduled departure time, then can miss that vehicle instead of holding everyone. Vanilla naturally reassigns them, often to the next transit vehicle.
 *   Families/groups are kept together where possible. If a group leader is already aboard, a separated child or pet is handled so one straggler doesn't hold up transit.
 
 **Cims Run Sooner**

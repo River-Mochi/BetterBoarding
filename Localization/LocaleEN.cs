@@ -123,12 +123,14 @@ namespace BetterBoarding
                     "- Ships, ferries, and airplanes keep vanilla late-passenger handling."
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cims Run Sooner" },
+
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
                     "Assigned cims start <running sooner> to help catch transit before it leaves.\n" +
                     "- Starts up to about 3 in-game minutes earlier than vanilla.\n" +
+                    "- Real movement assists: testing shows assisted cims often are able to board the same assigned vehicle.\n" +
                     "- Helps on long platforms and while approaching a stop.\n" +
                     "- Only affects cims already assigned to a boarding vehicle.\n" +
-                    "- Does not teleport cims or change departure times."
+                    "- Does not change departure times."
                 },
 
                 // Status overview
