@@ -205,23 +205,28 @@ namespace BetterBoarding
             for (int i = 0; i < passengers.Length; i++)
             {
                 Entity passenger = passengers[i].m_Passenger;
+
                 if (!EntityManager.Exists(passenger) ||
                     EntityManager.HasComponent<Deleted>(passenger) ||
                     EntityManager.HasComponent<Destroyed>(passenger) ||
                     EntityManager.HasComponent<Temp>(passenger) ||
                     EntityManager.HasComponent<Overridden>(passenger) ||
                     !EntityManager.HasComponent<CurrentVehicle>(passenger) ||
-                    !EntityManager.HasComponent<Human>(passenger))
+                    !EntityManager.HasComponent<Human>(passenger) ||
+                    !EntityManager.HasComponent<HumanCurrentLane>(passenger))
                 {
                     continue;
                 }
 
-                CurrentVehicle currentVehicle = EntityManager.GetComponentData<CurrentVehicle>(passenger);
-                if (currentVehicle.m_Vehicle != vehicleEntity ||
-                    (currentVehicle.m_Flags & CreatureVehicleFlags.Ready) != 0)
-                {
-                    continue;
-                }
+            CurrentVehicle currentVehicle =
+                EntityManager.GetComponentData<CurrentVehicle>(passenger);
+
+            if (currentVehicle.m_Vehicle != vehicleEntity ||
+                (currentVehicle.m_Flags &
+                    (CreatureVehicleFlags.Ready | CreatureVehicleFlags.Entering)) != 0)
+            {
+                continue;
+            }
 
                 Human human = EntityManager.GetComponentData<Human>(passenger);
                 if ((human.m_Flags & HumanFlags.Run) != 0)

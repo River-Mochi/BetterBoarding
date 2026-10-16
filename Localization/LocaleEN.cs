@@ -13,6 +13,10 @@ namespace BetterBoarding
 {
     using System.Collections.Generic;
     using Colossal;
+    using Game.Citizens;
+    using Game.Common;
+    using Game.Objects;
+    using UnityEngine;
 
     /// <summary>
     /// English localization source.
@@ -55,7 +59,7 @@ namespace BetterBoarding
         
                     "This helps normal queues clear faster, but a late passenger can still delay departure because of vanilla design.\n" +
                     $"<{ToggleName}> can release clearly distant bus, tram, train, and subway riders after departure time; nearby riders stay assigned.\n" +
-                    "Skipped citizens are not deleted; vanilla may continue or reroute their trips. Airplane riders are not skipped early.\n" +
+                    "Skipped citizens are not deleted; vanilla may continue or reroute their trips. Ship, ferry, and airplane riders are not skipped early.\n" +
                     "<==========================>\n" +
                     "Loading value:\n" +
                     "1x = 100% vanilla dwell\n" +
@@ -128,6 +132,7 @@ namespace BetterBoarding
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cims Run Sooner (see tooltip, 3rd panel)" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
                     "Citizens who are <late> start <running sooner> to try to make it **before** departure time.\n" +
+                    "Assigned citizens start <running sooner> before departure time.\n" +
                     "- Works for buses, trams, trains, and subways, especially on long platforms.\n" +
                     "- Only affects cims already assigned to a vehicle that is currently boarding.\n" +
                     "- Vanilla only starts cims running at departure time, which can be too late to help.\n" +

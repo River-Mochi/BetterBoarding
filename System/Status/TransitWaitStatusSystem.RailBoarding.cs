@@ -43,6 +43,7 @@ namespace BetterBoarding
             public int CarCount;
             public int Ready;
             public int Unready;
+            public int Entering;
             public int ClearlyFar;
             public int ProtectedNear;
             public int ProtectedStationLane;
@@ -177,7 +178,10 @@ namespace BetterBoarding
                     $"{departure} | cars {snapshot.CarCount} | " +
                     $"vanilla boarding distances max {snapshot.MaxBoardingDistance.ToString("G6", CultureInfo.InvariantCulture)}m, " +
                     $"nearest waiting {snapshot.MinWaitingDistance.ToString("G6", CultureInfo.InvariantCulture)}m | " +
-                    $"ready {snapshot.Ready}, unready {snapshot.Unready}, " +
+
+                    $"boarding complete {snapshot.Ready}, " +
+                    $"boarding incomplete {snapshot.Unready} " +
+                    $"(entering transition {snapshot.Entering}), " +
                     $"clearly far {snapshot.ClearlyFar}, protected near {snapshot.ProtectedNear}, " +
                     $"protected station lane {snapshot.ProtectedStationLane}, " +
                     $"protected unknown {snapshot.ProtectedUnknown}, " +
@@ -233,6 +237,13 @@ namespace BetterBoarding
                 }
 
                 snapshot.Unready++;
+
+                if ((assignment.m_Flags & CreatureVehicleFlags.Entering) != 0)
+                {
+                    snapshot.Entering++;
+                }
+
+
                 string proximity = "position or station topology unknown (protected)";
                 bool measured = LatePassengerProximityPolicy.TryMeasure(
                         EntityManager,
@@ -283,7 +294,7 @@ namespace BetterBoarding
                         .m_Timer.ToString(CultureInfo.InvariantCulture)
                     : "n/a";
                 snapshot.RiderSamples.Add(
-                    $"rider {rider} | assigned car {car} | group {group} | " +
+                    $"rider {rider} | assigned car {car} | flags {assignment.m_Flags} | group {group} | " +
                     $"walking {walking} | resident timer {timer} | " +
                     $"clearly far {clearlyFar} | {proximity}");
             }

@@ -131,7 +131,7 @@ namespace BetterBoarding
             m_LastDiagnosticFrame = frame;
             LogUtils.Info(
                 Mod.s_Log,
-                () => $"Boarding assist: vehicles={stats.Vehicles}, passengersScanned={stats.Passengers}, lateSolo={stats.Candidates}, skipped={stats.Canceled}, runFlagsSetByBB={stats.RunSoonerAssists}, totalSkipped={m_TotalCanceled}, totalRunSooner={m_TotalRunSoonerAssists}");
+                () => $"Boarding assist: vehicles={stats.Vehicles}, passengersScanned={stats.Passengers}, farSoloCandidates={stats.Candidates}, released={stats.Canceled}, runFlagsSetByBB={stats.RunSoonerAssists}, totalReleased={m_TotalCanceled}, totalRunSooner={m_TotalRunSoonerAssists}");
         }
 
         private void TrackFollowUpSample(CanceledPassengerSample sample)
@@ -416,7 +416,7 @@ namespace BetterBoarding
 
                 LogUtils.Info(
                     Mod.s_Log,
-                    () => $"Skipped Late Passenger: {sample.TransportType} | cim={sample.Passenger} | missed={sample.Vehicle} | skipped={sample.LocalTime:HH:mm:ss} | followUp={canceledFollowUpLocalTime:HH:mm:ss} | state={DescribeFollowUpState(canceledFollowUpSnapshot, sample.Vehicle, sample.Passenger, frame)}");
+                    () => $"Released Distant Passenger: {sample.TransportType} | cim={sample.Passenger} | missed={sample.Vehicle} | skipped={sample.LocalTime:HH:mm:ss} | followUp={canceledFollowUpLocalTime:HH:mm:ss} | state={DescribeFollowUpState(canceledFollowUpSnapshot, sample.Vehicle, sample.Passenger, frame)}");
             }
         }
 
@@ -518,8 +518,8 @@ namespace BetterBoarding
                 {
                     bool ready = (snapshot.CurrentVehicleFlags & CreatureVehicleFlags.Ready) != 0;
                     string sameVehicleResult = ready
-                        ? $"made same vehicle {snapshot.CurrentVehicleText}"
-                        : $"same vehicle not ready {snapshot.CurrentVehicleText}";
+                        ? $"made same vehicle; boarding complete {snapshot.CurrentVehicleText}"
+                        : $"same vehicle; boarding incomplete {snapshot.CurrentVehicleText}";
 
                     return AppendFollowUpTargetDetails(sameVehicleResult, snapshot);
                 }
@@ -771,7 +771,8 @@ namespace BetterBoarding
             }
 
             return
-                $"passengerBuffer={passengers.Length}, ready={readyCount}, notReady={notReadyCount}, containsCim={containsFollowedPassenger}";
+                $"passengerBuffer={passengers.Length}, boardingComplete={readyCount}, boardingIncomplete={notReadyCount}, containsCim={containsFollowedPassenger}";
+
         }
 
         private static string AppendFollowUpTargetDetails(

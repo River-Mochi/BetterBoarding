@@ -556,15 +556,15 @@ namespace BetterBoarding
             AppendTimingFields(sb, snapshot.BoardingAssist);
             AppendField(sb, "Vehicles scanned", LocaleUtils.FormatN0(snapshot.VehiclesScanned));
             AppendField(sb, "Passengers scanned", LocaleUtils.FormatN0(snapshot.PassengersScanned));
-            AppendField(sb, "Late solo candidates", LocaleUtils.FormatN0(snapshot.LateSoloCandidates));
-            AppendField(sb, "Late solo canceled", LocaleUtils.FormatN0(snapshot.LateSoloCanceled));
+            AppendField(sb, "Far solo candidates", LocaleUtils.FormatN0(snapshot.LateSoloCandidates));
+            AppendField(sb, "Solo assignments released", LocaleUtils.FormatN0(snapshot.LateSoloCanceled));
             AppendField(sb, "Run Sooners applied", LocaleUtils.FormatN0(snapshot.RunSoonerAssists));
             AppendField(
                 sb,
                 "Command buffer playbacks",
                 LocaleUtils.FormatN0(snapshot.BoardingCommandBufferPlaybacks));
 
-            AppendSubHeader(sb, "Late-family assist");
+            AppendSubHeader(sb, "Group boarding assist");
             AppendTimingFields(sb, snapshot.LateGroups);
             AppendField(
                 sb,
@@ -842,7 +842,7 @@ namespace BetterBoarding
             AppendField(sb, "Solo assignments released", LocaleUtils.FormatN0(lateBoardersCanceledToday) + " today");
             AppendField(
                 sb,
-                "Late groups unresolved now",
+                "Group boarding incomplete now",
                 $"{LocaleUtils.FormatN0(family.LateGroupPassengers)} passengers | {LocaleUtils.FormatN0(family.LateGroupGroups)} groups | {LocaleUtils.FormatN0(family.LateGroupVehicles)} vehicles");
 #if DEBUG
             AppendField(sb, "Follow-up outcomes (verbose)", FormatFollowUpOutcomes(followUpOutcomes));

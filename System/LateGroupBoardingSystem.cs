@@ -27,10 +27,10 @@ namespace BetterBoarding
     using Unity.Mathematics;
 
     /// <summary>
-    /// Handles the group/family cases deliberately excluded from the normal late-passenger pass.
+    /// Handles the group/family cases we exclude from the normal late-passenger pass.
     ///
-    /// If the leader is still outside, the leader is safely detached and vanilla cancels the
-    /// followers after observing that their leader no longer has CurrentVehicle. If the leader
+    /// If leader is still outside, the leader is safely detached and vanilla cancels the
+    /// followers after seeing their leader no longer has CurrentVehicle. If the leader
     /// has boarded, walking members are prompted to enter and assigned members receive vanilla's
     /// existing boarding-timeout nudge. ResidentAISystem or PetAISystem still performs every
     /// actual enter/finish transition and its bookkeeping.
@@ -456,7 +456,9 @@ namespace BetterBoarding
             Entity leader,
             Entity assignedVehicle)
         {
-            if (!EntityManager.HasComponent<Game.Creatures.Resident>(leader) ||
+
+            if (!EntityManager.HasComponent<CurrentVehicle>(leader) ||
+                !EntityManager.HasComponent<Game.Creatures.Resident>(leader) ||
                 !EntityManager.HasComponent<Human>(leader) ||
                 !EntityManager.HasComponent<PathOwner>(leader) ||
                 !EntityManager.HasBuffer<PathElement>(leader) ||
@@ -464,6 +466,17 @@ namespace BetterBoarding
             {
                 return false;
             }
+
+            CurrentVehicle currentVehicle =
+                EntityManager.GetComponentData<CurrentVehicle>(leader);
+
+            if (currentVehicle.m_Vehicle != assignedVehicle ||
+                (currentVehicle.m_Flags &
+                    (CreatureVehicleFlags.Ready | CreatureVehicleFlags.Entering)) != 0)
+            {
+                return false;
+            }
+
 
             PathOwner pathOwner = EntityManager.GetComponentData<PathOwner>(leader);
             DynamicBuffer<PathElement> pathElements =
