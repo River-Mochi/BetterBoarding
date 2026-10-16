@@ -48,24 +48,15 @@ namespace BetterBoarding
                     "5x = ~1/5 sosta prevista (max)";
             }
 
-            // One helper keeps the status tooltips consistent while explaining
-            // which modes Better Boarding can actually skip late passengers for.
-            string StatusDescription(string transitName, bool skipSupported)
+            string StatusDescription(string transitName)
             {
-                string skippedText = skipSupported
-                    ? "**Saltati** = passeggeri in ritardo saltati oggi, così il trasporto non continua ad aspettarli.\n" +
-                      "Better Boarding interviene molto prima del limite vanilla di ~10 minuti per un veicolo bloccato.\n" +
-                      $"Controllato da <{ToggleName}>.\n"
-                    : "**Saltati** = 0 per questa modalità. Mantiene la gestione vanilla dei passeggeri in ritardo.\n";
-
                 return
                     $"<Stato attuale: {transitName}>\n" +
                     "**In attesa** = passeggeri in attesa adesso.\n" +
                     "**Media** = attesa media di quei passeggeri.\n" +
                     "**Peggiore** = attesa media più alta a una fermata.\n" +
                     "Se è alta, controlla traffico, fermate bloccate/buggate o pochi veicoli.\n" +
-                    skippedText +
-                    "<Stats nel log> mostra fermate, ID entità e altri dettagli.";
+                    "<Stats nel log> mostra fermate, ID entità, passeggeri in ritardo saltati e altro.";
             }
 
             return new Dictionary<string, string>
@@ -105,26 +96,28 @@ namespace BetterBoarding
                         "Vale per i terminal passeggeri degli aerei.\n")
                 },
 
-                // Late passenger behavior
+                // Boarding behavior
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cims corrono prima" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
+                    "I cims assegnati iniziano a <correre prima> per prendere il trasporto prima che parta.\n" +
+                    "- Inizia fino a circa 3 minuti di gioco prima di vanilla.\n" +
+                    "- Aiuto di movimento reale: i test mostrano che molti cim aiutati riescono poi a salire sullo stesso veicolo assegnato.\n" +
+                    "- Aiuta sulle banchine lunghe e mentre si avvicinano alla fermata.\n" +
+                    "- Vale solo per cims già assegnati a un veicolo che sta imbarcando.\n" +
+                    "- Non teletrasporta i cims e non cambia gli orari di partenza."
+                },
+
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CancelLateBoarders)), ToggleName },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CancelLateBoarders)),
-                    "Un passeggero in ritardo troppo lontano dalla fermata può essere saltato, così il trasporto non continua ad aspettarlo.\n" +
+                    "Rete di sicurezza per i casi insoliti in cui il trasporto continua ad aspettare dopo la partenza un passeggero chiaramente lontano.\n" +
                     "Better Boarding interviene molto prima del limite vanilla di ~10 minuti per un veicolo bloccato.\n" +
+                    "- Cims Run Sooner aiuta prima nei casi normali; questa opzione gestisce i ritardatari che restano ancora troppo lontani.\n" +
                     "- Chi è alla fermata/stazione o vicino resta assegnato e continua a salire.\n" +
                     "- Le lunghe banchine di treno/metro restano protette.\n" +
                     "- Gruppi/famiglie hanno protezione extra.\n" +
                     "- I cims saltati restano in città; vanilla può continuare o ricalcolare il viaggio, spesso su un veicolo successivo.\n" +
                     "- Navi, traghetti e aerei mantengono la gestione vanilla dei passeggeri in ritardo."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cims corrono prima" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
-                    "I cims assegnati iniziano a <correre prima> per prendere il trasporto prima che parta.\n" +
-                    "- Inizia fino a circa 3 minuti di gioco prima di vanilla.\n" +
-                    "- Aiuta sulle banchine lunghe e mentre si avvicinano alla fermata.\n" +
-                    "- Vale solo per cims già assegnati a un veicolo che sta imbarcando.\n" +
-                    "- Non teletrasporta i cims e non cambia gli orari di partenza."
-                },
-
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusOverview)), "Uso totale" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusOverview)),
@@ -133,25 +126,31 @@ namespace BetterBoarding
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)), "Cims prima" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)),
-                    "Conta i cims che Better Boarding ha fatto **correre prima** oggi.\n" +
-                    "Fino a circa 3 minuti di gioco prima di vanilla."
+                    "Conta gli **aiuti a correre prima** di oggi per tipo di trasporto.\n" +
+                    "I test confermano che molti cim aiutati riescono poi a salire sullo stesso veicolo assegnato."
+                },
+
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusGroupFamilyAssists)), "Aiuti a gruppi/famiglie" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusGroupFamilyAssists)),
+                    "Conta gli aiuti di Better Boarding a gruppi/famiglie di oggi.\n" +
+                    "Include aiutare i membri in ritardo a salire e gestire in sicurezza i gruppi idonei ancora molto lontani."
                 },
 
                 // Status rows
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusBus)), "Autobus" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusBus)), StatusDescription("autobus", skipSupported: true) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusBus)), StatusDescription("autobus") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusTram)), "Tram" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTram)), StatusDescription("tram", skipSupported: true) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTram)), StatusDescription("tram") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusTrain)), "Treno" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTrain)), StatusDescription("treno", skipSupported: true) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTrain)), StatusDescription("treno") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusSubway)), "Metro" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusSubway)), StatusDescription("metro", skipSupported: true) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusSubway)), StatusDescription("metro") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusFerry)), "Traghetto" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusFerry)), StatusDescription("traghetto", skipSupported: false) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusFerry)), StatusDescription("traghetto") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusShip)), "Nave" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusShip)), StatusDescription("nave", skipSupported: false) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusShip)), StatusDescription("nave") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusAir)), "Aereo" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusAir)), StatusDescription("aereo", skipSupported: false) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusAir)), StatusDescription("aereo") },
 
                 // Status buttons
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatsToLog)), "Stats nel log" },
@@ -189,13 +188,12 @@ namespace BetterBoarding
                 { WaitStatus.KeyNoCityLoaded, "Nessuna città caricata." },
                 { WaitStatus.KeyNoStopsFound, "Nessuna fermata trovata." },
 
-                { WaitStatus.KeyStatusLine, "{0} attesa | med. {1} | peggio {2} | {3}" },
-                { WaitStatus.KeyStatusLateSkipped, "{0} ritardatari saltati" },
-                { WaitStatus.KeyStatusSkipOff, "salta OFF" },
+                { WaitStatus.KeyStatusLine, "{0} attesa | med. {1} | peggio {2}" },
 
                 { WaitStatus.KeyStatusOverviewLine, "{0} tur./mese | {1} citt./mese | agg. {2}" },
                 { WaitStatus.KeyStatusRunSoonerLine, "{0}" },
                 { WaitStatus.KeyStatusRunSoonerOff, "corri prima OFF" },
+                { WaitStatus.KeyStatusGroupFamilyAssistsLine, "{0} oggi" },
 
                 // Stats-to-log report strings
                 { WaitStatus.KeyReportNoCityLoaded, "[BBoard] Rapporto richiesto, ma non è caricata alcuna città." },

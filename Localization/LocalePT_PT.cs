@@ -30,7 +30,7 @@ namespace BetterBoarding
             IList<IDictionaryEntryError> errors,
             Dictionary<string, int> indexCounts)
         {
-           string title = Mod.ModName + " (Embarque melhorado)";
+            string title = Mod.ModName + " (Embarque melhorado)";
 
             const string ToggleName = "Não esperar passageiros atrasados";
 
@@ -48,24 +48,15 @@ namespace BetterBoarding
                     "5x = ~1/5 da paragem prevista (máx.)";
             }
 
-            // One helper keeps the status tooltips consistent while explaining
-            // which modes Better Boarding can actually skip late passengers for.
-            string StatusDescription(string transitName, bool skipSupported)
+            string StatusDescription(string transitName)
             {
-                string skippedText = skipSupported
-                    ? "**Ignorados** = passageiros atrasados ignorados hoje para o transporte não continuar à espera.\n" +
-                      "Better Boarding atua muito antes dos ~10 minutos que o vanilla leva a libertar um veículo bloqueado.\n" +
-                      $"Controlado por <{ToggleName}>.\n"
-                    : "**Ignorados** = 0 neste modo. Aqui, os passageiros atrasados ficam com o vanilla.\n";
-
                 return
                     $"<Estado atual: {transitName}>\n" +
                     "**À espera** = passageiros à espera agora.\n" +
                     "**Média** = tempo médio de espera.\n" +
                     "**Pior** = maior média de espera numa paragem.\n" +
                     "Se estiver alta, verifica trânsito, paragem bloqueada/com erro ou poucos veículos.\n" +
-                    skippedText +
-                    "<Stats no Log> mostra paragens, IDs de entidade e mais detalhes.";
+                    "<Stats no log> mostra paragens, IDs de entidade, passageiros atrasados ignorados e mais.";
             }
 
             return new Dictionary<string, string>
@@ -105,26 +96,28 @@ namespace BetterBoarding
                         "Aplica-se a terminais de passageiros dos aviões.\n")
                 },
 
-                // Late passenger behavior
+                // Boarding behavior
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cims correm mais cedo" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
+                    "Cims atribuídos começam a <correr mais cedo> para apanhar o transporte antes de partir.\n" +
+                    "- Começa até cerca de 3 minutos de jogo antes do vanilla.\n" +
+                    "- Ajuda de movimento real: os testes mostram que muitos cims ajudados acabam por embarcar no mesmo veículo atribuído.\n" +
+                    "- Ajuda em plataformas longas e ao aproximar-se da paragem.\n" +
+                    "- Só afeta cims já atribuídos a um veículo a embarcar passageiros.\n" +
+                    "- Não teletransporta cims nem muda horas de partida."
+                },
+
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CancelLateBoarders)), ToggleName },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CancelLateBoarders)),
-                    "Um passageiro atrasado demasiado longe da paragem pode ser ignorado para o transporte não continuar à espera.\n" +
+                    "Salvaguarda para casos pouco comuns em que o transporte continua à espera após a partida por um passageiro claramente distante.\n" +
                     "Better Boarding atua muito antes dos ~10 minutos que o vanilla leva a libertar um veículo bloqueado.\n" +
+                    "- Cims correm mais cedo ajuda primeiro nos casos normais; esta opção trata dos atrasados que continuam longe demais.\n" +
                     "- Passageiros na paragem/estação ou perto continuam atribuídos e a embarcar.\n" +
                     "- Plataformas longas de comboio/metro continuam protegidas.\n" +
                     "- Grupos/famílias têm proteção extra.\n" +
                     "- Cims ignorados continuam na cidade; o vanilla pode continuar ou recalcular a viagem, muitas vezes num veículo posterior.\n" +
                     "- Navios, ferries e aviões mantêm o tratamento vanilla para passageiros atrasados."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cims correm mais cedo" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
-                    "Cims atribuídos começam a <correr mais cedo> para apanhar o transporte antes de partir.\n" +
-                    "- Começa até cerca de 3 minutos de jogo antes do vanilla.\n" +
-                    "- Ajuda em plataformas longas e ao aproximar-se da paragem.\n" +
-                    "- Só afeta cims já atribuídos a um veículo a embarcar passageiros.\n" +
-                    "- Não teletransporta cims nem muda horas de partida."
-                },
-
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusOverview)), "Utilização total" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusOverview)),
@@ -133,25 +126,31 @@ namespace BetterBoarding
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)), "Cims + cedo" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)),
-                    "Conta os cims que Better Boarding fez **correr mais cedo** hoje.\n" +
-                    "Até cerca de 3 minutos de jogo antes do vanilla."
+                    "Conta as **ajudas para correr mais cedo** de hoje por tipo de transporte.\n" +
+                    "Os testes confirmam que muitos cims ajudados acabam por embarcar no mesmo veículo atribuído."
+                },
+
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusGroupFamilyAssists)), "Ajuda a grupos/famílias" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusGroupFamilyAssists)),
+                    "Conta as ajudas de Better Boarding a grupos/famílias de hoje.\n" +
+                    "Inclui ajudar membros atrasados a embarcar e tratar em segurança grupos elegíveis que ainda estão longe."
                 },
 
                 // Status rows
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusBus)), "Autocarro" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusBus)), StatusDescription("autocarro", skipSupported: true) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusBus)), StatusDescription("autocarro") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusTram)), "Elétrico" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTram)), StatusDescription("elétrico", skipSupported: true) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTram)), StatusDescription("elétrico") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusTrain)), "Comboio" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTrain)), StatusDescription("comboio", skipSupported: true) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTrain)), StatusDescription("comboio") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusSubway)), "Metro" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusSubway)), StatusDescription("metro", skipSupported: true) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusSubway)), StatusDescription("metro") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusFerry)), "Ferry" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusFerry)), StatusDescription("ferry", skipSupported: false) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusFerry)), StatusDescription("ferry") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusShip)), "Navio" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusShip)), StatusDescription("navio", skipSupported: false) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusShip)), StatusDescription("navio") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusAir)), "Avião" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusAir)), StatusDescription("avião", skipSupported: false) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusAir)), StatusDescription("avião") },
 
                 // Status buttons
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatsToLog)), "Stats no Log" },
@@ -189,13 +188,12 @@ namespace BetterBoarding
                 { WaitStatus.KeyNoCityLoaded, "Nenhuma cidade carregada." },
                 { WaitStatus.KeyNoStopsFound, "Nenhuma paragem encontrada." },
 
-                { WaitStatus.KeyStatusLine, "{0} espera | méd. {1} | pior {2} | {3}" },
-                { WaitStatus.KeyStatusLateSkipped, "{0} atrasados ignorados" },
-                { WaitStatus.KeyStatusSkipOff, "libertar OFF" },
+                { WaitStatus.KeyStatusLine, "{0} espera | méd. {1} | pior {2}" },
 
                 { WaitStatus.KeyStatusOverviewLine, "{0} tur./mês | {1} cid./mês | atual. {2}" },
                 { WaitStatus.KeyStatusRunSoonerLine, "{0}" },
                 { WaitStatus.KeyStatusRunSoonerOff, "correr cedo OFF" },
+                { WaitStatus.KeyStatusGroupFamilyAssistsLine, "{0} hoje" },
 
                 // Stats-to-log report strings
                 { WaitStatus.KeyReportNoCityLoaded, "[BBoard] Relatório pedido, mas nenhuma cidade está carregada." },

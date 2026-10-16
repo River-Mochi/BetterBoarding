@@ -48,24 +48,15 @@ namespace BetterBoarding
                     "5x = 約1/5（最大）";
             }
 
-            // One helper keeps the status tooltips consistent while explaining
-            // which modes Better Boarding can actually skip late passengers for.
-            string StatusDescription(string transitName, bool skipSupported)
+            string StatusDescription(string transitName)
             {
-                string skippedText = skipSupported
-                    ? "**スキップ** = 今日、交通が待ち続けないようスキップした遅れた乗客数。\n" +
-                      "Better Boarding は、vanilla の約10分の車両詰まり対策よりずっと早く対応します。\n" +
-                      $"<{ToggleName}> で制御します。\n"
-                    : "**スキップ** = この交通では0。遅れた乗客は vanilla の処理を使います。\n";
-
                 return
                     $"<{transitName}の現在状況>\n" +
                     "**待ち** = 現在待っている乗客数。\n" +
                     "**平均** = その乗客の平均待ち時間。\n" +
                     "**最悪** = 1停留所で最も長い平均待ち時間。\n" +
                     "長い場合は渋滞、停留所の詰まり/不具合、車両不足を確認してください。\n" +
-                    skippedText +
-                    "<ログに統計>で停留所名、Entity IDなどの詳細を確認できます。";
+                    "<Statsをログへ>で停留所、Entity ID、遅れ客のスキップなどを確認できます。";
             }
 
             return new Dictionary<string, string>
@@ -105,26 +96,28 @@ namespace BetterBoarding
                         "旅客機ターミナルに適用します。\n")
                 },
 
-                // Late passenger behavior
+                // Boarding behavior
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cimを早めに走らせる" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
+                    "割り当て済みのCimは、交通に間に合うよう<早めに走り始めます>。\n" +
+                    "- vanilla よりゲーム内で最大約3分早く開始します。\n" +
+                    "- 実際の移動支援です。テストでは、支援された市民の多くがそのまま割り当て車両に乗れています。\n" +
+                    "- 長いホームや停留所へ向かう途中で役立ちます。\n" +
+                    "- 乗客を乗せている車両にすでに割り当てられたCimだけが対象です。\n" +
+                    "- Cimをテレポートさせたり、出発時刻を変えたりしません。"
+                },
+
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CancelLateBoarders)), ToggleName },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CancelLateBoarders)),
-                    "停留所から遠すぎる遅れた乗客をスキップし、交通が待ち続けないようにします。\n" +
+                    "出発後も、明らかに遠くにいる乗客を待ち続けるまれなケース向けの安全策です。\n" +
                     "Better Boarding は、vanilla の約10分の車両詰まり対策よりずっと早く対応します。\n" +
+                    "- まず「早めに走る」で通常のケースを助け、それでも遠くに残った遅れ客をこの機能が処理します。\n" +
                     "- 停留所/駅の近くにいる乗客は割り当てを維持し、そのまま乗車します。\n" +
                     "- 長い鉄道/地下鉄ホームも保護されます。\n" +
                     "- グループ/家族は追加保護されます。\n" +
                     "- スキップされたCimは街に残り、vanilla が移動を続行・再経路化し、後の車両に乗ることもあります。\n" +
                     "- 船、フェリー、航空機は遅れた乗客を vanilla のまま処理します。"
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cimを早めに走らせる" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
-                    "割り当て済みのCimは、交通に間に合うよう<早めに走り始めます>。\n" +
-                    "- vanilla よりゲーム内で最大約3分早く開始します。\n" +
-                    "- 長いホームや停留所へ向かう途中で役立ちます。\n" +
-                    "- 乗客を乗せている車両にすでに割り当てられたCimだけが対象です。\n" +
-                    "- Cimをテレポートさせたり、出発時刻を変えたりしません。"
-                },
-
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusOverview)), "総利用数" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusOverview)),
@@ -133,25 +126,31 @@ namespace BetterBoarding
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)), "早走りCim" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)),
-                    "Better Boarding が今日**早めに走らせた**Cim数。\n" +
-                    "vanilla よりゲーム内で最大約3分早く開始します。"
+                    "今日の実際の**早めに走る支援**を交通種別ごとに数えます。\n" +
+                    "テストでは、支援された市民の多くが割り当て車両に乗れています。"
+                },
+
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusGroupFamilyAssists)), "グループ/家族の支援" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusGroupFamilyAssists)),
+                    "今日のグループ/家族へのBetter Boardingの支援回数です。\n" +
+                    "遅れたメンバーの乗車補助や、条件を満たす遠方グループの安全な処理を含みます。"
                 },
 
                 // Status rows
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusBus)), "バス" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusBus)), StatusDescription("バス", skipSupported: true) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusBus)), StatusDescription("バス") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusTram)), "路面電車" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTram)), StatusDescription("路面電車", skipSupported: true) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTram)), StatusDescription("路面電車") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusTrain)), "鉄道" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTrain)), StatusDescription("鉄道", skipSupported: true) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTrain)), StatusDescription("鉄道") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusSubway)), "地下鉄" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusSubway)), StatusDescription("地下鉄", skipSupported: true) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusSubway)), StatusDescription("地下鉄") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusFerry)), "フェリー" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusFerry)), StatusDescription("フェリー", skipSupported: false) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusFerry)), StatusDescription("フェリー") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusShip)), "船" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusShip)), StatusDescription("船", skipSupported: false) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusShip)), StatusDescription("船") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusAir)), "航空機" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusAir)), StatusDescription("航空機", skipSupported: false) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusAir)), StatusDescription("航空機") },
 
                 // Status buttons
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatsToLog)), "ログに統計" },
@@ -189,13 +188,12 @@ namespace BetterBoarding
                 { WaitStatus.KeyNoCityLoaded, "都市が読み込まれていません。" },
                 { WaitStatus.KeyNoStopsFound, "停留所がありません。" },
 
-                { WaitStatus.KeyStatusLine, "{0}人待ち | 平均 {1} | 最悪 {2} | {3}" },
-                { WaitStatus.KeyStatusLateSkipped, "{0} 遅れスキップ" },
-                { WaitStatus.KeyStatusSkipOff, "待たない OFF" },
+                { WaitStatus.KeyStatusLine, "{0}人待ち | 平均 {1} | 最悪 {2}" },
 
                 { WaitStatus.KeyStatusOverviewLine, "観光 {0}/月 | 市民 {1}/月 | 更新 {2}" },
                 { WaitStatus.KeyStatusRunSoonerLine, "{0}" },
                 { WaitStatus.KeyStatusRunSoonerOff, "早走り OFF" },
+                { WaitStatus.KeyStatusGroupFamilyAssistsLine, "{0}回（今日）" },
 
                 // Stats-to-log report strings
                 { WaitStatus.KeyReportNoCityLoaded, "[BBoard] 統計レポートを要求しましたが、都市が読み込まれていません。" },

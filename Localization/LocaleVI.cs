@@ -48,24 +48,15 @@ namespace BetterBoarding
                     "5x = ~1/5 (tối đa)";
             }
 
-            // One helper keeps the status tooltips consistent while explaining
-            // which modes Better Boarding can actually skip late passengers for.
-            string StatusDescription(string transitName, bool skipSupported)
+            string StatusDescription(string transitName)
             {
-                string skippedText = skipSupported
-                    ? "**Bỏ qua** = hành khách đến muộn bị bỏ qua hôm nay để phương tiện không phải chờ tiếp.\n" +
-                      "Better Boarding can thiệp sớm hơn nhiều so với mốc ~10 phút vanilla dùng cho xe bị kẹt.\n" +
-                      $"Điều khiển bởi <{ToggleName}>.\n"
-                    : "**Bỏ qua** = 0 ở chế độ này. Hành khách đến muộn vẫn do vanilla xử lý.\n";
-
                 return
                     $"<Trạng thái {transitName} hiện tại>\n" +
                     "**Đang chờ** = số hành khách đang chờ.\n" +
                     "**TB** = thời gian chờ trung bình.\n" +
                     "**Tệ nhất** = thời gian chờ TB cao nhất tại một điểm dừng.\n" +
                     "Nếu cao, hãy kiểm tra kẹt xe, điểm dừng bị kẹt/lỗi hoặc thiếu xe.\n" +
-                    skippedText +
-                    "<Ghi thống kê> cho biết tên điểm dừng, Entity ID và chi tiết khác.";
+                    "<Stats vào log> hiển thị điểm dừng, Entity ID, hành khách trễ bị bỏ qua và nhiều thông tin khác.";
             }
 
             return new Dictionary<string, string>
@@ -105,26 +96,28 @@ namespace BetterBoarding
                         "Áp dụng cho nhà ga máy bay chở khách.\n")
                 },
 
-                // Late passenger behavior
+                // Boarding behavior
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cim chạy sớm hơn" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
+                    "Cim đã được gán bắt đầu <chạy sớm hơn> để kịp phương tiện trước khi rời đi.\n" +
+                    "- Bắt đầu sớm hơn vanilla tối đa khoảng 3 phút trong game.\n" +
+                    "- Đây là hỗ trợ di chuyển thật: thử nghiệm cho thấy nhiều cim được hỗ trợ sau đó vẫn lên đúng xe đã được chỉ định.\n" +
+                    "- Hữu ích trên sân ga dài và khi đang tiến tới điểm dừng.\n" +
+                    "- Chỉ ảnh hưởng cim đã được gán cho xe đang đón khách.\n" +
+                    "- Không dịch chuyển tức thời cim hay đổi giờ khởi hành."
+                },
+
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CancelLateBoarders)), ToggleName },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CancelLateBoarders)),
-                    "Hành khách đến muộn ở quá xa điểm dừng có thể bị bỏ qua để phương tiện không phải chờ tiếp.\n" +
+                    "Lớp an toàn cho các trường hợp hiếm khi phương tiện vẫn chờ sau giờ khởi hành vì một hành khách rõ ràng còn ở quá xa.\n" +
                     "Better Boarding can thiệp sớm hơn nhiều so với mốc ~10 phút vanilla dùng cho xe bị kẹt.\n" +
+                    "- Cims chạy sớm hơn xử lý trường hợp thường gặp trước; tùy chọn này xử lý những người vẫn còn ở quá xa.\n" +
                     "- Hành khách ở hoặc gần điểm dừng/ga vẫn giữ lượt gán và tiếp tục lên xe.\n" +
                     "- Sân ga tàu/metro dài vẫn được bảo vệ.\n" +
                     "- Nhóm/gia đình được bảo vệ thêm.\n" +
                     "- Cim bị bỏ qua vẫn ở trong thành phố; vanilla có thể tiếp tục hoặc tìm lại tuyến đường, thường trên chuyến xe sau.\n" +
                     "- Tàu thủy, phà và máy bay vẫn dùng cách xử lý hành khách trễ của vanilla."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cim chạy sớm hơn" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
-                    "Cim đã được gán bắt đầu <chạy sớm hơn> để kịp phương tiện trước khi rời đi.\n" +
-                    "- Bắt đầu sớm hơn vanilla tối đa khoảng 3 phút trong game.\n" +
-                    "- Hữu ích trên sân ga dài và khi đang tiến tới điểm dừng.\n" +
-                    "- Chỉ ảnh hưởng cim đã được gán cho xe đang đón khách.\n" +
-                    "- Không dịch chuyển tức thời cim hay đổi giờ khởi hành."
-                },
-
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusOverview)), "Tổng lượt dùng" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusOverview)),
@@ -133,25 +126,31 @@ namespace BetterBoarding
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)), "Cim chạy sớm" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)),
-                    "Đếm cim mà Better Boarding cho **chạy sớm hơn** hôm nay.\n" +
-                    "Sớm hơn vanilla tối đa khoảng 3 phút trong game."
+                    "Đếm **lần hỗ trợ chạy sớm hơn** hôm nay theo loại phương tiện.\n" +
+                    "Thử nghiệm xác nhận nhiều cim được hỗ trợ sau đó vẫn lên đúng xe đã được chỉ định."
+                },
+
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusGroupFamilyAssists)), "Hỗ trợ nhóm/gia đình" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusGroupFamilyAssists)),
+                    "Đếm số lần Better Boarding hỗ trợ nhóm/gia đình lên xe hôm nay.\n" +
+                    "Gồm giúp thành viên chậm hoàn tất lên xe và xử lý an toàn các nhóm đủ điều kiện nhưng vẫn ở quá xa."
                 },
 
                 // Status rows
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusBus)), "Xe buýt" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusBus)), StatusDescription("xe buýt", skipSupported: true) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusBus)), StatusDescription("xe buýt") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusTram)), "Tram" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTram)), StatusDescription("tram", skipSupported: true) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTram)), StatusDescription("tram") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusTrain)), "Tàu hỏa" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTrain)), StatusDescription("tàu hỏa", skipSupported: true) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTrain)), StatusDescription("tàu hỏa") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusSubway)), "Metro" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusSubway)), StatusDescription("metro", skipSupported: true) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusSubway)), StatusDescription("metro") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusFerry)), "Phà" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusFerry)), StatusDescription("phà", skipSupported: false) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusFerry)), StatusDescription("phà") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusShip)), "Tàu thủy" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusShip)), StatusDescription("tàu thủy", skipSupported: false) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusShip)), StatusDescription("tàu thủy") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusAir)), "Máy bay" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusAir)), StatusDescription("máy bay", skipSupported: false) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusAir)), StatusDescription("máy bay") },
 
                 // Status buttons
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatsToLog)), "Ghi thống kê" },
@@ -189,13 +188,12 @@ namespace BetterBoarding
                 { WaitStatus.KeyNoCityLoaded, "Chưa tải thành phố." },
                 { WaitStatus.KeyNoStopsFound, "Không tìm thấy điểm dừng." },
 
-                { WaitStatus.KeyStatusLine, "{0} chờ | TB {1} | tệ {2} | {3}" },
-                { WaitStatus.KeyStatusLateSkipped, "bỏ qua {0} khách trễ" },
-                { WaitStatus.KeyStatusSkipOff, "không chờ OFF" },
+                { WaitStatus.KeyStatusLine, "{0} chờ | TB {1} | tệ {2}" },
 
                 { WaitStatus.KeyStatusOverviewLine, "{0} khách/th | {1} dân/th | {2}" },
                 { WaitStatus.KeyStatusRunSoonerLine, "{0}" },
                 { WaitStatus.KeyStatusRunSoonerOff, "chạy sớm OFF" },
+                { WaitStatus.KeyStatusGroupFamilyAssistsLine, "{0} hôm nay" },
 
                 // Stats-to-log report strings
                 { WaitStatus.KeyReportNoCityLoaded, "[BBoard] Đã yêu cầu báo cáo nhưng chưa tải thành phố." },

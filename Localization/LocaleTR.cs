@@ -48,24 +48,15 @@ namespace BetterBoarding
                     "5x = ~1/5 (maks.)";
             }
 
-            // One helper keeps the status tooltips consistent while explaining
-            // which modes Better Boarding can actually skip late passengers for.
-            string StatusDescription(string transitName, bool skipSupported)
+            string StatusDescription(string transitName)
             {
-                string skippedText = skipSupported
-                    ? "**Atlandı** = aracın beklememesi için bugün atlanan geç kalan yolcular.\n" +
-                      "Better Boarding, vanilla'nın sıkışan araç için ~10 dakikalık çözümünden çok daha erken devreye girer.\n" +
-                      $"<{ToggleName}> ile kontrol edilir.\n"
-                    : "**Atlandı** = bu ulaşım türünde 0. Geç kalan yolcuları vanilla işler.\n";
-
                 return
                     $"<Güncel {transitName} durumu>\n" +
                     "**Bekleyen** = şu an bekleyen yolcular.\n" +
                     "**Ort.** = bu yolcuların ortalama bekleme süresi.\n" +
                     "**En kötü** = tek duraktaki en yüksek ortalama bekleme.\n" +
                     "Yüksekse trafik, tıkalı/bozuk durak veya az araç olup olmadığını kontrol et.\n" +
-                    skippedText +
-                    "<Loga istatistik> durak adları, Entity ID ve daha fazla ayrıntı verir.";
+                    "<Stats to Log> durakları, varlık kimliklerini, atlanan geç yolcuları ve daha fazlasını gösterir.";
             }
 
             return new Dictionary<string, string>
@@ -105,26 +96,28 @@ namespace BetterBoarding
                         "Yolcu uçağı terminalleri için geçerlidir.\n")
                 },
 
-                // Late passenger behavior
+                // Boarding behavior
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cimler daha erken koşsun" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
+                    "Atanmış cimler ulaşım aracını kalkmadan yakalamak için <daha erken koşmaya> başlar.\n" +
+                    "- vanilla'dan oyun içinde yaklaşık 3 dakikaya kadar erken başlar.\n" +
+                    "- Gerçek hareket yardımıdır: testlerde yardım edilen birçok cim daha sonra aynı atanmış araca binebildi.\n" +
+                    "- Uzun peronlarda ve durağa yaklaşırken yardımcı olur.\n" +
+                    "- Yalnızca yolcu alan bir araca zaten atanmış cimleri etkiler.\n" +
+                    "- Cimleri ışınlamaz veya kalkış saatini değiştirmez."
+                },
+
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CancelLateBoarders)), ToggleName },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CancelLateBoarders)),
-                    "Duraktan fazla uzakta olan geç kalmış bir yolcu atlanabilir; böylece araç beklemeye devam etmez.\n" +
+                    "Kalkıştan sonra bile açıkça çok uzaktaki bir yolcuyu bekleyen araçlar için nadir durum güvenlik ağı.\n" +
                     "Better Boarding, vanilla'nın sıkışan araç için ~10 dakikalık çözümünden çok daha erken devreye girer.\n" +
+                    "- Cims Run Sooner önce normal durumlara yardımcı olur; bu seçenek hâlâ çok uzakta kalan gecikenleri yakalar.\n" +
                     "- Durak/istasyonda veya yakınında olan yolcu atanmış kalır ve binmeye devam eder.\n" +
                     "- Uzun tren/metro peronları korunur.\n" +
                     "- Grup/aileler ek koruma alır.\n" +
                     "- Atlanan cim şehirde kalır; vanilla yolculuğunu sürdürebilir veya yeniden rota çizebilir, çoğu zaman daha sonraki bir araca binebilir.\n" +
                     "- Gemi, feribot ve uçaklar geç kalan yolcuları vanilla şekilde işler."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cimler daha erken koşsun" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
-                    "Atanmış cimler ulaşım aracını kalkmadan yakalamak için <daha erken koşmaya> başlar.\n" +
-                    "- vanilla'dan oyun içinde yaklaşık 3 dakikaya kadar erken başlar.\n" +
-                    "- Uzun peronlarda ve durağa yaklaşırken yardımcı olur.\n" +
-                    "- Yalnızca yolcu alan bir araca zaten atanmış cimleri etkiler.\n" +
-                    "- Cimleri ışınlamaz veya kalkış saatini değiştirmez."
-                },
-
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusOverview)), "Toplam kullanım" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusOverview)),
@@ -133,25 +126,31 @@ namespace BetterBoarding
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)), "Erken koşan cim" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)),
-                    "Better Boarding’ın bugün **daha erken koşturduğu** cimleri sayar.\n" +
-                    "vanilla'dan oyun içinde yaklaşık 3 dakikaya kadar erken."
+                    "Bugünkü gerçek **daha erken koşma yardımlarını** ulaşım türüne göre sayar.\n" +
+                    "Testler, yardım edilen birçok cimin daha sonra aynı atanmış araca binebildiğini doğruluyor."
+                },
+
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusGroupFamilyAssists)), "Grup/aile yardımları" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusGroupFamilyAssists)),
+                    "Bugün Better Boarding tarafından yapılan grup/aile biniş yardımlarını sayar.\n" +
+                    "Geride kalan üyelerin binmesine yardım etmeyi ve uygun, uzakta kalan grupları güvenle işlemeyi içerir."
                 },
 
                 // Status rows
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusBus)), "Otobüs" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusBus)), StatusDescription("otobüs", skipSupported: true) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusBus)), StatusDescription("otobüs") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusTram)), "Tramvay" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTram)), StatusDescription("tramvay", skipSupported: true) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTram)), StatusDescription("tramvay") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusTrain)), "Tren" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTrain)), StatusDescription("tren", skipSupported: true) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTrain)), StatusDescription("tren") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusSubway)), "Metro" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusSubway)), StatusDescription("metro", skipSupported: true) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusSubway)), StatusDescription("metro") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusFerry)), "Feribot" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusFerry)), StatusDescription("feribot", skipSupported: false) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusFerry)), StatusDescription("feribot") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusShip)), "Gemi" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusShip)), StatusDescription("gemi", skipSupported: false) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusShip)), StatusDescription("gemi") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusAir)), "Uçak" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusAir)), StatusDescription("uçak", skipSupported: false) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusAir)), StatusDescription("uçak") },
 
                 // Status buttons
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatsToLog)), "Loga istatistik" },
@@ -189,13 +188,12 @@ namespace BetterBoarding
                 { WaitStatus.KeyNoCityLoaded, "Şehir yüklenmedi." },
                 { WaitStatus.KeyNoStopsFound, "Durak bulunamadı." },
 
-                { WaitStatus.KeyStatusLine, "{0} bek. | ort. {1} | kötü {2} | {3}" },
-                { WaitStatus.KeyStatusLateSkipped, "{0} geç yolcu atlandı" },
-                { WaitStatus.KeyStatusSkipOff, "bekleme KAPALI" },
+                { WaitStatus.KeyStatusLine, "{0} bek. | ort. {1} | kötü {2}" },
 
                 { WaitStatus.KeyStatusOverviewLine, "{0} tur./ay | {1} kişi/ay | {2}" },
                 { WaitStatus.KeyStatusRunSoonerLine, "{0}" },
                 { WaitStatus.KeyStatusRunSoonerOff, "erken koşma KAPALI" },
+                { WaitStatus.KeyStatusGroupFamilyAssistsLine, "bugün {0}" },
 
                 // Stats-to-log report strings
                 { WaitStatus.KeyReportNoCityLoaded, "[BBoard] İstatistik raporu istendi, ancak şehir yüklü değil." },

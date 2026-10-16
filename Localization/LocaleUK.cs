@@ -48,24 +48,15 @@ namespace BetterBoarding
                     "5x = ~1/5 (макс.)";
             }
 
-            // One helper keeps the status tooltips consistent while explaining
-            // which modes Better Boarding can actually skip late passengers for.
-            string StatusDescription(string transitName, bool skipSupported)
+            string StatusDescription(string transitName)
             {
-                string skippedText = skipSupported
-                    ? "**Пропущено** = запізнілі пасажири, яких сьогодні пропустили, щоб транспорт не чекав далі.\n" +
-                      "Better Boarding втручається значно раніше за ~10-хвилинний механізм vanilla для застряглого транспорту.\n" +
-                      $"Керується через <{ToggleName}>.\n"
-                    : "**Пропущено** = 0 для цього виду транспорту. Тут лишається vanilla-обробка запізнілих пасажирів.\n";
-
                 return
                     $"<Поточний стан: {transitName}>\n" +
                     "**Очікує** = пасажири, що чекають зараз.\n" +
                     "**Сер.** = середній час очікування.\n" +
                     "**Найгірше** = найбільше середнє очікування на одній зупинці.\n" +
                     "Якщо воно велике, перевірте затори, заблоковану/зламану зупинку або нестачу транспорту.\n" +
-                    skippedText +
-                    "<Статистика в лог> показує назви зупинок, Entity ID та інші деталі.";
+                    "<Stats у лог> показує зупинки, ID сутностей, пропуски запізнілих пасажирів та інше.";
             }
 
             return new Dictionary<string, string>
@@ -105,26 +96,28 @@ namespace BetterBoarding
                         "Для пасажирських авіатерміналів.\n")
                 },
 
-                // Late passenger behavior
+                // Boarding behavior
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cims біжать раніше" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
+                    "Призначені cims починають <бігти раніше>, щоб встигнути на транспорт до відправлення.\n" +
+                    "- Починається до ~3 ігрових хвилин раніше за vanilla.\n" +
+                    "- Це реальна допомога руху: тести показують, що багато сімуів після допомоги сідають у той самий призначений транспорт.\n" +
+                    "- Допомагає на довгих платформах і на підході до зупинки.\n" +
+                    "- Впливає лише на cims, уже призначених транспорту, що здійснює посадку.\n" +
+                    "- Не телепортує cims і не змінює час відправлення."
+                },
+
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CancelLateBoarders)), ToggleName },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CancelLateBoarders)),
-                    "Запізнілого пасажира, який надто далеко від зупинки, можна пропустити, щоб транспорт не чекав далі.\n" +
+                    "Страховка для рідкісних випадків, коли транспорт після часу відправлення все ще чекає пасажира, який явно далеко.\n" +
                     "Better Boarding втручається значно раніше за ~10-хвилинний механізм vanilla для застряглого транспорту.\n" +
+                    "- Cims Run Sooner спочатку допомагає у звичайних випадках; ця опція ловить тих, хто все ще лишився надто далеко.\n" +
                     "- Пасажири на зупинці/станції або поруч залишаються призначеними й продовжують посадку.\n" +
                     "- Довгі платформи поїзда/метро залишаються захищеними.\n" +
                     "- Групи/сім’ї мають додатковий захист.\n" +
                     "- Пропущені cims залишаються в місті; vanilla може продовжити або перебудувати їхню поїздку, часто на пізніший транспорт.\n" +
                     "- Кораблі, пороми й літаки залишають vanilla-обробку запізнілих пасажирів."
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cims біжать раніше" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
-                    "Призначені cims починають <бігти раніше>, щоб встигнути на транспорт до відправлення.\n" +
-                    "- Починається до ~3 ігрових хвилин раніше за vanilla.\n" +
-                    "- Допомагає на довгих платформах і на підході до зупинки.\n" +
-                    "- Впливає лише на cims, уже призначених транспорту, що здійснює посадку.\n" +
-                    "- Не телепортує cims і не змінює час відправлення."
-                },
-
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusOverview)), "Загальне використання" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusOverview)),
@@ -133,25 +126,31 @@ namespace BetterBoarding
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)), "Cims раніше" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)),
-                    "Рахує cims, яких Better Boarding сьогодні змусив **бігти раніше**.\n" +
-                    "До ~3 ігрових хвилин раніше за vanilla."
+                    "Рахує сьогоднішні реальні **допомоги бігти раніше** за видом транспорту.\n" +
+                    "Тести підтверджують, що багато сімуів після допомоги сідають у той самий призначений транспорт."
+                },
+
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusGroupFamilyAssists)), "Допомога групам/сім’ям" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusGroupFamilyAssists)),
+                    "Рахує сьогоднішні допомоги Better Boarding для груп/сімей.\n" +
+                    "Включає допомогу відсталим учасникам завершити посадку та безпечну обробку придатних груп, що залишилися далеко."
                 },
 
                 // Status rows
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusBus)), "Автобус" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusBus)), StatusDescription("автобус", skipSupported: true) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusBus)), StatusDescription("автобус") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusTram)), "Трамвай" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTram)), StatusDescription("трамвай", skipSupported: true) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTram)), StatusDescription("трамвай") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusTrain)), "Поїзд" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTrain)), StatusDescription("поїзд", skipSupported: true) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTrain)), StatusDescription("поїзд") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusSubway)), "Метро" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusSubway)), StatusDescription("метро", skipSupported: true) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusSubway)), StatusDescription("метро") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusFerry)), "Пором" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusFerry)), StatusDescription("пором", skipSupported: false) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusFerry)), StatusDescription("пором") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusShip)), "Корабель" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusShip)), StatusDescription("корабель", skipSupported: false) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusShip)), StatusDescription("корабель") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusAir)), "Літак" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusAir)), StatusDescription("літак", skipSupported: false) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusAir)), StatusDescription("літак") },
 
                 // Status buttons
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatsToLog)), "Статистика в лог" },
@@ -189,13 +188,12 @@ namespace BetterBoarding
                 { WaitStatus.KeyNoCityLoaded, "Місто не завантажено." },
                 { WaitStatus.KeyNoStopsFound, "Зупинок не знайдено." },
 
-                { WaitStatus.KeyStatusLine, "{0} чекає | сер. {1} | гірш. {2} | {3}" },
-                { WaitStatus.KeyStatusLateSkipped, "пропущено запізнілих: {0}" },
-                { WaitStatus.KeyStatusSkipOff, "не чекати ВИМК." },
+                { WaitStatus.KeyStatusLine, "{0} чекає | сер. {1} | гірш. {2}" },
 
                 { WaitStatus.KeyStatusOverviewLine, "{0} тур./міс. | {1} мешк./міс. | {2}" },
                 { WaitStatus.KeyStatusRunSoonerLine, "{0}" },
                 { WaitStatus.KeyStatusRunSoonerOff, "біг раніше ВИМК." },
+                { WaitStatus.KeyStatusGroupFamilyAssistsLine, "сьогодні {0}" },
 
                 // Stats-to-log report strings
                 { WaitStatus.KeyReportNoCityLoaded, "[BBoard] Запитано звіт, але місто не завантажено." },

@@ -48,24 +48,15 @@ namespace BetterBoarding
                     "5x = ~1/5 (สูงสุด)";
             }
 
-            // One helper keeps the status tooltips consistent while explaining
-            // which modes Better Boarding can actually skip late passengers for.
-            string StatusDescription(string transitName, bool skipSupported)
+            string StatusDescription(string transitName)
             {
-                string skippedText = skipSupported
-                    ? "**ข้าม** = วันนี้ข้ามผู้โดยสารที่มาช้า เพื่อไม่ให้รถต้องรอต่อ\n" +
-                      "Better Boarding ช่วยได้เร็วกว่าระบบแก้รถค้างของ vanilla ที่รอราว 10 นาทีมาก\n" +
-                      $"ควบคุมด้วย <{ToggleName}>\n"
-                    : "**ข้าม** = 0 สำหรับโหมดนี้ ยังใช้การจัดการผู้โดยสารมาช้าของ vanilla\n";
-
                 return
                     $"<สถานะ {transitName} ตอนนี้>\n" +
                     "**รอ** = จำนวนผู้โดยสารที่กำลังรอ\n" +
                     "**เฉลี่ย** = เวลารอเฉลี่ย\n" +
                     "**แย่สุด** = เวลารอเฉลี่ยสูงสุดของหนึ่งป้าย\n" +
                     "ถ้าสูง ให้ตรวจรถติด ป้ายติด/บั๊ก หรือจำนวนรถไม่พอ\n" +
-                    skippedText +
-                    "ใช้ <สถิติลง Log> เพื่อดูชื่อป้าย Entity ID และรายละเอียดเพิ่ม";
+                    "<Stats to Log> แสดงป้าย, Entity ID, การข้ามผู้โดยสารที่มาสาย และข้อมูลอื่น";
             }
 
             return new Dictionary<string, string>
@@ -105,26 +96,28 @@ namespace BetterBoarding
                         "ใช้กับอาคารผู้โดยสารเครื่องบิน\n")
                 },
 
-                // Late passenger behavior
+                // Boarding behavior
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "ให้ Cim วิ่งเร็วขึ้น" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
+                    "Cim ที่ถูกกำหนดแล้วจะ <เริ่มวิ่งเร็วขึ้น> เพื่อให้ทันรถก่อนออก\n" +
+                    "- เริ่มได้เร็วกว่า vanilla สูงสุดประมาณ 3 นาทีในเกม\n" +
+                    "- เป็นการช่วยการเคลื่อนที่จริง: จากการทดสอบ Cims ที่ได้รับการช่วยจำนวนมากขึ้นรถคันเดิมที่ถูกกำหนดไว้ได้\n" +
+                    "- ช่วยบนชานชาลายาวและตอนกำลังเข้าใกล้ป้าย\n" +
+                    "- มีผลเฉพาะ Cim ที่ถูกกำหนดให้รถที่กำลังรับผู้โดยสารแล้ว\n" +
+                    "- ไม่วาร์ป Cim และไม่เปลี่ยนเวลาออก"
+                },
+
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CancelLateBoarders)), ToggleName },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CancelLateBoarders)),
-                    "ผู้โดยสารที่มาช้าและอยู่ไกลป้ายเกินไปจะถูกข้ามได้ เพื่อไม่ให้รถต้องรอต่อ\n" +
+                    "ตัวช่วยสำรองสำหรับกรณีที่ไม่ปกติ ซึ่งรถยังรอหลังเวลาออกเพราะผู้โดยสารอยู่ไกลอย่างชัดเจน\n" +
                     "Better Boarding ช่วยได้เร็วกว่าระบบแก้รถค้างของ vanilla ที่รอราว 10 นาทีมาก\n" +
+                    "- ให้ Cims วิ่งเร็วขึ้นช่วยกรณีทั่วไปก่อน ส่วนตัวเลือกนี้จัดการคนที่ยังอยู่ไกลเกินไป\n" +
                     "- ผู้โดยสารที่อยู่ตรงหรือใกล้ป้าย/สถานียังถูกกำหนดไว้และขึ้นรถต่อ\n" +
                     "- ชานชาลารถไฟ/รถไฟใต้ดินยาวยังได้รับการป้องกัน\n" +
                     "- กลุ่ม/ครอบครัวได้รับการป้องกันเพิ่ม\n" +
                     "- Cim ที่ถูกข้ามยังอยู่ในเมือง; vanilla สามารถให้เดินทางต่อหรือจัดเส้นทางใหม่ มักขึ้นรถคันหลังได้\n" +
                     "- เรือ เรือเฟอร์รี่ และเครื่องบินยังใช้การจัดการผู้โดยสารมาช้าของ vanilla"
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "ให้ Cim วิ่งเร็วขึ้น" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
-                    "Cim ที่ถูกกำหนดแล้วจะ <เริ่มวิ่งเร็วขึ้น> เพื่อให้ทันรถก่อนออก\n" +
-                    "- เริ่มได้เร็วกว่า vanilla สูงสุดประมาณ 3 นาทีในเกม\n" +
-                    "- ช่วยบนชานชาลายาวและตอนกำลังเข้าใกล้ป้าย\n" +
-                    "- มีผลเฉพาะ Cim ที่ถูกกำหนดให้รถที่กำลังรับผู้โดยสารแล้ว\n" +
-                    "- ไม่วาร์ป Cim และไม่เปลี่ยนเวลาออก"
-                },
-
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusOverview)), "การใช้งานรวม" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusOverview)),
@@ -133,25 +126,31 @@ namespace BetterBoarding
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)), "Cim วิ่งเร็วขึ้น" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)),
-                    "นับ Cim วันนี้ที่ Better Boarding ทำให้ **เริ่มวิ่งเร็วขึ้น**\n" +
-                    "เร็วกว่า vanilla ได้สูงสุดประมาณ 3 นาทีในเกม"
+                    "นับ **การช่วยให้วิ่งเร็วขึ้น** วันนี้ แยกตามชนิดขนส่ง\n" +
+                    "การทดสอบยืนยันว่า Cims ที่ได้รับการช่วยจำนวนมากขึ้นรถคันเดิมที่ถูกกำหนดไว้ได้"
+                },
+
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusGroupFamilyAssists)), "ช่วยกลุ่ม/ครอบครัว" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusGroupFamilyAssists)),
+                    "นับจำนวนครั้งที่ Better Boarding ช่วยกลุ่ม/ครอบครัวขึ้นรถในวันนี้\n" +
+                    "รวมการช่วยสมาชิกที่ตามหลังให้ขึ้นรถ และจัดการกลุ่มที่อยู่ไกลและเข้าเงื่อนไขอย่างปลอดภัย"
                 },
 
                 // Status rows
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusBus)), "รถบัส" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusBus)), StatusDescription("รถบัส", skipSupported: true) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusBus)), StatusDescription("รถบัส") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusTram)), "รถราง" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTram)), StatusDescription("รถราง", skipSupported: true) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTram)), StatusDescription("รถราง") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusTrain)), "รถไฟ" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTrain)), StatusDescription("รถไฟ", skipSupported: true) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTrain)), StatusDescription("รถไฟ") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusSubway)), "รถไฟใต้ดิน" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusSubway)), StatusDescription("รถไฟใต้ดิน", skipSupported: true) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusSubway)), StatusDescription("รถไฟใต้ดิน") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusFerry)), "เฟอร์รี" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusFerry)), StatusDescription("เฟอร์รี", skipSupported: false) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusFerry)), StatusDescription("เฟอร์รี") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusShip)), "เรือ" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusShip)), StatusDescription("เรือ", skipSupported: false) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusShip)), StatusDescription("เรือ") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusAir)), "เครื่องบิน" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusAir)), StatusDescription("เครื่องบิน", skipSupported: false) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusAir)), StatusDescription("เครื่องบิน") },
 
                 // Status buttons
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatsToLog)), "สถิติลง Log" },
@@ -189,13 +188,12 @@ namespace BetterBoarding
                 { WaitStatus.KeyNoCityLoaded, "ยังไม่ได้โหลดเมือง" },
                 { WaitStatus.KeyNoStopsFound, "ไม่พบป้าย" },
 
-                { WaitStatus.KeyStatusLine, "รอ {0} | เฉลี่ย {1} | แย่ {2} | {3}" },
-                { WaitStatus.KeyStatusLateSkipped, "ข้ามผู้โดยสารมาช้า {0}" },
-                { WaitStatus.KeyStatusSkipOff, "ไม่รอ OFF" },
+                { WaitStatus.KeyStatusLine, "รอ {0} | เฉลี่ย {1} | แย่ {2}" },
 
                 { WaitStatus.KeyStatusOverviewLine, "นักท่องเที่ยว {0}/ด. | พลเมือง {1}/ด. | {2}" },
                 { WaitStatus.KeyStatusRunSoonerLine, "{0}" },
                 { WaitStatus.KeyStatusRunSoonerOff, "วิ่งเร็วขึ้น OFF" },
+                { WaitStatus.KeyStatusGroupFamilyAssistsLine, "วันนี้ {0}" },
 
                 // Stats-to-log report strings
                 { WaitStatus.KeyReportNoCityLoaded, "[BBoard] ขอรายงานสถิติ แต่ยังไม่ได้โหลดเมือง" },

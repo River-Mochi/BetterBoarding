@@ -48,24 +48,15 @@ namespace BetterBoarding
                     "5x = 約1/5（最大）";
             }
 
-            // One helper keeps the status tooltips consistent while explaining
-            // which modes Better Boarding can actually skip late passengers for.
-            string StatusDescription(string transitName, bool skipSupported)
+            string StatusDescription(string transitName)
             {
-                string skippedText = skipSupported
-                    ? "**跳過** = 今天跳過遲到乘客，避免車輛繼續等待。\n" +
-                      "Better Boarding 比 vanilla 對卡住車輛約10分鐘的保底處理更早介入。\n" +
-                      $"由 <{ToggleName}> 控制。\n"
-                    : "**跳過** = 此模式為0。遲到乘客繼續由 vanilla 處理。\n";
-
                 return
                     $"<{transitName}目前狀態>\n" +
                     "**等待** = 目前等待乘客數。\n" +
                     "**平均** = 這些乘客的平均等待時間。\n" +
                     "**最差** = 單一站點最高平均等待時間。\n" +
                     "過高時請檢查壅塞、站點卡住/異常或車輛不足。\n" +
-                    skippedText +
-                    "用<統計寫入日誌>查看站點名、Entity ID等詳細資訊。";
+                    "<Stats to Log> 可查看站點、實體 ID、遲到乘客略過記錄等。";
             }
 
             return new Dictionary<string, string>
@@ -105,26 +96,28 @@ namespace BetterBoarding
                         "適用於客運飛機航廈。\n")
                 },
 
-                // Late passenger behavior
+                // Boarding behavior
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cim 提早跑步" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
+                    "已指派的 Cim 會<提早開始跑步>，更容易在交通工具發車前趕上。\n" +
+                    "- 最多比 vanilla 提早約3分鐘遊戲時間開始。\n" +
+                    "- 這是真實的移動輔助：測試中，許多獲得幫助的市民最後成功搭上原本分配的車輛。\n" +
+                    "- 對長月台與正在接近站點的 Cim 很有幫助。\n" +
+                    "- 只影響已指派給正在上下客車輛的 Cim。\n" +
+                    "- 不傳送 Cim，也不改變發車時間。"
+                },
+
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CancelLateBoarders)), ToggleName },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CancelLateBoarders)),
-                    "離站點太遠的遲到乘客可以被跳過，避免車輛繼續等待。\n" +
+                    "用於少數異常情況：車輛已過發車時間，卻還在等待明顯離站點很遠的乘客。\n" +
                     "Better Boarding 比 vanilla 對卡住車輛約10分鐘的保底處理更早介入。\n" +
+                    "- 「市民提前跑」先處理常見情況；這個選項再處理仍然離得很遠的遲到乘客。\n" +
                     "- 在站點/車站內或附近的乘客會保留指派並繼續上車。\n" +
                     "- 長火車/地鐵月台繼續受到保護。\n" +
                     "- 群組/家庭有額外保護。\n" +
                     "- 被跳過的 Cim 仍留在城市中；vanilla 可以繼續或重新規劃行程，通常會搭乘之後的車輛。\n" +
                     "- 船舶、渡輪與飛機繼續使用 vanilla 的遲到乘客處理。"
                 },
-                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cim 提早跑步" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
-                    "已指派的 Cim 會<提早開始跑步>，更容易在交通工具發車前趕上。\n" +
-                    "- 最多比 vanilla 提早約3分鐘遊戲時間開始。\n" +
-                    "- 對長月台與正在接近站點的 Cim 很有幫助。\n" +
-                    "- 只影響已指派給正在上下客車輛的 Cim。\n" +
-                    "- 不傳送 Cim，也不改變發車時間。"
-                },
-
                 // Status overview
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusOverview)), "總使用量" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusOverview)),
@@ -133,25 +126,31 @@ namespace BetterBoarding
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)), "Cim 提早跑" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusCimsRunSooner)),
-                    "統計今天被 Better Boarding **提早跑步**的 Cim。\n" +
-                    "最多比 vanilla 提早約3分鐘遊戲時間。"
+                    "按交通類型統計今天實際觸發的**提前跑輔助**。\n" +
+                    "測試確認，許多獲得幫助的市民最後搭上了原本分配的車輛。"
+                },
+
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusGroupFamilyAssists)), "團體/家庭協助" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusGroupFamilyAssists)),
+                    "統計今天 Better Boarding 對團體/家庭乘車的協助次數。\n" +
+                    "包括幫助落後成員完成上車，以及安全處理符合條件的遠距離團體。"
                 },
 
                 // Status rows
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusBus)), "公車" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusBus)), StatusDescription("公車", skipSupported: true) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusBus)), StatusDescription("公車") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusTram)), "電車" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTram)), StatusDescription("電車", skipSupported: true) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTram)), StatusDescription("電車") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusTrain)), "火車" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTrain)), StatusDescription("火車", skipSupported: true) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusTrain)), StatusDescription("火車") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusSubway)), "地鐵" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusSubway)), StatusDescription("地鐵", skipSupported: true) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusSubway)), StatusDescription("地鐵") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusFerry)), "渡輪" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusFerry)), StatusDescription("渡輪", skipSupported: false) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusFerry)), StatusDescription("渡輪") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusShip)), "船舶" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusShip)), StatusDescription("船舶", skipSupported: false) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusShip)), StatusDescription("船舶") },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusAir)), "飛機" },
-                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusAir)), StatusDescription("飛機", skipSupported: false) },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusAir)), StatusDescription("飛機") },
 
                 // Status buttons
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatsToLog)), "統計寫入日誌" },
@@ -189,13 +188,12 @@ namespace BetterBoarding
                 { WaitStatus.KeyNoCityLoaded, "未載入城市。" },
                 { WaitStatus.KeyNoStopsFound, "找不到站點。" },
 
-                { WaitStatus.KeyStatusLine, "{0} 等待 | 平均 {1} | 最差 {2} | {3}" },
-                { WaitStatus.KeyStatusLateSkipped, "跳過遲到乘客 {0}" },
-                { WaitStatus.KeyStatusSkipOff, "不等待 OFF" },
+                { WaitStatus.KeyStatusLine, "{0} 等待 | 平均 {1} | 最差 {2}" },
 
                 { WaitStatus.KeyStatusOverviewLine, "遊客 {0}/月 | 市民 {1}/月 | 更新 {2}" },
                 { WaitStatus.KeyStatusRunSoonerLine, "{0}" },
                 { WaitStatus.KeyStatusRunSoonerOff, "提早跑 OFF" },
+                { WaitStatus.KeyStatusGroupFamilyAssistsLine, "今天 {0}" },
 
                 // Stats-to-log report strings
                 { WaitStatus.KeyReportNoCityLoaded, "[BBoard] 要求統計報告，但目前未載入城市。" },
