@@ -12,14 +12,15 @@ Better Boarding helps much sooner by improving late-passenger behavior while lea
 - `Skip Late Passengers`: late solo cims clearly far from a bus/tram stop or rail station can miss that vehicle after a short grace instead of holding everyone. Riders at or near those stops remain assigned so they can board.
 - Groups/families get extra help so one lagging child, pet, or group member does not cause a long delay.
 - `Cims Run Sooner`: assigned late passengers start running earlier for bus, tram, train, and subway.
-- Compact Options status plus `Stats to Log` for waits, worst stops, skipped passengers, and an on-demand train/subway boarding snapshot.
+- Compact Options status plus `Stats to Log` button for waits, worst stops, released passenger assignments, and an on-demand train/subway boarding snapshot.
 
 ### Late Passengers
 
 Better Boarding mainly targets citizen behavior because the schedule does not help much if a cim several blocks away can keep a vehicle from leaving.
 
-- Late solo bus, tram, train, and subway passengers can miss the vehicle only when confirmed clearly far from its stop/station and every car after scheduled departure plus a short grace. The scheduled time is not the moment it actually leaves the stop. A rider merely marked "not ready" remains eligible to board when nearby.
-- Ships and aircraft are not skipped early. Released cims are not deleted; vanilla may reassign or reroute them.
+- Late solo bus, tram, train, and subway passengers can miss the vehicle only when confirmed clearly far from its stop/station and every car after scheduled departure plus a short grace. The scheduled time is not the moment it actually leaves the stop.
+ Riders at or near the stop or station stay assigned and keep boarding.
+- Ships, ferries, and aircraft keep vanilla late-passenger handling. Released cims are not deleted; vanilla may reassign or reroute them.
 - Families/groups are kept together where possible. If the leader is already aboard, Better Boarding nudges vanilla's existing child and pet boarding flow rather than directly teleporting members.
 
 ### Cims Run Sooner
