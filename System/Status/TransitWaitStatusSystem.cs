@@ -26,7 +26,7 @@ namespace BetterBoarding
     using Unity.Collections;
     using Unity.Entities;
 
-    public sealed partial class TransitWaitStatusSystem : GameSystemBase
+    public partial class TransitWaitStatusSystem : GameSystemBase
     {
         private const int kTopWorstStopCount = 3;
 
