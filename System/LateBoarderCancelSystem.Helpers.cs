@@ -11,20 +11,20 @@
 
 namespace BetterBoarding
 {
-    using System; // Math
-    using System.Collections.Generic; // HashSet
-    using Game; // GameSystemBase
-    using Game.Common; // Deleted, Destroyed, Overridden
-    using Game.Creatures; // Human, CurrentVehicle, group checks
-    using Game.Pathfind; // PathOwner, PathElement
-    using Game.Tools; // Temp
-    using Game.Vehicles; // CargoTransport, LayoutElement, Passenger
-    using Unity.Collections; // Allocator
-    using Unity.Entities; // DynamicBuffer, Entity, EntityCommandBuffer
-    using Unity.Mathematics; // math
-    using PrefabRef = Game.Prefabs.PrefabRef; // prefab lookup
+    using System;                                                   // Math
+    using System.Collections.Generic;                               // HashSet
+    using Game;                                                     // GameSystemBase
+    using Game.Common;                                              // Deleted, Destroyed, Overridden
+    using Game.Creatures;                                           // Human, CurrentVehicle, group checks
+    using Game.Pathfind;                                            // PathOwner, PathElement
+    using Game.Tools;                                               // Temp
+    using Game.Vehicles;                                            // CargoTransport, LayoutElement, Passenger
+    using Unity.Collections;                                        // Allocator
+    using Unity.Entities;                                           // DynamicBuffer, Entity, EntityCommandBuffer
+    using Unity.Mathematics;                                        // math
+    using PrefabRef = Game.Prefabs.PrefabRef;                       // prefab lookup
     using PublicTransportVehicleData = Game.Prefabs.PublicTransportVehicleData; // transport type source
-    using TransportType = Game.Prefabs.TransportType; // bus/train/etc.
+    using TransportType = Game.Prefabs.TransportType;               // bus/train/etc.
 
     public partial class LateBoarderCancelSystem : GameSystemBase
     {
@@ -218,15 +218,14 @@ namespace BetterBoarding
                     continue;
                 }
 
-            CurrentVehicle currentVehicle =
-                EntityManager.GetComponentData<CurrentVehicle>(passenger);
+                CurrentVehicle currentVehicle =
+                    EntityManager.GetComponentData<CurrentVehicle>(passenger);
 
-            if (currentVehicle.m_Vehicle != vehicleEntity ||
-                (currentVehicle.m_Flags &
-                    (CreatureVehicleFlags.Ready | CreatureVehicleFlags.Entering)) != 0)
-            {
-                continue;
-            }
+                if (currentVehicle.m_Vehicle != vehicleEntity ||
+                    (currentVehicle.m_Flags & CreatureVehicleFlags.Ready) != 0)
+                {
+                    continue;
+                }
 
                 Human human = EntityManager.GetComponentData<Human>(passenger);
                 if ((human.m_Flags & HumanFlags.Run) != 0)

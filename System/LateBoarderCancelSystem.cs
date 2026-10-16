@@ -18,7 +18,6 @@ namespace BetterBoarding
     using Game;
     using Game.Common;
     using Game.Creatures;
-    using Game.Pathfind;
     using Game.Tools;
     using Game.Vehicles;
     using Unity.Collections;
