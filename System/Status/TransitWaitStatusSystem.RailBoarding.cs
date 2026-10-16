@@ -11,17 +11,19 @@
 
 namespace BetterBoarding
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.Text;
-    using Game.Common;
-    using Game.Creatures;
-    using Game.Prefabs;
-    using Game.Routes;
-    using Game.Vehicles;
-    using Unity.Collections;
-    using Unity.Entities;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Text;
+using Game.Common;
+using Game.Creatures;
+using Game.Prefabs;
+using Game.Routes;
+using Game.Simulation;
+using Game.UI;
+using Game.Vehicles;
+using Unity.Collections;
+using Unity.Entities;
 
     public sealed partial class TransitWaitStatusSystem
     {

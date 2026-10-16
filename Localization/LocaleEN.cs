@@ -53,20 +53,16 @@ namespace BetterBoarding
             string SpeedDescription(string transitName, string extraLine)
             {
                 return
-                    "<1x = vanilla>\n" +
+                    "<1x = vanilla>\\n" +
                     extraLine +
-                    $"Higher values reduce {transitName} boarding and loading time.\n" +
-        
-                    "This helps normal queues clear faster, but a late passenger can still delay departure because of vanilla design.\n" +
-                    $"<{ToggleName}> can release clearly distant bus, tram, train, and subway riders after departure time; nearby riders stay assigned.\n" +
-                    "Skipped citizens are not deleted; vanilla may continue or reroute their trips. Ship, ferry, and airplane riders are not skipped early.\n" +
-                    "<==========================>\n" +
-                    "Loading value:\n" +
-                    "1x = 100% vanilla dwell\n" +
-                    "2x = ~1/2 planned dwell\n" +
-                    "3x = ~1/3 planned dwell (recommended)\n" +
-                    "5x = ~1/5 planned dwell (max)\n" +
-                    $"This is separate from <{ToggleName}>; boarding speed alone does not remove a rider's assignment.";
+                    $"Higher values make {transitName} boarding and loading faster.\\n" +
+                    "This shortens normal boarding time when passengers are getting on/off.\\n" +
+                    "<==========================>\\n" +
+                    "Loading value:\\n" +
+                    "1x = 100% vanilla dwell\\n" +
+                    "2x = ~1/2 planned dwell\\n" +
+                    "3x = ~1/3 planned dwell (recommended)\\n" +
+                    "5x = ~1/5 planned dwell (max)";
             }
 
             // One helper keeps all seven status tooltips in sync for future translations.
@@ -131,13 +127,11 @@ namespace BetterBoarding
                 },
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)), "Cims Run Sooner (see tooltip, 3rd panel)" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.CimsRunSoonerToCatchBuses)),
-                    "Citizens who are <late> start <running sooner> to try to make it **before** departure time.\n" +
-                    "Assigned citizens start <running sooner> before departure time.\n" +
-                    "- Works for buses, trams, trains, and subways, especially on long platforms.\n" +
-                    "- Only affects cims already assigned to a vehicle that is currently boarding.\n" +
-                    "- Vanilla only starts cims running at departure time, which can be too late to help.\n" +
-                    $"- Pairs well with <{ToggleName}> because it may reduce how many cims miss the vehicle and need to be reassigned.\n" +
-                    "- Does not change the vehicle's departure time, force boarding, or teleport citizens."
+                    "Assigned cims who are walking start <running sooner> to help catch their bus, tram, train, or subway before departure.\\n" +
+                    "- Better Boarding turns on the game's Run behavior up to 512 frames earlier than vanilla.\\n" +
+                    "- Helps cims farther down a platform or still approaching the stop reach the vehicle sooner.\\n" +
+                    "- Only affects cims already assigned to a vehicle that is currently boarding.\\n" +
+                    "- Does not teleport citizens, force boarding, or change the scheduled departure time."
                 },
 
                 // Status overview

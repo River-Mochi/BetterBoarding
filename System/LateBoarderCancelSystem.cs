@@ -33,7 +33,7 @@ namespace BetterBoarding
         // 2. Optionally set vanilla's Run flag shortly before bus/tram/train departure so assigned cims hurry sooner.
         // 3. After planned departure time, optionally detach eligible solo late passengers
         //    whose remaining path still contains that exact vehicle.
-        // 4. Optionally record delayed "what happened next?" samples for verbose diagnostics.
+        // 4. Optionally record delayed "what happened next" samples for verbose diagnostics.
         // 2048/day means every 128 simulation frames (~42 game seconds); cancellation work is also capped below.
         public const int UpdatesPerDay = 2048;
 
@@ -353,17 +353,16 @@ namespace BetterBoarding
                                 continue;
                             }
 
-                            if ((currentVehicle.m_Flags & CreatureVehicleFlags.Ready) != 0)
+                            if ((currentVehicle.m_Flags &
+                                (CreatureVehicleFlags.Ready | CreatureVehicleFlags.Entering)) != 0)
                             {
+                                // Ready = boarding completed.
+                                // Entering = vanilla is actively completing boarding.
+                                // Better Boarding must never abandon either state.
                                 continue;
                             }
 
                             if (IsGroupPassenger(passenger))
-                            {
-                                continue;
-                            }
-
-                            if (!CanSafelyCancelPassenger(assignedVehicle, passenger))
                             {
                                 continue;
                             }
@@ -393,6 +392,14 @@ namespace BetterBoarding
                             {
                                 continue;
                             }
+
+                            // Only inspect the remaining path after the inexpensive
+                            // physical proximity checks say this rider is clearly far away.
+                            if (!CanSafelyCancelPassenger(assignedVehicle, passenger))
+                            {
+                                continue;
+                            }
+    
 
                             pendingCancellation.Add(passenger);
                             candidates++;
