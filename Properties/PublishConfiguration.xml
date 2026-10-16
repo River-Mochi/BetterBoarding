@@ -116,6 +116,7 @@ tags: faster boarding, boarding time, bus stop issues, slow stuck transit, debun
 <!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
 <ChangeLog>
 - Improved tooltips and details.
+- updated all locale files.
 - Fix for passenger-release behavior, especially for trains.
 - Improves performance by reducing repeated boarding work, allocations, and unnecessary stop tuning.
 </ChangeLog>
