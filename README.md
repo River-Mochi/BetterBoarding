@@ -18,8 +18,8 @@ Better Boarding helps much sooner by improving late-passenger behavior while lea
 
 Better Boarding mainly targets citizen behavior because the schedule does not help much if a cim several blocks away can keep a vehicle from leaving.
 
-- Late solo bus, tram, train, and subway passengers can miss the vehicle only when confirmed clearly far from its stop/station and every car after scheduled departure plus a short grace. The scheduled time is not the moment it actually leaves the stop.
- Riders at or near the stop or station stay assigned and keep boarding.
+- Late solo bus, tram, train, and subway passengers can miss the vehicle only when confirmed clearly far from its stop/station and every train car, and it's  after scheduled departure plus a short grace. The scheduled time is not the moment it actually leaves the stop.
+- Riders at or near the stop or station stay assigned and keep boarding.
 - Ships, ferries, and aircraft keep vanilla late-passenger handling. Released cims are not deleted; vanilla may reassign or reroute them.
 - Families/groups are kept together where possible. If the leader is already aboard, Better Boarding nudges vanilla's existing child and pet boarding flow rather than directly teleporting members.
 
