@@ -53,7 +53,7 @@ Better Boarding mainly fixes citizen behavior that can keep boarding open too lo
 **Late passengers / families**
 
 *   Riders confirmed far from the bus/tram stop or train/subway station get a short grace after scheduled departure time, then can miss that vehicle instead of holding everyone. Vanilla naturally reassigns them, often to the next vehicle.
-*   Families/groups are kept together where possible. If the leader is already aboard, a separated child or pet is handled so stragglers doesn't hold up transit.
+*   Families/groups are kept together where possible. If a group leader is already aboard, a separated child or pet is handled so one straggler doesn't hold up transit.
 
 **Cims Run Sooner**
 
