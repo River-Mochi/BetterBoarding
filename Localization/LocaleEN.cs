@@ -60,8 +60,7 @@ namespace BetterBoarding
                     "5x = ~1/5 planned dwell (max)";
             }
 
-            // One helper keeps the status tooltips consistent while explaining
-            // which modes Better Boarding can actually skip late passengers for.
+
             string StatusDescription(string transitName, bool skipSupported)
             {
                 string skippedText = skipSupported
