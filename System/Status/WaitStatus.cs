@@ -32,11 +32,11 @@ namespace BetterBoarding
         public const string KeyNoStopsFound = "FB_STATUS_NO_STOPS";
 
         public const string KeyStatusLine = "FB_STATUS_LINE";
-        public const string KeyStatusLateSkipped = "FB_STATUS_LATE_SKIPPED";
-        public const string KeyStatusSkipOff = "FB_STATUS_SKIP_OFF";
         public const string KeyStatusOverviewLine = "FB_STATUS_OVERVIEW_LINE";
         public const string KeyStatusRunSoonerLine = "FB_STATUS_RUN_SOONER_LINE";
         public const string KeyStatusRunSoonerOff = "FB_STATUS_RUN_SOONER_OFF";
+        public const string KeyStatusGroupFamilyAssistsLine =
+            "FB_STATUS_GROUP_FAMILY_ASSISTS_LINE";
 
         public const string KeyReportNoCityLoaded = "FB_REPORT_NO_CITY_LOADED";
         public const string KeyReportTitle = "FB_REPORT_TITLE";
@@ -75,6 +75,7 @@ namespace BetterBoarding
 
         public static string OverviewSummary { get; private set; } = string.Empty;
         public static string CimsRunSoonerSummary { get; private set; } = string.Empty;
+        public static string GroupFamilyAssistsSummary { get; private set; } = string.Empty;
         public static string BusSummary { get; private set; } = string.Empty;
         public static string TrainSummary { get; private set; } = string.Empty;
         public static string TramSummary { get; private set; } = string.Empty;
@@ -103,6 +104,7 @@ namespace BetterBoarding
         private static long s_ShipRunSoonerToday;
         private static long s_FerryRunSoonerToday;
         private static long s_AirRunSoonerToday;
+        private static long s_GroupFamilyAssistsToday;
         private static DateTime s_LastSnapshotLocalTime;
         // Outcome counters/rings back the detailed log report without bloating the Options UI rows.
         private static FollowUpOutcomeCounts s_BusFollowUpOutcomes;
@@ -322,6 +324,7 @@ namespace BetterBoarding
             BusSummary = Localize(KeyStatusNotLoaded, "Status not loaded.");
             OverviewSummary = BusSummary;
             CimsRunSoonerSummary = string.Empty;
+            GroupFamilyAssistsSummary = string.Empty;
             TrainSummary = string.Empty;
             TramSummary = string.Empty;
             SubwaySummary = string.Empty;
@@ -393,6 +396,7 @@ namespace BetterBoarding
                 BusSummary = Localize(KeyNoCityLoaded, "No city loaded.");
                 OverviewSummary = BusSummary;
                 CimsRunSoonerSummary = string.Empty;
+            GroupFamilyAssistsSummary = string.Empty;
                 TrainSummary = string.Empty;
                 TramSummary = string.Empty;
                 SubwaySummary = string.Empty;
@@ -437,6 +441,7 @@ namespace BetterBoarding
             {
                 BusSummary = Localize(KeyStatusNotLoaded, "Status not loaded.");
                 CimsRunSoonerSummary = string.Empty;
+            GroupFamilyAssistsSummary = string.Empty;
                 TrainSummary = string.Empty;
                 TramSummary = string.Empty;
                 SubwaySummary = string.Empty;
@@ -686,6 +691,17 @@ namespace BetterBoarding
             }
         }
 
+        internal static void RecordGroupFamilyAssists(World world, int count)
+        {
+            if (count <= 0)
+            {
+                return;
+            }
+
+            EnsureCounterDay(world);
+            s_GroupFamilyAssistsToday += count;
+        }
+
         internal static void RecordLateBoarderSample(World world, TransportType transportType, Entity vehicle, Entity passenger)
         {
             EnsureCounterDay(world);
@@ -718,27 +734,19 @@ namespace BetterBoarding
                     snapshot));
         }
 
-        private static string FormatFamily(TransitWaitStatusSystem.FamilySnapshot family, long lateBoardersCanceledToday)
+        private static string FormatFamily(TransitWaitStatusSystem.FamilySnapshot family)
         {
             if (family.StopCount == 0)
             {
                 return LocaleUtils.Localize(KeyNoStopsFound, "No stops found.");
             }
 
-            string lateSkipText = BoardingRuntimeSettings.CancelLateBoarders
-                ? LocaleUtils.SafeFormat(
-                    KeyStatusLateSkipped,
-                    "{0} late today",
-                    LocaleUtils.FormatN0(lateBoardersCanceledToday))
-                : LocaleUtils.Localize(KeyStatusSkipOff, "skip OFF");
-
             return LocaleUtils.SafeFormat(
                 KeyStatusLine,
-                "{0} waiting | avg {1} | worst {2} | {3}",
+                "{0} waiting | avg {1} | worst {2}",
                 LocaleUtils.FormatN0(family.WaitingPassengers),
                 FormatDuration(family.AverageWaitSeconds),
-                FormatDuration(family.WorstStopWaitSeconds),
-                lateSkipText);
+                FormatDuration(family.WorstStopWaitSeconds));
         }
 
         private static void ApplySnapshot(TransitWaitStatusSystem.Snapshot snapshot)
@@ -746,13 +754,14 @@ namespace BetterBoarding
             s_LastSnapshotLocalTime = DateTime.Now;
             OverviewSummary = FormatOverview(snapshot);
             CimsRunSoonerSummary = FormatRunSoonerSummary();
-            BusSummary = FormatFamily(snapshot.Bus, s_BusLateBoardersToday);
-            TrainSummary = FormatFamily(snapshot.Train, s_TrainLateBoardersToday);
-            TramSummary = FormatFamily(snapshot.Tram, s_TramLateBoardersToday);
-            SubwaySummary = FormatFamily(snapshot.Subway, s_SubwayLateBoardersToday);
-            ShipSummary = FormatFamily(snapshot.Ship, s_ShipLateBoardersToday);
-            FerrySummary = FormatFamily(snapshot.Ferry, s_FerryLateBoardersToday);
-            AirSummary = FormatFamily(snapshot.Air, s_AirLateBoardersToday);
+            GroupFamilyAssistsSummary = FormatGroupFamilyAssistsSummary();
+            BusSummary = FormatFamily(snapshot.Bus);
+            TrainSummary = FormatFamily(snapshot.Train);
+            TramSummary = FormatFamily(snapshot.Tram);
+            SubwaySummary = FormatFamily(snapshot.Subway);
+            ShipSummary = FormatFamily(snapshot.Ship);
+            FerrySummary = FormatFamily(snapshot.Ferry);
+            AirSummary = FormatFamily(snapshot.Air);
         }
 
         private static string FormatOverview(TransitWaitStatusSystem.Snapshot snapshot)
@@ -781,6 +790,14 @@ namespace BetterBoarding
             return LocaleUtils.SafeFormat(KeyStatusRunSoonerLine, "{0}", summary);
         }
 
+        private static string FormatGroupFamilyAssistsSummary()
+        {
+            return LocaleUtils.SafeFormat(
+                KeyStatusGroupFamilyAssistsLine,
+                "{0} today",
+                LocaleUtils.FormatN0(s_GroupFamilyAssistsToday));
+        }
+
         private static void AppendSummaryReport(StringBuilder sb, TransitWaitStatusSystem.Snapshot snapshot)
         {
             sb.AppendLine();
@@ -790,6 +807,10 @@ namespace BetterBoarding
                 "Total public transit",
                 $"{LocaleUtils.FormatN0(snapshot.MonthlyTourists)} tourists/mo | {LocaleUtils.FormatN0(snapshot.MonthlyCitizens)} citizens/mo");
             AppendField(sb, "Cims run sooner", FormatRunSoonerSummary());
+            AppendField(
+                sb,
+                "Group/family assists",
+                LocaleUtils.FormatN0(s_GroupFamilyAssistsToday) + " today");
             AppendSummaryLine(sb, "Bus", snapshot.Bus, s_BusLateBoardersToday);
             AppendSummaryLine(sb, "Tram", snapshot.Tram, s_TramLateBoardersToday);
             AppendSummaryLine(sb, "Train", snapshot.Train, s_TrainLateBoardersToday);
@@ -1242,6 +1263,7 @@ namespace BetterBoarding
             s_ShipRunSoonerToday = 0;
             s_FerryRunSoonerToday = 0;
             s_AirRunSoonerToday = 0;
+            s_GroupFamilyAssistsToday = 0;
             s_BusFollowUpOutcomes = default;
             s_TrainFollowUpOutcomes = default;
             s_TramFollowUpOutcomes = default;

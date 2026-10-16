@@ -139,6 +139,12 @@ namespace BetterBoarding
                     "Testing confirms many assisted cims go on to board the same assigned vehicle."
                 },
 
+                { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusGroupFamilyAssists)), "Group/family assists" },
+                { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusGroupFamilyAssists)),
+                    "Counts today's Better Boarding group/family boarding assists.\n" +
+                    "Includes helping lagging members finish boarding and safely handling eligible far-away groups."
+                },
+
                 // Status rows
                 { m_Setting.GetOptionLabelLocaleID(nameof(BBoardSettings.StatusBus)), "Bus" },
                 { m_Setting.GetOptionDescLocaleID(nameof(BBoardSettings.StatusBus)), StatusDescription("bus") },
@@ -200,14 +206,13 @@ namespace BetterBoarding
                 { WaitStatus.KeyNoCityLoaded, "No city loaded." },
                 { WaitStatus.KeyNoStopsFound, "No stops found." },
 
-                // Late skips intentionally stay out of the normal Options Status rows.
+                // Late skips intentionally stay in Stats to Log instead of the normal Options Status rows.
                 { WaitStatus.KeyStatusLine, "{0} waiting | avg {1} | worst {2}" },
-                { WaitStatus.KeyStatusLateSkipped, "{0} late skipped" },
-                { WaitStatus.KeyStatusSkipOff, "skip OFF" },
 
                 { WaitStatus.KeyStatusOverviewLine, "{0} tourist/mo | {1} citizens/mo | updated {2}" },
                 { WaitStatus.KeyStatusRunSoonerLine, "{0}" },
                 { WaitStatus.KeyStatusRunSoonerOff, "run sooner OFF" },
+                { WaitStatus.KeyStatusGroupFamilyAssistsLine, "{0} today" },
 
                 // Stats-to-log report strings
                 { WaitStatus.KeyReportNoCityLoaded, "[BBoard] Stats report requested, but no city is loaded." },

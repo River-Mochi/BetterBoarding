@@ -35,7 +35,7 @@ namespace BetterBoarding
     /// existing boarding-timeout nudge. ResidentAISystem or PetAISystem still performs every
     /// actual enter/finish transition and its bookkeeping.
     /// </summary>
-    public sealed partial class LateGroupBoardingSystem : GameSystemBase
+    public partial class LateGroupBoardingSystem : GameSystemBase
     {
         public const int UpdatesPerDay = 2048;
 
@@ -76,6 +76,12 @@ namespace BetterBoarding
 
         protected override void OnUpdate()
         {
+            int groupFamilyAssists = groupsReleased + groupsAssisted;
+            if (groupFamilyAssists > 0)
+            {
+                WaitStatus.RecordGroupFamilyAssists(World, groupFamilyAssists);
+            }
+
             if (!BoardingRuntimeSettings.CancelLateBoarders ||
                 m_SimulationSystem == null)
             {

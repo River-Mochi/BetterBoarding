@@ -109,6 +109,16 @@ namespace BetterBoarding
         }
 
         [SettingsUISection(ActionsTab, StatusGroup)]
+        public string StatusGroupFamilyAssists
+        {
+            get
+            {
+                try { WaitStatus.RefreshIfNeeded(); } catch { }
+                return WaitStatus.GroupFamilyAssistsSummary ?? string.Empty;
+            }
+        }
+
+        [SettingsUISection(ActionsTab, StatusGroup)]
         public string StatusBus
         {
             get
