@@ -12,8 +12,10 @@
 namespace BetterBoarding
 {
     using System;
+    using Game.Common;
     using Game.Creatures;
     using Game.Pathfind;
+    using Game.Tools;
     using Unity.Collections;
     using Unity.Entities;
 
