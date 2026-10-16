@@ -79,14 +79,14 @@ namespace BetterBoarding
         [SettingsUISetter(typeof(BBoardSettings), nameof(SetAirBoardingSpeedFactorLive))]
         public int AirBoardingSpeedFactor { get; set; }
 
-        [SettingsUISection(ActionsTab, BehaviorGroup)]
-        [SettingsUISetter(typeof(BBoardSettings), nameof(SetCancelLateBoardersLive))]
-        public bool CancelLateBoarders { get; set; }
-
         // Historical property name retained for .coc compatibility; applies to bus, tram, train, and subway.
         [SettingsUISection(ActionsTab, BehaviorGroup)]
         [SettingsUISetter(typeof(BBoardSettings), nameof(SetCimsRunSoonerToCatchBusesLive))]
         public bool CimsRunSoonerToCatchBuses { get; set; }
+
+        [SettingsUISection(ActionsTab, BehaviorGroup)]
+        [SettingsUISetter(typeof(BBoardSettings), nameof(SetCancelLateBoardersLive))]
+        public bool CancelLateBoarders { get; set; }
 
         [SettingsUISection(ActionsTab, StatusGroup)]
         public string StatusOverview
@@ -309,6 +309,19 @@ namespace BetterBoarding
             }
         }
 
+        private void SetCimsRunSoonerToCatchBusesLive(bool value)
+        {
+            if (BoardingRuntimeSettings.SetCimsRunSoonerToCatchBuses(value))
+            {
+                LogUtils.Info(
+                    Mod.s_Log,
+                    () => DescribeBehaviorForLog(BoardingRuntimeSettings.CancelLateBoarders, value));
+
+                TrySetLateBoarderSystemEnabled(BoardingRuntimeSettings.BoardingAssistEnabled);
+                WaitStatus.MarkDirty();
+            }
+        }
+
         private void SetCancelLateBoardersLive(bool value)
         {
             if (BoardingRuntimeSettings.SetCancelLateBoarders(value))
@@ -323,19 +336,6 @@ namespace BetterBoarding
                     BoardingRuntimeSettings.BoardingAssistEnabled);
 
                 TrySetLateGroupBoardingSystemEnabled(value);
-                WaitStatus.MarkDirty();
-            }
-        }
-
-        private void SetCimsRunSoonerToCatchBusesLive(bool value)
-        {
-            if (BoardingRuntimeSettings.SetCimsRunSoonerToCatchBuses(value))
-            {
-                LogUtils.Info(
-                    Mod.s_Log,
-                    () => DescribeBehaviorForLog(BoardingRuntimeSettings.CancelLateBoarders, value));
-
-                TrySetLateBoarderSystemEnabled(BoardingRuntimeSettings.BoardingAssistEnabled);
                 WaitStatus.MarkDirty();
             }
         }
@@ -478,8 +478,10 @@ namespace BetterBoarding
             BusBoardingSpeedFactor = DefaultSpeedFactor;
             RailBoardingSpeedFactor = DefaultSpeedFactor;
             AirBoardingSpeedFactor = DefaultSpeedFactor;
-            CancelLateBoarders = true;
+
+            // New-install defaults: both boarding assists are enabled.
             CimsRunSoonerToCatchBuses = true;
+            CancelLateBoarders = true;
             EnableVerboseLogging = false;
         }
     }

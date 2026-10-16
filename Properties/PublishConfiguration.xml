@@ -115,7 +115,7 @@ tags: faster boarding, boarding time, bus stop issues, slow stuck transit, debun
 <Dependency Id=""/>
 <!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
 <ChangeLog>
-- Improvements in cims run sooner, make Late passengers more edge case.
+- Improved mod so late passengers are less likely to happen. They are still handled if it happens.
 - updated all locale files.
 - Fix for passenger-release behavior, especially for trains or subways.
 </ChangeLog>
