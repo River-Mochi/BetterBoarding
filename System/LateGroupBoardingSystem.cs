@@ -18,7 +18,6 @@ namespace BetterBoarding
     using Game.Common;
     using Game.Creatures;
     using Game.Prefabs;
-    using Game.Simulation;
     using Game.Tools;
     using Game.Vehicles;
     using Unity.Collections;
@@ -51,7 +50,7 @@ namespace BetterBoarding
         private EntityQuery m_VehicleQuery;
         private readonly List<float3> m_CachedCarPositions = new List<float3>(8);
 
-        private SimulationSystem? m_SimulationSystem;
+        private Game.Simulation.SimulationSystem? m_SimulationSystem;
 
         public override int GetUpdateInterval(SystemUpdatePhase phase)
         {
@@ -62,7 +61,8 @@ namespace BetterBoarding
         {
             base.OnCreate();
 
-            m_SimulationSystem = World.GetOrCreateSystemManaged<SimulationSystem>();
+            m_SimulationSystem =
+                World.GetOrCreateSystemManaged<Game.Simulation.SimulationSystem>();
 
             // Start from public-transport controllers, then inspect only their passenger buffers.
             m_VehicleQuery = SystemAPI.QueryBuilder()
