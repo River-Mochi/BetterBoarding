@@ -13,11 +13,7 @@ namespace BetterBoarding
 {
     using System.Collections.Generic;
     using Colossal;
-    using Game.Citizens;
-    using Game.Common;
-    using Game.Objects;
-    using UnityEngine;
-
+   
     /// <summary>
     /// English localization source.
     /// </summary>

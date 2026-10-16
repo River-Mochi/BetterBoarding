@@ -16,9 +16,7 @@ namespace BetterBoarding
     using System.Text;
     using CS2Shared.RiverMochi;
     using Game;
-  //  using Game.Common;
     using Game.Creatures;
-   // using Game.Pathfind;
     using Game.Prefabs;
     using Game.SceneFlow;
     using Game.Simulation;
