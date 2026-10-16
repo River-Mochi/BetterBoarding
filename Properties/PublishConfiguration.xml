@@ -29,7 +29,7 @@ Vanilla only releases a stuck transit vehicle after ~10 in-game minutes.
 *   ✅ **Helps long train platforms** — cims hanging around far from the doors get a head start instead of waiting until departure time to start running (vanilla behavior).
 *   ✅ **Boarding/Loading** — adjust from **1x vanilla to 5x**, for shorter planned dwell/loading times.
 *   Vanilla may still **hold a vehicle briefly for spacing** as part of its un-bunching system.
-*   Skipped cims aren't deleted; vanilla can continue or reroute their trip, often onto a later vehicle.
+*   Skipped cims aren't deleted; vanilla can continue or reroute their trip.
 
 Reduce boarding delays, traffic backups, and vehicles bunching up — especially in busy transit cities.
 
