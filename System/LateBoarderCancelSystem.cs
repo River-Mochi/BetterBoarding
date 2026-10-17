@@ -141,7 +141,8 @@ namespace BetterBoarding
 
         private PassStats RunCancellationPass()
         {
-            NativeArray<Entity> vehicles = default;
+
+            NativeList<Entity> vehicles = default;
             EntityCommandBuffer ecb = default;
             bool hasCommandBuffer = false;
             int cancellationsThisUpdate = 0;
@@ -183,36 +184,53 @@ namespace BetterBoarding
 
             try
             {
-                // Gather entity IDs without pre-completing city-wide component sets. EntityManager
-                // accessors below synchronize each component type lazily, after a relevant boarding
-                // vehicle is found, instead of draining human/path jobs on every assist pass.
-                vehicles = m_VehicleQuery.ToEntityArray(Allocator.Temp);
+                // Burst-filter the broad public-transport query first. The managed pass below
+                // now sees only vehicles that are actually in a normal boarding state.
+                int sourceVehicleCount = m_VehicleQuery.CalculateEntityCount();
 
-                foreach (Entity vehicleEntity in vehicles)
+                vehicles = new NativeList<Entity>(
+                    sourceVehicleCount,
+                    Allocator.TempJob);
+
+                Dependency = new BoardingVehicleFilterJob
                 {
+                    m_EntityType = SystemAPI.GetEntityTypeHandle(),
+                    m_PublicTransportType =
+                        SystemAPI.GetComponentTypeHandle<Game.Vehicles.PublicTransport>(
+                            isReadOnly: true),
+                    m_ControllerType =
+                        SystemAPI.GetComponentTypeHandle<Controller>(
+                            isReadOnly: true),
+                    m_CargoTransportType =
+                        SystemAPI.GetComponentTypeHandle<Game.Vehicles.CargoTransport>(
+                            isReadOnly: true),
+                    m_Results = vehicles.AsParallelWriter(),
+                    m_ExcludedStates =
+                        PublicTransportFlags.Evacuating |
+                        PublicTransportFlags.PrisonerTransport,
+                    m_SkipChildControllers = false,
+                    m_RequirePastDeparture = false,
+                    m_Frame = frame,
+                    m_MinimumPastDepartureFrames = 0u,
+                }.ScheduleParallel(m_VehicleQuery, Dependency);
+
+                Dependency.Complete();
+
+                for (int filteredIndex = 0;
+                    filteredIndex < vehicles.Length;
+                    filteredIndex++)
+                {
+                    Entity vehicleEntity = vehicles[filteredIndex];
                     vehiclesScanned++;
 
-                    if (!EntityManager.Exists(vehicleEntity) ||
-                        EntityManager.HasComponent<Destroyed>(vehicleEntity) ||
-                        EntityManager.HasComponent<Overridden>(vehicleEntity))
-                    {
-                        continue;
-                    }
-
-                    PublicTransport publicTransport = EntityManager.GetComponentData<Game.Vehicles.PublicTransport>(vehicleEntity);
-                    if ((publicTransport.m_State & PublicTransportFlags.Boarding) == 0)
-                    {
-                        // Only intervene while vanilla says the vehicle is in a boarding state.
-                        continue;
-                    }
-
-                    if ((publicTransport.m_State & (PublicTransportFlags.Evacuating | PublicTransportFlags.PrisonerTransport)) != 0)
-                    {
-                        // These flags are special gameplay flows, not normal public boarding.
-                        continue;
-                    }
+                    PublicTransport publicTransport =
+                        EntityManager.GetComponentData<Game.Vehicles.PublicTransport>(
+                            vehicleEntity);
 
                     TransportType transportType = GetTransportType(vehicleEntity);
+
+
+
                     bool isRail = transportType == TransportType.Train ||
                         transportType == TransportType.Subway;
                     bool isBusOrTram = transportType == TransportType.Bus ||

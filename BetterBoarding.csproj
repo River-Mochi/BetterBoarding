@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>Library</OutputType>
 		<Configurations>Debug;Release</Configurations>
@@ -58,6 +58,7 @@
 		<Reference Include="UnityEngine.CoreModule">
 			<Private>false</Private>
 		</Reference>
+        <Reference Include="Unity.Burst"><Private>false</Private></Reference>
 		<Reference Include="Unity.Collections">
 			<Private>false</Private>
 		</Reference>
