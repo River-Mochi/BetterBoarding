@@ -20,12 +20,13 @@ Vanilla only releases a stuck transit vehicle after ~10 in-game minutes.
 
 └─────────────────────────────────────────────────────────┘
 
-**Better Boarding steps in sooner to skip late passengers who are too far away so they don't hold everyone up. Transit can keep moving sooner.** In testing, before-and-after comparisons also showed higher total transit usage.
+**Better Boarding helps sooner with late passengers who are too far away so they don't hold everyone up. Transit can keep moving sooner.** You may get some higher transit usage.
 
 ### 🏃‍➡️🏃‍♀️‍➡️🏃‍♂️‍➡️ 🚍 More Transit Use
 
 *   ✅ **Cims Run Sooner** — assigned passengers start running before vanilla normally tells them to.
 *   ✅ **Helps long train platforms** — cims hanging around far from the doors get a head start instead of waiting until departure time to start running (vanilla behavior).
+* Important thing is we want citizens to make it to their same assigned vehicle and complete boarding.
 *   ✅ **Skip Late Passengers** — after a short grace, a late cim who is too far away from the stop/station and vehicle can miss it instead of holding it up (bus, tram, train, or subway). Groups/families are handled too.
 *   ✅ **Boarding/Loading** — adjust from **1x vanilla to 5x**, for shorter planned dwell/loading times.
 *   Vanilla may still hold a vehicle briefly **for spacing** as part of its un-bunching system.
@@ -69,9 +70,6 @@ Better Boarding mainly fixes citizen behavior that can keep boarding open too lo
 *   This mod does not change departure times. That is left to vanilla as it has a robust system in place for scheduling and un-bunching and just needs a little help. Goal is not to replace vanilla systems. This is a lightweight system working with the game methods to help reduce hiccups.
 
 ### Bonus Status report
-
-Check Options after your city runs for a bit to see waiting passengers, worst stops, late passengers skipped, and Run Sooner counts.
-
 **Stats to Log** creates a detailed one-time report with stop names, Entity IDs, line hints, and more. It only runs when clicked.
 
 ### Credits and Thanks
@@ -115,9 +113,11 @@ tags: faster boarding, boarding time, bus stop issues, slow stuck transit, debun
 <Dependency Id=""/>
 <!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
 <ChangeLog>
-- Improved mod so late passengers are less likely to happen. They are still handled if it happens.
-- updated all locale files.
-- Fix for passenger-release behavior, especially for trains or subways.
+- Cims Run Sooner now helps more passengers reach their assigned transit before departure.
+- Improved late-passenger handling while protecting riders on long train/subway platforms.
+- Added Run Sooner and group/family assist counts to Options Status.
+- Improved passenger-release behavior for trains and subways.
+- Updated all translations.
 </ChangeLog>
 <!--External link. supported types are discord, github, youtube, twitch, x, paypal, patreon, buymeacoffee, kofi, crowdin, gitlab-->
 <ExternalLink Type="github" Url="https://github.com/River-Mochi/BetterBoarding"/>
