@@ -24,8 +24,8 @@ namespace BetterBoarding
     {
         // This is deliberately larger than an ordinary platform. A rider in or near a
         // station is protected even if the consist occupies only part of the platform.
-        private const float kRailClearlyFarMeters = 300f;
-        private const float kBusTramClearlyFarMeters = 100f;
+        private const float kRailClearlyFarMeters = 200f;
+        private const float kBusTramClearlyFarMeters = 75f;
         private const int kMaxOwnerHops = 16;
 
         // Valid only for one boarding controller during one assist pass. Vehicles and
