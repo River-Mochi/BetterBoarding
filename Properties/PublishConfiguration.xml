@@ -113,8 +113,8 @@ tags: faster boarding, boarding time, bus stop issues, slow stuck transit, debun
 <Dependency Id=""/>
 <!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
 <ChangeLog>
-- Cims Run Sooner now helps more passengers reach their assigned transit before departure.
-- Improved late-passenger handling while protecting riders on long train/subway platforms.
+- Cims Run Sooner now helps more passengers reach assigned transit before departure.
+- Improved late-passenger handling while protecting them on long train/subway platforms.
 - Added Run Sooner and group/family assist counts to Options Status.
 - Improved passenger-release behavior for trains and subways.
 - Updated all translations.
