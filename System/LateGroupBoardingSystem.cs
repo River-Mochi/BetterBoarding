@@ -99,11 +99,40 @@ namespace BetterBoarding
             {
                 uint frame = m_SimulationSystem.frameIndex;
 
-                // Gather entity IDs without pre-completing city-wide component sets. Scattered
-                // EntityManager reads below synchronize their component types lazily and only
-                // after a genuinely late boarding controller is found.
-                using NativeArray<Entity> controllers =
-                    m_VehicleQuery.ToEntityArray(Allocator.Temp);
+                // Burst-filter the broad public-transport query first. Keep only root
+                // controllers that are boarding and already past the group grace period.
+                int sourceControllerCount = m_VehicleQuery.CalculateEntityCount();
+
+                using NativeList<Entity> controllers =
+                    new NativeList<Entity>(
+                        sourceControllerCount,
+                        Allocator.TempJob);
+
+                Dependency = new BoardingVehicleFilterJob
+                {
+                    m_EntityType = SystemAPI.GetEntityTypeHandle(),
+                    m_PublicTransportType =
+                        SystemAPI.GetComponentTypeHandle<Game.Vehicles.PublicTransport>(
+                            isReadOnly: true),
+                    m_ControllerType =
+                        SystemAPI.GetComponentTypeHandle<Controller>(
+                            isReadOnly: true),
+                    m_CargoTransportType =
+                        SystemAPI.GetComponentTypeHandle<Game.Vehicles.CargoTransport>(
+                            isReadOnly: true),
+                    m_Results = controllers.AsParallelWriter(),
+                    m_ExcludedStates =
+                        PublicTransportFlags.Evacuating |
+                        PublicTransportFlags.PrisonerTransport |
+                        PublicTransportFlags.Refueling,
+                    m_SkipChildControllers = true,
+                    m_RequirePastDeparture = true,
+                    m_Frame = frame,
+                    m_MinimumPastDepartureFrames = kLateGroupGraceFrames,
+                }.ScheduleParallel(m_VehicleQuery, Dependency);
+
+                Dependency.Complete();
+
                 using NativeList<GroupCandidate> candidates =
                     new NativeList<GroupCandidate>(kMaxGroupsPerUpdate, Allocator.Temp);
                 using NativeList<Entity> releasedLeaders =
@@ -119,8 +148,7 @@ namespace BetterBoarding
                 {
                     Entity controllerVehicle = controllers[i];
 
-                    if (GetControllerVehicle(controllerVehicle) != controllerVehicle ||
-                        !IsLateBoardingController(controllerVehicle, frame))
+                  if (!IsLateBoardingController(controllerVehicle, frame))
                     {
                         continue;
                     }
