@@ -170,7 +170,7 @@ namespace BetterBoarding
             int shipSampleCount = 0;
             int ferrySampleCount = 0;
             int airSampleCount = 0;
-            CanceledPassengerSample[]? sampledCanceledPassengers = null;
+            CanceledPassengerSample[] sampledCanceledPassengers = null!;
             int sampledCanceledPassengerCount = 0;
             uint frame = m_SimulationSystem?.frameIndex ?? 0;
             bool cancelLateBoarders = BoardingRuntimeSettings.CancelLateBoarders;
